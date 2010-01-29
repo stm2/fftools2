@@ -1,4 +1,5 @@
 #summary Sart page
+#labels Featured
 
 = Introduction =
 
