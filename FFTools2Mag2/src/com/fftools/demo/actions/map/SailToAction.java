@@ -137,7 +137,8 @@ public class SailToAction extends MenuAction {
 	  	         } catch(Exception exc) {}
 	  	    	 
 	  	       actRegion = u.getRegion();
-	  	       regionList = Regions.planShipRoute(u.getModifiedShip(), this.targetRegion.getCoordinate(), data.regions(), harbour, aquarianBonus);
+	  	       // regionList = Regions.planShipRoute(u.getModifiedShip(), this.targetRegion.getCoordinate(), data.regions(), harbour, aquarianBonus);
+	  	     regionList = Regions.planShipRoute(u.getModifiedShip(), data,this.targetRegion.getCoordinate());
 	           path=Regions.getDirections(regionList);
   	       } else {
   	    	   order = "; !!! nicht möglich (Kein Kapitän, ungünstige Zielregion)";

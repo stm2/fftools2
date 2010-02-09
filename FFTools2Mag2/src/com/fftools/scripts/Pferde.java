@@ -108,6 +108,11 @@ public class Pferde extends MatPoolScript{
 	
 	public void runScript(int scriptDurchlauf){
 		
+		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("md")){
+			int i = 0;
+		}
+		
+		
 		if (scriptDurchlauf==Durchlauf_vorMP1){
 			this.scriptStart();
 		}

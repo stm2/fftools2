@@ -84,7 +84,8 @@ public class FFToolsRegions {
 		
 		// Path organisieren
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
-		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
+		// String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
+		String path = Regions.getDirections(data, von, nach, excludeMap,1);
 		if (path==null || path.length()==0) {
 			return -1;
 		}
@@ -100,22 +101,21 @@ public class FFToolsRegions {
 		int step = 0;
 		CoordinateID lastCoord = null;
 		CoordinateID actCoord = null;
-		try {
+		// try {
 			lastCoord = (CoordinateID)von.clone();
 			actCoord = (CoordinateID)von.clone();
-		} catch (CloneNotSupportedException e){
+		// } catch (CloneNotSupportedException e){
 			
-		}
+		// }
 		boolean reached = false;
 		boolean nextHoldSet = false;
 		while (!reached){
-			String actDir = dirs[step];
-			int actDirInt = Direction.toInt(actDir);
-			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
-			actCoord.translate(moveCoord);
-			
-			
-			
+			String actDirString = dirs[step];
+			// int actDirInt = Direction.toInt(actDir);
+			Direction actDirection = Direction.toDirection(actDirString);
+			CoordinateID moveCoord = Direction.toCoordinate(actDirection);
+			actCoord = actCoord.translate(moveCoord);
+
 			int notwBewPunkte = 3;
 			Region r1 = (Region)data.regions().get(lastCoord);
 			Region r2 = (Region)data.regions().get(actCoord);
@@ -132,9 +132,10 @@ public class FFToolsRegions {
 				nextHoldSet = true;
 			} else {
 				if (!nextHoldSet && nextHold!=null){
-					nextHold.x = actCoord.x;
-					nextHold.y = actCoord.y;
-					nextHold.z = actCoord.z;
+					// nextHold.x = actCoord.x;
+					// nextHold.y = actCoord.y;
+					// nextHold.z = actCoord.z;
+					nextHold = CoordinateID.create(actCoord);
 				}
 			}
 			
@@ -142,9 +143,10 @@ public class FFToolsRegions {
 				reached = true;
 			} else {
 				// schieben
-				lastCoord.x = actCoord.x;
-				lastCoord.y = actCoord.y;
-				lastCoord.z = actCoord.z;
+				// lastCoord.x = actCoord.x;
+				// lastCoord.y = actCoord.y;
+				// lastCoord.z = actCoord.z;
+				lastCoord = CoordinateID.create(actCoord);
 				step++;
 			}
 		}
@@ -176,7 +178,7 @@ public class FFToolsRegions {
 		
 		// Path organisieren
 		Map<ID,RegionType> excludeMap = FFToolsRegions.getNonOceanRegionTypes(data.rules);
-		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
+		String path = Regions.getDirections(data, von, nach, excludeMap,1);
 		if (path==null || path.length()==0) {
 			return -1;
 		}
@@ -187,21 +189,24 @@ public class FFToolsRegions {
 		int restBewegunspunkte = bewegungsPunkte;
 		String[] dirs = path.split(" ");
 		int step = 0;
-		CoordinateID lastCoord = null;
 		CoordinateID actCoord = null;
-		try {
-			lastCoord = (CoordinateID)von.clone();
-			actCoord = (CoordinateID)von.clone();
-		} catch (CloneNotSupportedException e){
-			
-		}
+		actCoord = (CoordinateID)von.clone();
+		
 		boolean reached = false;
 		boolean nextHoldSet = false;
 		while (!reached){
+			/*
 			String actDir = dirs[step];
 			int actDirInt = Direction.toInt(actDir);
 			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
 			actCoord.translate(moveCoord);
+			*/
+			String actDirString = dirs[step];
+			Direction actDirection = Direction.toDirection(actDirString);
+			CoordinateID moveCoord = Direction.toCoordinate(actDirection);
+			actCoord=actCoord.translate(moveCoord);
+			
+			
 			int notwBewPunkte = 1;
 			restBewegunspunkte-=notwBewPunkte;
 			if (restBewegunspunkte<0) {
@@ -210,9 +215,10 @@ public class FFToolsRegions {
 				nextHoldSet = true;
 			} else {
 				if (!nextHoldSet && nextHold!=null){
-					nextHold.x = actCoord.x;
-					nextHold.y = actCoord.y;
-					nextHold.z = actCoord.z;
+					// nextHold.x = actCoord.x;
+					// nextHold.y = actCoord.y;
+					// nextHold.z = actCoord.z;
+					nextHold = CoordinateID.create(actCoord);
 				}
 			}
 			
@@ -220,9 +226,10 @@ public class FFToolsRegions {
 				reached = true;
 			} else {
 				// schieben
-				lastCoord.x = actCoord.x;
-				lastCoord.y = actCoord.y;
-				lastCoord.z = actCoord.z;
+				// lastCoord.x = actCoord.x;
+				// lastCoord.y = actCoord.y;
+				// lastCoord.z = actCoord.z;
+				// lastCoord = CoordinateID.create(actCoord);
 				step++;
 			}
 		}
@@ -255,7 +262,7 @@ public class FFToolsRegions {
 		
 		// Path organisieren
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
-		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
+		String path = Regions.getDirections(data, von, nach, excludeMap,1);
 		if (path==null || path.length()==0) {
 			return null;
 		}
@@ -271,22 +278,27 @@ public class FFToolsRegions {
 		int step = 0;
 		CoordinateID lastCoord = null;
 		CoordinateID actCoord = null;
-		try {
-			lastCoord = (CoordinateID)von.clone();
-			actCoord = (CoordinateID)von.clone();
-		} catch (CloneNotSupportedException e){
-			
-		}
-		CoordinateID nextHold = new CoordinateID(0,0);
+		lastCoord = (CoordinateID)von.clone();
+		actCoord = (CoordinateID)von.clone();
+		
+		CoordinateID nextHold = CoordinateID.create(0,0);
 		Region lastHoldRegion = data.getRegion(von);
 		
 		boolean reached = false;
 		boolean nextHoldSet = false;
 		while (!reached){
+			/*
 			String actDir = dirs[step];
 			int actDirInt = Direction.toInt(actDir);
 			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
 			actCoord.translate(moveCoord);
+			*/
+			
+			String actDirString = dirs[step];
+			Direction actDirection = Direction.toDirection(actDirString);
+			CoordinateID moveCoord = Direction.toCoordinate(actDirection);
+			actCoord = actCoord.translate(moveCoord);
+			
 
 			int notwBewPunkte = 3;
 			Region r1 = (Region)data.regions().get(lastCoord);
@@ -307,9 +319,10 @@ public class FFToolsRegions {
 				erg.setNextHold(data.getRegion(nextHold));
 			} else {
 				if (!nextHoldSet && nextHold!=null){
-					nextHold.x = actCoord.x;
-					nextHold.y = actCoord.y;
-					nextHold.z = actCoord.z;
+					// nextHold.x = actCoord.x;
+					// nextHold.y = actCoord.y;
+					// nextHold.z = actCoord.z;
+					nextHold = CoordinateID.create(actCoord);
 				}
 			}
 			
@@ -318,9 +331,10 @@ public class FFToolsRegions {
 				erg.setPathElement(anzRunden-1, lastHoldRegion, data.getRegion(actCoord));
 			} else {
 				// schieben
-				lastCoord.x = actCoord.x;
-				lastCoord.y = actCoord.y;
-				lastCoord.z = actCoord.z;
+				// lastCoord.x = actCoord.x;
+				// lastCoord.y = actCoord.y;
+				// lastCoord.z = actCoord.z;
+				lastCoord = CoordinateID.create(actCoord);
 				step++;
 			}
 		}
@@ -353,7 +367,7 @@ public class FFToolsRegions {
 		
 		// Path organisieren
 		Map<ID,RegionType> excludeMap = FFToolsRegions.getNonOceanRegionTypes(data.rules);
-		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
+		String path = Regions.getDirections(data, von, nach, excludeMap,1);
 		if (path==null || path.length()==0) {
 			return null;
 		}
@@ -365,23 +379,26 @@ public class FFToolsRegions {
 		int step = 0;
 		CoordinateID lastCoord = null;
 		CoordinateID actCoord = null;
-		try {
-			lastCoord = (CoordinateID)von.clone();
-			actCoord = (CoordinateID)von.clone();
-		} catch (CloneNotSupportedException e){
-			
-		}
-		CoordinateID nextHold = new CoordinateID(0,0);
+		lastCoord = (CoordinateID)von.clone();
+		actCoord = (CoordinateID)von.clone();
+		CoordinateID nextHold = CoordinateID.create(0,0);
 		Region lastHoldRegion = data.getRegion(von);
 		
 		boolean reached = false;
 		boolean nextHoldSet = false;
 		while (!reached){
+			/*
 			String actDir = dirs[step];
 			int actDirInt = Direction.toInt(actDir);
 			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
 			actCoord.translate(moveCoord);
-
+			*/
+			String actDirString = dirs[step];
+			Direction actDirection = Direction.toDirection(actDirString);
+			CoordinateID moveCoord = Direction.toCoordinate(actDirection);
+			actCoord = actCoord.translate(moveCoord);
+			
+			
 			int notwBewPunkte = 3;
 			Region r1 = (Region)data.regions().get(lastCoord);
 			Region r2 = (Region)data.regions().get(actCoord);
@@ -401,9 +418,10 @@ public class FFToolsRegions {
 				erg.setNextHold(data.getRegion(nextHold));
 			} else {
 				if (!nextHoldSet && nextHold!=null){
-					nextHold.x = actCoord.x;
-					nextHold.y = actCoord.y;
-					nextHold.z = actCoord.z;
+					// nextHold.x = actCoord.x;
+					// nextHold.y = actCoord.y;
+					// nextHold.z = actCoord.z;
+					nextHold = CoordinateID.create(actCoord);
 				}
 			}
 			
@@ -412,9 +430,10 @@ public class FFToolsRegions {
 				erg.setPathElement(anzRunden-1, lastHoldRegion, data.getRegion(actCoord));
 			} else {
 				// schieben
-				lastCoord.x = actCoord.x;
-				lastCoord.y = actCoord.y;
-				lastCoord.z = actCoord.z;
+				// lastCoord.x = actCoord.x;
+				// lastCoord.y = actCoord.y;
+				// lastCoord.z = actCoord.z;
+				lastCoord = CoordinateID.create(actCoord);
 				step++;
 			}
 		}
@@ -472,7 +491,7 @@ public class FFToolsRegions {
 		erg.setDestRegion(u.getScriptMain().gd_ScriptMain.getRegion(dest));
 		
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(u.getScriptMain().gd_ScriptMain.rules);
-		String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain.regions(), act, dest, excludeMap);
+		String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain, act, dest, excludeMap,1);
 		if (path!=null && path.length()>0) {
 			// path gefunden
 			if (writeOrders){
@@ -486,7 +505,7 @@ public class FFToolsRegions {
 			if (u.getPayloadOnHorse()>=0){
 				reitend = true;
 			}
-			CoordinateID nextHold = new CoordinateID(act);
+			CoordinateID nextHold = CoordinateID.create(act);
 			int _anzRunden = FFToolsRegions.getPathDistLand(u.getScriptMain().gd_ScriptMain, act, dest, reitend,nextHold);
 			if (_anzRunden>0){
 				Region _nextHoldRegion = u.getScriptMain().gd_ScriptMain.getRegion(nextHold);
