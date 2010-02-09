@@ -215,7 +215,7 @@ public void runScript(int scriptDurchlauf){
 				s = OP.getOptionString("Ziel");
 			}
 			try {
-				this.dir = new Direction(s);
+				this.dir = Direction.toDirection(s);
 			} catch (IllegalArgumentException e){
 				this.dir=null;
 				this.addComment("Bauen: Strassenrichtung nicht erkannt: " + s);

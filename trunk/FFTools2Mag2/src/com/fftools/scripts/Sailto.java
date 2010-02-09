@@ -27,6 +27,11 @@ public class Sailto extends Script{
 		// hier code fuer Sailto
 		// addOutLine("....start SAILTO mit " + super.getArgCount() + " Argumenten");
 		
+		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("yw27")){
+			int iii=0;
+		}
+		
+		
 		if (checkShip()){
 		
 			if (super.getArgCount()<1) {
@@ -117,12 +122,12 @@ public class Sailto extends Script{
 			return;
 		} 
 
-		int speed = super.gd_Script.getGameSpecificStuff().getGameSpecificRules().getShipRange(this.ship);
+		// int speed = super.gd_Script.getGameSpecificStuff().getGameSpecificRules().getShipRange(this.ship);
 		
-		BuildingType harbour = super.gd_Script.rules.getBuildingType(StringID.create("Hafen"));
+		// BuildingType harbour = super.gd_Script.rules.getBuildingType(StringID.create("Hafen"));
 
-		List<Region> pathL = Regions.planShipRoute(this.ship, dest,super.gd_Script.regions(), harbour,
-										  speed);
+		// List<Region> pathL = Regions.planShipRoute(this.ship, dest,super.gd_Script.regions(), harbour, speed);
+		List<Region> pathL = Regions.planShipRoute(this.ship, super.gd_Script,dest);
 		
 		String path = null;
 		if (pathL!=null){
