@@ -230,9 +230,7 @@ public class Depot extends TransportScript{
 		if (sockel>0){
 			erg+=sockel;
 		}
-		
-		
-		
+		this.addComment("DEBUG: Reportsettings -> DepotSilberSockel = " + sockel);
 		return erg;
 	}
 	

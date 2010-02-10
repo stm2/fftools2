@@ -10,11 +10,14 @@ import java.util.Map;
 
 import magellan.library.CoordinateID;
 import magellan.library.GameData;
+import magellan.library.ID;
 import magellan.library.Region;
 import magellan.library.Rules;
 import magellan.library.Unit;
 import magellan.library.rules.ItemType;
+import magellan.library.rules.RegionType;
 import magellan.library.utils.Islands;
+import magellan.library.utils.Regions;
 
 import com.fftools.utils.ItemTypePriorityComparator;
 
@@ -354,7 +357,13 @@ public class ReportSettings {
 			myReportOptions.add(this.getRegionOptions(r));
 		} else if (geltungsbereich.equalsIgnoreCase("insel")){
 			// ok..für die ganze Insel
-			Map<CoordinateID,Region> regions = Islands.getIsland(_gd.rules,_gd.regions(),r);
+			// Feuerwände excluden
+			Map<ID, RegionType> excludeMap = new Hashtable<ID, RegionType>();
+			RegionType feuerwand = Regions.getFeuerwandRegionType(r.getData());
+			if (feuerwand != null) {
+				excludeMap.put(feuerwand.getID(),feuerwand);
+			}
+			Map<CoordinateID,Region> regions = Islands.getIsland(_gd.rules,_gd.regions(),r,excludeMap);
 			if (regions==null){
 				// should never happen
 				outText.addOutLine("!!! ReportSettings: keine Insel gefunden.");

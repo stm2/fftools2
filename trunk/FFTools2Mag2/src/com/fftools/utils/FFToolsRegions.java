@@ -40,9 +40,9 @@ public class FFToolsRegions {
 	
 	
 	/**
-	 * a cache for the calls to getPathDistLand with no(!) nextstepInfo!
+	 * a cache for the calls to getPathDistLand...
 	 */
-	private static HashMap<PathDistLandInfo,Integer> pathDistCache = null;
+	private static HashMap<PathDistLandInfo,GotoInfo> pathDistCache = null;
 	
 	/**
 	 * Gibt es eine Koordinate in den übergebenen Regionen?
@@ -60,182 +60,7 @@ public class FFToolsRegions {
 		}
 		return false;
 	}
-	
-	/**
-	 * liefert den Abstand zweier Regionen in Anzahl Runden
-	 * berücksichtigt dabei Strassen
-	 * @param regions Zur Verfügung stehende Regionen...
-	 * @param von Startregion
-	 * @param nach Zielregion
-	 * @param reitend  reitet die Einheit oder zu Fuss?
-	 * @param nextHold wenn Übergeben, wird darin CoordinateID des nächsten Halts der Unit abgelegt
-	 * @return Anzahl benötigter Runden
-	 */
-	public static int getPathDistLand(GameData data, CoordinateID von, CoordinateID nach,boolean reitend,CoordinateID nextHold){
-		if (!data.regions().containsKey(von)){
-			return -1;
-		}
-		if (!data.regions().containsKey(nach)){
-			return -1;
-		}
-		if (von.equals(nach)){
-			return 0;
-		}
-		
-		// Path organisieren
-		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
-		// String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
-		String path = Regions.getDirections(data, von, nach, excludeMap,1);
-		if (path==null || path.length()==0) {
-			return -1;
-		}
-		
-		int bewegungsPunkte = 4;
-		if (reitend){
-			bewegungsPunkte = 6;
-		}
-		
-		int anzRunden = 1;
-		int restBewegunspunkte = bewegungsPunkte;
-		String[] dirs = path.split(" ");
-		int step = 0;
-		CoordinateID lastCoord = null;
-		CoordinateID actCoord = null;
-		// try {
-			lastCoord = (CoordinateID)von.clone();
-			actCoord = (CoordinateID)von.clone();
-		// } catch (CloneNotSupportedException e){
-			
-		// }
-		boolean reached = false;
-		boolean nextHoldSet = false;
-		while (!reached){
-			String actDirString = dirs[step];
-			// int actDirInt = Direction.toInt(actDir);
-			Direction actDirection = Direction.toDirection(actDirString);
-			CoordinateID moveCoord = Direction.toCoordinate(actDirection);
-			actCoord = actCoord.translate(moveCoord);
 
-			int notwBewPunkte = 3;
-			Region r1 = (Region)data.regions().get(lastCoord);
-			Region r2 = (Region)data.regions().get(actCoord);
-			if(r1==null || r2==null){
-				return -1;
-			}
-			if (Regions.isCompleteRoadConnection(r1, r2)){
-				notwBewPunkte = 2;
-			}
-			restBewegunspunkte-=notwBewPunkte;
-			if (restBewegunspunkte<0) {
-				anzRunden++;
-				restBewegunspunkte = bewegungsPunkte-notwBewPunkte;
-				nextHoldSet = true;
-			} else {
-				if (!nextHoldSet && nextHold!=null){
-					// nextHold.x = actCoord.x;
-					// nextHold.y = actCoord.y;
-					// nextHold.z = actCoord.z;
-					nextHold = CoordinateID.create(actCoord);
-				}
-			}
-			
-			if (actCoord.equals(nach)){
-				reached = true;
-			} else {
-				// schieben
-				// lastCoord.x = actCoord.x;
-				// lastCoord.y = actCoord.y;
-				// lastCoord.z = actCoord.z;
-				lastCoord = CoordinateID.create(actCoord);
-				step++;
-			}
-		}
-		
-		return anzRunden;
-	}
-	
-	
-	/**
-	 * liefert den Abstand zweier Regionen in Anzahl Runden
-	 * wenn über See gefahren wird
-	 * @param regions Zur Verfügung stehende Regionen...
-	 * @param von Startregion
-	 * @param nach Zielregion
-	 * @param shipmovement
-	 * @param nextHold wenn Übergeben, wird darin CoordinateID des nächsten Halts der Unit abgelegt
-	 * @return Anzahl benötigter Runden
-	 */
-	public static int getPathDistOcean(GameData data, CoordinateID von, CoordinateID nach,int shipMovement,CoordinateID nextHold){
-		if (!data.regions().containsKey(von)){
-			return -1;
-		}
-		if (!data.regions().containsKey(nach)){
-			return -1;
-		}
-		if (von.equals(nach)){
-			return 0;
-		}
-		
-		// Path organisieren
-		Map<ID,RegionType> excludeMap = FFToolsRegions.getNonOceanRegionTypes(data.rules);
-		String path = Regions.getDirections(data, von, nach, excludeMap,1);
-		if (path==null || path.length()==0) {
-			return -1;
-		}
-		
-		int bewegungsPunkte = shipMovement;
-		
-		int anzRunden = 1;
-		int restBewegunspunkte = bewegungsPunkte;
-		String[] dirs = path.split(" ");
-		int step = 0;
-		CoordinateID actCoord = null;
-		actCoord = (CoordinateID)von.clone();
-		
-		boolean reached = false;
-		boolean nextHoldSet = false;
-		while (!reached){
-			/*
-			String actDir = dirs[step];
-			int actDirInt = Direction.toInt(actDir);
-			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
-			actCoord.translate(moveCoord);
-			*/
-			String actDirString = dirs[step];
-			Direction actDirection = Direction.toDirection(actDirString);
-			CoordinateID moveCoord = Direction.toCoordinate(actDirection);
-			actCoord=actCoord.translate(moveCoord);
-			
-			
-			int notwBewPunkte = 1;
-			restBewegunspunkte-=notwBewPunkte;
-			if (restBewegunspunkte<0) {
-				anzRunden++;
-				restBewegunspunkte = bewegungsPunkte-notwBewPunkte;
-				nextHoldSet = true;
-			} else {
-				if (!nextHoldSet && nextHold!=null){
-					// nextHold.x = actCoord.x;
-					// nextHold.y = actCoord.y;
-					// nextHold.z = actCoord.z;
-					nextHold = CoordinateID.create(actCoord);
-				}
-			}
-			
-			if (actCoord.equals(nach)){
-				reached = true;
-			} else {
-				// schieben
-				// lastCoord.x = actCoord.x;
-				// lastCoord.y = actCoord.y;
-				// lastCoord.z = actCoord.z;
-				// lastCoord = CoordinateID.create(actCoord);
-				step++;
-			}
-		}
-		
-		return anzRunden;
-	}
 	
 	/**
 	 * liefert komplette GotoInfo
@@ -253,10 +78,30 @@ public class FFToolsRegions {
 		if (!data.regions().containsKey(nach)){
 			return null;
 		}
+		
+		// check im Cache?
+		if (pathDistCache==null){
+			pathDistCache=new HashMap<PathDistLandInfo, GotoInfo>();
+		}
+		
+		PathDistLandInfo actPDLI = new PathDistLandInfo(von,nach,reitend);
+		
+		if (pathDistCache.size()>0){
+			cntCacheRequests++;
+			for (PathDistLandInfo pd:pathDistCache.keySet()){
+				if (pd.equals(actPDLI)){
+					cntCacheHits++;
+					return pathDistCache.get(pd);
+				}
+			}
+		}
+		
+		
 		GotoInfo erg = new GotoInfo();
 		erg.setDestRegion(data.getRegion(nach));
 		if (von.equals(nach)){
 			erg.setAnzRunden(0);
+			pathDistCache.put(actPDLI, erg);
 			return erg;
 		}
 		
@@ -264,7 +109,9 @@ public class FFToolsRegions {
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
 		String path = Regions.getDirections(data, von, nach, excludeMap,1);
 		if (path==null || path.length()==0) {
-			return null;
+			erg.setAnzRunden(-1);
+			pathDistCache.put(actPDLI, erg);
+			return erg;
 		}
 		erg.setPath(path);
 		int bewegungsPunkte = 4;
@@ -276,23 +123,16 @@ public class FFToolsRegions {
 		int restBewegunspunkte = bewegungsPunkte;
 		String[] dirs = path.split(" ");
 		int step = 0;
-		CoordinateID lastCoord = null;
-		CoordinateID actCoord = null;
-		lastCoord = (CoordinateID)von.clone();
-		actCoord = (CoordinateID)von.clone();
 		
+		CoordinateID lastCoord = CoordinateID.create(von.getX(),von.getY(),von.getZ());
+		CoordinateID actCoord = CoordinateID.create(von.getX(),von.getY(),von.getZ());
 		CoordinateID nextHold = CoordinateID.create(0,0);
 		Region lastHoldRegion = data.getRegion(von);
 		
 		boolean reached = false;
 		boolean nextHoldSet = false;
 		while (!reached){
-			/*
-			String actDir = dirs[step];
-			int actDirInt = Direction.toInt(actDir);
-			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
-			actCoord.translate(moveCoord);
-			*/
+			
 			
 			String actDirString = dirs[step];
 			Direction actDirection = Direction.toDirection(actDirString);
@@ -304,7 +144,9 @@ public class FFToolsRegions {
 			Region r1 = (Region)data.regions().get(lastCoord);
 			Region r2 = (Region)data.regions().get(actCoord);
 			if(r1==null || r2==null){
-				return null;
+				erg.setAnzRunden(-1);
+				pathDistCache.put(actPDLI, erg);
+				return erg;
 			}
 			if (Regions.isCompleteRoadConnection(r1, r2)){
 				notwBewPunkte = 2;
@@ -322,7 +164,9 @@ public class FFToolsRegions {
 					// nextHold.x = actCoord.x;
 					// nextHold.y = actCoord.y;
 					// nextHold.z = actCoord.z;
-					nextHold = CoordinateID.create(actCoord);
+					nextHold.setCoordinates(actCoord);
+					erg.setNextHold(data.getRegion(nextHold));
+					// nextHold = CoordinateID.create(actCoord);
 				}
 			}
 			
@@ -334,11 +178,13 @@ public class FFToolsRegions {
 				// lastCoord.x = actCoord.x;
 				// lastCoord.y = actCoord.y;
 				// lastCoord.z = actCoord.z;
-				lastCoord = CoordinateID.create(actCoord);
+				lastCoord.setCoordinates(actCoord);
+				// lastCoord = CoordinateID.create(actCoord);
 				step++;
 			}
 		}
 		erg.setAnzRunden(anzRunden);
+		pathDistCache.put(actPDLI, erg);
 		return erg;
 	}
 	
@@ -377,10 +223,9 @@ public class FFToolsRegions {
 		int restBewegunspunkte = bewegungsPunkte;
 		String[] dirs = path.split(" ");
 		int step = 0;
-		CoordinateID lastCoord = null;
-		CoordinateID actCoord = null;
-		lastCoord = (CoordinateID)von.clone();
-		actCoord = (CoordinateID)von.clone();
+		CoordinateID lastCoord = CoordinateID.create(von.getX(),von.getY(),von.getZ());
+		CoordinateID actCoord = CoordinateID.create(von.getX(),von.getY(),von.getZ());
+		
 		CoordinateID nextHold = CoordinateID.create(0,0);
 		Region lastHoldRegion = data.getRegion(von);
 		
@@ -421,7 +266,8 @@ public class FFToolsRegions {
 					// nextHold.x = actCoord.x;
 					// nextHold.y = actCoord.y;
 					// nextHold.z = actCoord.z;
-					nextHold = CoordinateID.create(actCoord);
+					nextHold.setCoordinates(actCoord);
+					// nextHold = CoordinateID.create(actCoord);
 				}
 			}
 			
@@ -433,7 +279,8 @@ public class FFToolsRegions {
 				// lastCoord.x = actCoord.x;
 				// lastCoord.y = actCoord.y;
 				// lastCoord.z = actCoord.z;
-				lastCoord = CoordinateID.create(actCoord);
+				lastCoord.setCoordinates(actCoord);
+				// lastCoord = CoordinateID.create(actCoord);
 				step++;
 			}
 		}
@@ -441,38 +288,7 @@ public class FFToolsRegions {
 		return erg;
 	}
 	
-	/**
-	 * Aufruf ohne CoordinateID für ersten Aufenthalt
-	 * @param data
-	 * @param von
-	 * @param nach
-	 * @param reitend
-	 * @return
-	 */
-	public static int getPathDistLand(GameData data, CoordinateID von, CoordinateID nach,boolean reitend){
-		// cache check
-		cntCacheRequests++;
-		if (pathDistCache==null){
-			pathDistCache = new HashMap<PathDistLandInfo, Integer>();
-		}
-		// schon vorhanden ?
-		for (Iterator<PathDistLandInfo> iter = pathDistCache.keySet().iterator();iter.hasNext();){
-			PathDistLandInfo info = (PathDistLandInfo)iter.next();
-			if (info.is(data, von, nach) || info.is(data, nach, von)){
-				// Treffer
-				Integer actI = pathDistCache.get(info);
-				cntCacheHits++;
-				return actI.intValue();
-			}
-		}
-		
-		int retVal =  getPathDistLand(data, von, nach, reitend,null);
-		// in den Cache
-		PathDistLandInfo neueInfo = new PathDistLandInfo(data,von,nach);
-		Integer cacheValue = Integer.valueOf(retVal);
-		pathDistCache.put(neueInfo,cacheValue);
-		return retVal;
-	}
+	
 	
 	
 	public static GotoInfo makeOrderNACH(ScriptUnit u,CoordinateID act,CoordinateID dest,boolean writeOrders){
@@ -485,30 +301,29 @@ public class FFToolsRegions {
 			outText.addOutLine("!!! Goto Ziel nicht im CR: " + u.unitDesc());
 			return null;
 		} 
+		boolean reitend = false;
+		if (u.getPayloadOnHorse()>=0){
+			reitend = true;
+		}
 		
-		GotoInfo erg = new GotoInfo();
+		if (u.getUnitNumber().equalsIgnoreCase("iuu1")){
+			// DEBUG
+			int iii=1;
+		}
 		
-		erg.setDestRegion(u.getScriptMain().gd_ScriptMain.getRegion(dest));
-		
-		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(u.getScriptMain().gd_ScriptMain.rules);
-		String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain, act, dest, excludeMap,1);
-		if (path!=null && path.length()>0) {
+		GotoInfo erg = FFToolsRegions.getPathDistLandGotoInfo(u.getScriptMain().gd_ScriptMain, act, dest, reitend);
+
+		String path = erg.getPath();
+		if (path!=null && path.length()>0 && erg.getAnzRunden()>=0) {
 			// path gefunden
 			if (writeOrders){
 				u.addOrder("NACH " + path, true);
 				u.addComment("Einheit durch GOTO bestätigt.",true);
 			}
-			erg.setPath(path);
+
 			
-			// Testing anzRunden
-			boolean reitend = false;
-			if (u.getPayloadOnHorse()>=0){
-				reitend = true;
-			}
-			CoordinateID nextHold = CoordinateID.create(act);
-			int _anzRunden = FFToolsRegions.getPathDistLand(u.getScriptMain().gd_ScriptMain, act, dest, reitend,nextHold);
-			if (_anzRunden>0){
-				Region _nextHoldRegion = u.getScriptMain().gd_ScriptMain.getRegion(nextHold);
+			if (erg.getAnzRunden()>0){
+				Region _nextHoldRegion = erg.getNextHold();
 				if (_nextHoldRegion!=null){
 					if (writeOrders){
 					  u.addComment("Nächster Halt in " + _nextHoldRegion.toString(),true);
@@ -516,12 +331,12 @@ public class FFToolsRegions {
 					erg.setNextHold(_nextHoldRegion);
 				}
 				if (writeOrders){
-					u.addComment("Erwartete Ankunft am EndZiel in " + _anzRunden + " Runden",true);
+					u.addComment("Erwartete Ankunft am EndZiel in " + erg.getAnzRunden() + " Runden",true);
 				}
-				erg.setAnzRunden(_anzRunden);
+				
 			} else {
 				if (writeOrders){
-					u.addComment("Anzahl Runden: " + _anzRunden + " (?)",true);
+					u.addComment("Anzahl Runden: " + erg.getAnzRunden() + " (?)",true);
 				}
 			}
 		} else {

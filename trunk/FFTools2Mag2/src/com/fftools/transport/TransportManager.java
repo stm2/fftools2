@@ -570,7 +570,7 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		// neu: dist setzen
 		for (Iterator<TransportOffer> iter = offers.iterator();iter.hasNext();){
 			TransportOffer offer = (TransportOffer)iter.next();
-			int dist = FFToolsRegions.getPathDistLand(this.scriptMain.gd_ScriptMain, offer.getRegion().getCoordinate(),request.getRegion().getCoordinate(), true);
+			int dist = FFToolsRegions.getPathDistLandGotoInfo(this.scriptMain.gd_ScriptMain, offer.getRegion().getCoordinate(),request.getRegion().getCoordinate(), true).getAnzRunden();
 			offer.setActDist(dist);
 		}
 
@@ -750,7 +750,7 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		// neu: dist vorher setzen
 		for (Iterator<Transporter> iter = actTransporters.iterator();iter.hasNext();){
 			Transporter actTransporter = (Transporter)iter.next();
-			int dist = FFToolsRegions.getPathDistLand(this.scriptMain.gd_ScriptMain, actTransporter.getActRegion().getCoordinate(),offer.getRegion().getCoordinate(), true);
+			int dist = FFToolsRegions.getPathDistLandGotoInfo(this.scriptMain.gd_ScriptMain, actTransporter.getActRegion().getCoordinate(),offer.getRegion().getCoordinate(), true).getAnzRunden();
 			actTransporter.setActDist(dist);
 		}
 		
@@ -921,7 +921,15 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 					r = gotoInfo.getNextHold();
 				}
 			}
-			int dist = FFToolsRegions.getPathDistLand(this.scriptMain.gd_ScriptMain, r.getCoordinate(),offer.getRegion().getCoordinate(), true);
+			if (r==null){
+				// DEBUG
+				int iii=1;
+			}
+			GotoInfo gI = FFToolsRegions.getPathDistLandGotoInfo(this.scriptMain.gd_ScriptMain, r.getCoordinate(),offer.getRegion().getCoordinate(), true);
+			if (gI==null){
+				gI = FFToolsRegions.getPathDistLandGotoInfo(this.scriptMain.gd_ScriptMain, r.getCoordinate(),offer.getRegion().getCoordinate(), true);
+			}
+			int dist = gI.getAnzRunden();
 			actTransporter.setActDist(dist);
 		}
 		
@@ -990,7 +998,7 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		for (Iterator<Transporter> iter = actTransporters.iterator();iter.hasNext();){
 			Transporter actTransporter = (Transporter)iter.next();
 			Region r = actTransporter.getActRegion();
-			int dist = FFToolsRegions.getPathDistLand(this.scriptMain.gd_ScriptMain, r.getCoordinate(),offer.getRegion().getCoordinate(), actTransporter.isRiding());
+			int dist = FFToolsRegions.getPathDistLandGotoInfo(this.scriptMain.gd_ScriptMain, r.getCoordinate(),offer.getRegion().getCoordinate(), actTransporter.isRiding()).getAnzRunden();
 			actTransporter.setActDist(dist);
 		}
 		
@@ -1048,13 +1056,13 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 			reitend = true;
 		}
 		
-		int distOffer = FFToolsRegions.getPathDistLand(offer.getScriptUnit().getScriptMain().gd_ScriptMain, 
+		int distOffer = FFToolsRegions.getPathDistLandGotoInfo(offer.getScriptUnit().getScriptMain().gd_ScriptMain, 
 					offer.getRegion().getCoordinate(), request.getRegion().getCoordinate(), 
-						reitend);
+						reitend).getAnzRunden();
 		
-		int distNextHold = FFToolsRegions.getPathDistLand(offer.getScriptUnit().getScriptMain().gd_ScriptMain, 
+		int distNextHold = FFToolsRegions.getPathDistLandGotoInfo(offer.getScriptUnit().getScriptMain().gd_ScriptMain, 
 				gotoInfo.getNextHold().getCoordinate(), request.getRegion().getCoordinate(), 
-					reitend);
+					reitend).getAnzRunden();
 		
 		if (distOffer<=distNextHold){
 			// hat keinen sinn
