@@ -336,6 +336,11 @@ public class PferdeManager implements OverlordRun,OverlordInfo {
 				// ist geeignet!
 				// Kommen wir hin?
 				GotoInfo gotoInfo = FFToolsRegions.getPathDistLandGotoInfo(overLord.getScriptMain().gd_ScriptMain, actMover.region().getCoordinate(), actR.getCoordinate(), false);
+				// DEBUG
+				if (gotoInfo==null){
+					int iii=0;
+					gotoInfo = FFToolsRegions.getPathDistLandGotoInfo(overLord.getScriptMain().gd_ScriptMain, actMover.region().getCoordinate(), actR.getCoordinate(), false);
+				}
 				if (gotoInfo.getAnzRunden()>0){
 					// wir kommen hin
 					gotoInfo = FFToolsRegions.makeOrderNACH(actMover.scriptUnit, actMover.region().getCoordinate(),actR.getCoordinate(), true);

@@ -24,13 +24,6 @@ public class Sailto extends Script{
 	public void runScript(int scriptDurchlauf){
 		if (scriptDurchlauf!=Durchlauf){return;}
 		
-		// hier code fuer Sailto
-		// addOutLine("....start SAILTO mit " + super.getArgCount() + " Argumenten");
-		
-		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("yw27")){
-			int iii=0;
-		}
-		
 		
 		if (checkShip()){
 		

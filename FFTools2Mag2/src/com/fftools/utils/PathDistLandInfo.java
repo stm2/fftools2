@@ -9,9 +9,9 @@ import magellan.library.GameData;
  *
  */
 public class PathDistLandInfo {
-	private GameData data=null;
 	private CoordinateID von = null;
 	private CoordinateID nach = null;
+	private boolean reitend = false;
 	
 	/**
 	 * Konstruktor
@@ -19,11 +19,12 @@ public class PathDistLandInfo {
 	 * @param von
 	 * @param nach
 	 */
-	public PathDistLandInfo(GameData data, CoordinateID von, CoordinateID nach) {
+	public PathDistLandInfo(CoordinateID von, CoordinateID nach, boolean reitend) {
 		super();
-		this.data = data;
+		
 		this.von = von;
 		this.nach = nach;
+		this.reitend = reitend;
 	}
 	
 	public boolean equals(Object o){
@@ -32,39 +33,37 @@ public class PathDistLandInfo {
 			return false;
 		}
 		PathDistLandInfo other = (PathDistLandInfo)o;
-		if (!other.getData().equals(this.data)){
-			return false;
-		}
+		
 		if (!other.getVon().equals(this.von)){
 			return false;
 		}
 		if (!other.getNach().equals(this.nach)){
 			return false;
 		}
+		if (other.isReitend()!=this.reitend){
+			return false;
+		}
 		return retVal;
 	}
 	
-	public boolean is(GameData _data, CoordinateID _von,CoordinateID _nach){
+	public boolean is(CoordinateID _von,CoordinateID _nach,boolean _reitend){
 		boolean retVal=true;
 
-		if (!_data.equals(this.data)){
-			return false;
-		}
 		if (!_von.equals(this.von)){
 			return false;
 		}
 		if (!_nach.equals(this.nach)){
 			return false;
 		}
+		if (_reitend!=this.reitend){
+			return false;
+		}
+		
+		
 		return retVal;
 	}
 
-	/**
-	 * @return the data
-	 */
-	public GameData getData() {
-		return data;
-	}
+	
 
 	/**
 	 * @return the nach
@@ -78,6 +77,20 @@ public class PathDistLandInfo {
 	 */
 	public CoordinateID getVon() {
 		return von;
+	}
+
+	/**
+	 * @return the reitend
+	 */
+	public boolean isReitend() {
+		return reitend;
+	}
+
+	/**
+	 * @param reitend the reitend to set
+	 */
+	public void setReitend(boolean reitend) {
+		this.reitend = reitend;
 	}
 	
 }
