@@ -43,6 +43,7 @@ public class Auramaxwarning extends Script{
 		if (u.getAuraMax()>0) {
 			if (u.getAura()==u.getAuraMax()){
 				/* Maximum erreicht */
+				/* ToDo: check for zaubere orders */
 				this.doNotConfirmOrders();
 				this.addComment("AuraMaxWarning: Einheit hat Maximum an Aura!");
 			} else {
