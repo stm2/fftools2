@@ -569,13 +569,14 @@ public class ScriptUnit {
 	 */
 	
 	public void readReportSettings(){
-		
 		for(Iterator<String> iter = this.unit.getOrders().iterator(); iter.hasNext();) {
 			String s = (String) iter.next();
 			if (s.toLowerCase().startsWith("// script setitemgroup")) {
 				String s2 = s.substring(23);
 				// ToDo: in ReportSettings verschieben
-
+			
+				
+				
 				StringTokenizer st = new StringTokenizer(s2);
 				int i = 0;
 				String catName = "";

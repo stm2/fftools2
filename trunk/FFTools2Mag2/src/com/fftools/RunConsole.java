@@ -181,14 +181,15 @@ public class RunConsole {
     		// Filetype organisieren..brauchen wir zum init des CRWriters
     		filetype = FileTypeFactory.singleton().createFileType(crFile, false);
     		filetype.setCreateBackup(false);
-    		CRWriter crw = new CRWriter(sm.gd_ScriptMain,null,filetype,Encoding.ISO.toString());
+    		CRWriter crw = new CRWriter(null,filetype,Encoding.ISO.toString());
     		// alle anderen Values des CRw auf default
     		crw.setServerConformance(false);
     		// temp.cr schreiben
     		// sm.gd_ScriptMain.encoding = FileType.ISO_8859_1;
     		sm.gd_ScriptMain.setEncoding(Encoding.ISO.toString());
-    		crw.writeSynchronously();
-    		
+    		Thread t = crw.writeAsynchronously(sm.gd_ScriptMain);
+    		while (t.isAlive()) {}
+    		// crw.write(sm.gd_ScriptMain);
     		
     		crw.close();
     		outText.addOutLine("wrote " + crFile.getName());

@@ -115,7 +115,7 @@ public class GoToAction extends MenuAction {
   	     if (actRegion==null || !u.getRegion().equals(actRegion)){
   	       // String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain.regions(), act, dest, excludeMap);
   	       actRegion = u.getRegion();
-  	       regionList = Regions.getPath1(data.regions(), actRegion.getCoordinate(), this.targetRegion.getCoordinate(), excludeMap);
+  	       regionList = Regions.getPath(data.regions(), actRegion.getCoordinate(), this.targetRegion.getCoordinate(), excludeMap);
   	       path=Regions.getDirections(regionList);
   	     }
   	   
