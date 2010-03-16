@@ -201,8 +201,7 @@ public class TradeAreaHandler implements OverlordInfo{
 			}
 			
 			if (TradeUtils.onSameIsland(r, actOriginRegion, this.data)) {
-				// String path = Regions.getDirections(this.data.regions(), actOriginRegion.getID() , r.getID(), excludeMap);
-				String path = Regions.getDirections(this.data, actOriginRegion.getID() , r.getID(), excludeMap,1);
+				String path = Regions.getDirections(this.data.regions(), actOriginRegion.getID() , r.getID(), excludeMap);
 				if (path!=null && path.length()>0) {
 					// weg gefunden
 					// länge bestimmen = Anzahl der richtungen
@@ -436,7 +435,6 @@ public class TradeAreaHandler implements OverlordInfo{
 				}
 			}
 		}
-		int i1 = 0;
 		// alle automatischen zuordnen
 		for (Iterator<TradeRegion> iter = this.tradeRegions.values().iterator();iter.hasNext();){
 			TradeRegion tR = (TradeRegion)iter.next();
@@ -448,7 +446,7 @@ public class TradeAreaHandler implements OverlordInfo{
 				}
 			}
 		}
-		int i2 = 0;
+		
 		// traders wieder zuordnen
 		if (this.traders!=null) {
 			for (Iterator<ScriptUnit> iter = this.traders.keySet().iterator();iter.hasNext();){
@@ -463,8 +461,8 @@ public class TradeAreaHandler implements OverlordInfo{
 				}		
 			}
 		}
-		int i = 0;
 		
+		// int i = 0;
 	}
 	
 	/**

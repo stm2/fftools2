@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import magellan.library.ID;
 import magellan.library.Skill;
-import magellan.library.StringID;
 import magellan.library.rules.SkillType;
 
 import com.fftools.pools.ausbildung.AusbildungsPool;
@@ -152,7 +152,7 @@ public class Lernfix extends MatPoolScript{
 	 * @return
 	 */
       
-	  private HashMap<SkillType,Skill> erzeugeSkillList(Map<StringID,Skill> _m){
+	  private HashMap<SkillType,Skill> erzeugeSkillList(Map<ID,Skill> _m){
 		  HashMap<SkillType,Skill> liste = new HashMap<SkillType,Skill>();
 			for(Iterator<Skill> iter = _m.values().iterator();iter.hasNext();){
 				Skill skill =( Skill) iter.next();
