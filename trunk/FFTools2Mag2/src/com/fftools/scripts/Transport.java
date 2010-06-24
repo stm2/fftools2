@@ -73,6 +73,7 @@ public class Transport extends TransportScript{
 		
 		// Einschub: minReitTalent abfragen
 		if (this.transporter.getMinReitTalent()>0){
+			this.addComment("DEBUG: minReitTalent ist " + this.transporter.getMinReitTalent());
 			SkillType reitSkillType = super.gd_Script.rules.getSkillType("Reiten");
 			if (reitSkillType!=null){
 				Skill reitSkill = super.getUnit().getSkill(reitSkillType);
@@ -83,6 +84,8 @@ public class Transport extends TransportScript{
 					this.transporter.setLearning(true);
 				}
 			}
+		} else {
+			this.addComment("DEBUG: kein minReitTalent");
 		}
 		
 		
