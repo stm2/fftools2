@@ -1,5 +1,7 @@
 package com.fftools.scripts;
 
+import java.util.Iterator;
+
 import magellan.library.Unit;
 
 
@@ -41,7 +43,7 @@ public class Auramaxwarning extends Script{
 	private void scriptStart(){
 		Unit u = this.scriptUnit.getUnit();
 		if (u.getAuraMax()>0) {
-			if (u.getAura()==u.getAuraMax()){
+			if (u.getAura()==u.getAuraMax() && !zaubert()){
 				/* Maximum erreicht */
 				this.doNotConfirmOrders();
 				this.addComment("AuraMaxWarning: Einheit hat Maximum an Aura!");
@@ -62,5 +64,31 @@ public class Auramaxwarning extends Script{
 	public boolean allowMultipleScripts(){
 		return false;
 	}
+	
+	
+	/**
+	 * prüft, ob ZAUBERE gesetzt ist
+	 * @return
+	 */
+	private boolean zaubert(){
+		
+		if (this.scriptUnit.getUnit().getOrders()==null || this.scriptUnit.getUnit().getOrders().size()==0){
+			return false;
+		}
+		for(Iterator<String> iter = this.scriptUnit.getUnit().getOrders().iterator(); iter.hasNext();) {
+			String s = (String) iter.next();
+			if (s.startsWith("ZAUBERE")){
+				this.addComment("auramax: Einheit zaubert.");
+				return true;
+			}
+			if (s.startsWith("zaubere")){
+				this.addComment("auramax: Einheit zaubert.");
+				return true;
+			}
+		}
+		this.addComment("auramax: Einheit zaubert nicht.");
+		return false;
+	}
+	
 	
 }

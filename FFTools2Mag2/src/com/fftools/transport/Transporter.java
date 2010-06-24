@@ -301,9 +301,11 @@ public class Transporter {
 		
 		if (OP.getOptionInt("minReitTalent", -1)>-1	){
 			this.minReitTalent = OP.getOptionInt("minReitTalent", -1);
+			this.scriptUnit.addComment("parse Orders: minReitTalent gesetzt auf " + this.minReitTalent);
 		}
 		if (OP.getOptionInt("minTalent", -1)>-1	){
-			this.minReitTalent = OP.getOptionInt("minReitTalent", -1);
+			this.minReitTalent = OP.getOptionInt("minTalent", -1);
+			this.scriptUnit.addComment("parse Orders: minReitTalent gesetzt auf " + this.minReitTalent);
 		}
 		
 	}
