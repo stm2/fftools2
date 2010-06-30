@@ -60,22 +60,26 @@ public class TeilenAnzahlAction extends MenuAction {
 	private void doAction(Unit u){
 		
 		int allPersons = u.getModifiedPersons();
-		int personsPerTemp = (int)Math.floor((double)allPersons/(double)this.Anzahl);
+		int personsPerTemp = (int)Math.round((double)allPersons/(double)this.Anzahl);
+		// int personsPerTemp = (int)Math.floor((double)allPersons/(double)this.Anzahl);
 		int remainingPersons=allPersons;
 		
 		ArrayList<TempUnit> tempUnits = new ArrayList<TempUnit>();
 		
 		for (int i = 1;i<=this.Anzahl;i++){
-			TempUnit newUnit = createTemp(u);
-			// Übergabe setzen
-			int transfer = Math.min(personsPerTemp,remainingPersons);
-			remainingPersons-=transfer;
-			if (remainingPersons<personsPerTemp){
-				transfer+=remainingPersons;
+			if (remainingPersons>0){
+				TempUnit newUnit = createTemp(u);
+				// Übergabe setzen
+				int transfer = Math.min(personsPerTemp,remainingPersons);
+				remainingPersons-=transfer;
+				if (remainingPersons<personsPerTemp){
+					transfer+=remainingPersons;
+					remainingPersons=0;
+				}
+				// Order setzen
+				u.addOrderAt(0, "GIB " + newUnit.toString(false) + " " + transfer + " Personen ;dnt");
+				tempUnits.add(newUnit);
 			}
-			// Order setzen
-			u.addOrderAt(0, "GIB " + newUnit.toString(false) + " " + transfer + " Personen ;dnt");
-			tempUnits.add(newUnit);
 		}
 
 		this.selectionObserver.getClient().getDispatcher().fire(new UnitOrdersEvent(this,u));

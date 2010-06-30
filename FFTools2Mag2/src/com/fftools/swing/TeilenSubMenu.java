@@ -29,6 +29,8 @@ public class TeilenSubMenu extends JMenu {
 		addMenuItem(this,new TeilenAnzahlAction(selectionObserver,10));
 		addMenuItem(this,new TeilenAnzahlAction(selectionObserver,15));
 		addMenuItem(this,new TeilenAnzahlAction(selectionObserver,20));
+		addMenuItem(this,new TeilenAnzahlAction(selectionObserver,25));
+		addMenuItem(this,new TeilenAnzahlAction(selectionObserver,50));
 		
 		
 	}

@@ -85,7 +85,7 @@ public class UnterhalterAction extends MenuAction {
 		tempUnit.addOrderAt(0, "BENENNEN EINHEIT Zirkus ;dnt");
 		// script Setzen
 		tempUnit.addOrderAt(0, "// Tip: mindestAuslastung=[XX]  (In prozent)");
-		tempUnit.addOrderAt(0, "// script Unterhalten minTalent=3");
+		tempUnit.addOrderAt(0, "// script Unterhalten minTalent=3 mode=auto");
 		
 		
 		// rekrutieren

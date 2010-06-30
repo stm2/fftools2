@@ -11,7 +11,10 @@ import javax.swing.KeyStroke;
 import com.fftools.demo.actions.MenuAction;
 import com.fftools.demo.actions.temp.DepotWahrnehmerAction;
 import com.fftools.demo.actions.temp.HandelAction;
+import com.fftools.demo.actions.temp.SoldatenFrontAction;
+import com.fftools.demo.actions.temp.SoldatenRearAction;
 import com.fftools.demo.actions.temp.TarnDepotAction;
+import com.fftools.demo.actions.temp.TarnerAction;
 import com.fftools.demo.actions.temp.TransporterAction;
 import com.fftools.demo.actions.temp.UnterhalterAction;
 import com.fftools.demo.actions.temp.WahrnehmerAction;
@@ -35,6 +38,9 @@ public class TempSubMenu extends JMenu {
 		addMenuItem(this,new TransporterAction(selectionObserver));
 		addMenuItem(this,new UnterhalterAction(selectionObserver));
 		addMenuItem(this,new WahrnehmerAction(selectionObserver));
+		addMenuItem(this,new TarnerAction(selectionObserver));
+		addMenuItem(this,new SoldatenFrontAction(selectionObserver));
+		addMenuItem(this,new SoldatenRearAction(selectionObserver));
 
 	}
 	
