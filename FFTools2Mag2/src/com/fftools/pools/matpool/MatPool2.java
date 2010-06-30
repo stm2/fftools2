@@ -774,13 +774,7 @@ public class MatPool2 implements MatPool{
 	 * @return
 	 */
 	private boolean isMatPoolItemType(ItemType itemType){
-		
-		// debug
-		if (itemType.getName().equalsIgnoreCase("Ring der flinken Finger") || itemType.getName().equalsIgnoreCase("Ring der Unsichtbarkeit")){
-			int iii=0;
-			iii++;
-		}
-		
+
 		// prinzipiell alles zulassen
 		boolean erg = true;
 		// Name der Kategorie extrahieren
@@ -792,11 +786,13 @@ public class MatPool2 implements MatPool{
 				erg = false;
 			}
 			// Sonstiges ausser Silber
-			if (itemCat.getName().equalsIgnoreCase("Sonstiges")) {
-				if (!itemType.getName().equalsIgnoreCase("Silber")) {
-					erg = false;
-				}
-			}
+			// 20100630: Sonstige zulassen
+			// 
+			// if (itemCat.getName().equalsIgnoreCase("Sonstiges")) {
+			//	if (!itemType.getName().equalsIgnoreCase("Silber")) {
+			//		erg = false;
+			//	}
+			// }
 			// RdF explizit zulassen
 			if (itemType.getName().equalsIgnoreCase("Ring der flinken Finger")) {
 				erg=true;
@@ -817,6 +813,27 @@ public class MatPool2 implements MatPool{
 				erg = true;
 			}
 			if (itemType.getName().equalsIgnoreCase("Weihnachtsbaum")) {
+				erg = true;
+			}
+			if (itemType.getName().equalsIgnoreCase("Antimagiekristall")) {
+				erg = true;
+			}
+			if (itemType.getName().equalsIgnoreCase("Sphäre der Unsichtbarkeit")) {
+				erg = true;
+			}
+			if (itemType.getName().equalsIgnoreCase("Ring der Macht")) {
+				erg = true;
+			}
+			if (itemType.getName().equalsIgnoreCase("Feenstiefel")) {
+				erg = true;
+			}
+			if (itemType.getName().equalsIgnoreCase("Drachenblut")) {
+				erg = true;
+			}
+			if (itemType.getName().equalsIgnoreCase("Geburtstagstorte")) {
+				erg = true;
+			}
+			if (itemType.getName().equalsIgnoreCase("Tiegel mit Krötenschleim")) {
 				erg = true;
 			}
 		}
