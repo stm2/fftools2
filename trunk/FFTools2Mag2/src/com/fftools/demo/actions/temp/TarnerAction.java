@@ -11,17 +11,16 @@
  *
  */
 
-package com.fftools.demo.actions.unit;
+package com.fftools.demo.actions.temp;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
-import magellan.client.event.OrderConfirmEvent;
-import magellan.client.event.UnitOrdersEvent;
+import magellan.client.event.TempUnitEvent;
+import magellan.library.TempUnit;
 import magellan.library.Unit;
+import magellan.library.UnitID;
 
 import com.fftools.demo.actions.MenuAction;
 import com.fftools.swing.SelectionObserver;
@@ -34,7 +33,7 @@ import com.fftools.utils.MsgBox;
  * @author Fiete
  * @version
  */
-public class TransporterAction extends MenuAction {
+public class TarnerAction extends MenuAction {
 	private static final long serialVersionUID = 1L;
 	private SelectionObserver selectionObserver;
 	
@@ -45,9 +44,9 @@ public class TransporterAction extends MenuAction {
 	 *
 	 * @param parent TODO: DOCUMENT ME!
 	 */
-	public TransporterAction(SelectionObserver selectionObserver) {
+	public TarnerAction(SelectionObserver selectionObserver) {
         super(selectionObserver.getClient());
-        setName("Transporter");
+        setName("Temp: Tarner");
         this.selectionObserver = selectionObserver; 
 	}
 
@@ -61,28 +60,37 @@ public class TransporterAction extends MenuAction {
 		if (units!=null && units.size()>0){
 			for (Iterator<Object> iter = units.iterator();iter.hasNext();){
 				Unit actUnit = (Unit)iter.next();
-				this.doAction(actUnit);
+				this.makeIt(actUnit);
 			}
 		} else {
-			new MsgBox(this.selectionObserver.getClient(),"Nicht möglich:" + this.getClass().getName(),"Fehler",true);
+			new MsgBox(this.selectionObserver.getClient(),"Keine Aktion möglich:" + this.getClass().getName(),"Fehler",true);
 		}
 	}
 
 	/**
-	 * führt die Aktion für diese Unit durch
+	 * führt den Klonvorgang für diese Unit durch
 	 * @param u
 	 */
-	private void doAction(Unit u){
-		String order = "// script Transport mode=auto";
-		u.addOrderAt(0, order);
-		// order = "Benennen Einheit Transporter ;dnt";
-		// u.addOrderAt(0, order);
-		order = "// setTag eTag1 Transporter";
-		u.addOrderAt(0, order);
-		u.setOrdersConfirmed(true);
-		List<Unit> units = new LinkedList<Unit>();
-		units.add(u);
-		this.selectionObserver.getClient().getDispatcher().fire(new OrderConfirmEvent(this, units));
-		this.selectionObserver.getClient().getDispatcher().fire(new UnitOrdersEvent(this,u));
+	private void makeIt(Unit u){
+		Unit parentUnit = u;
+		if(u instanceof TempUnit) {
+			parentUnit = ((TempUnit) u).getParent();
+		}
+		// neue Unit ID
+		UnitID id = UnitID.createTempID(this.selectionObserver.getClient().getData(), this.selectionObserver.getClient().getProperties(), parentUnit);
+		// Die tempUnit anlegen
+		TempUnit tempUnit = parentUnit.createTemp(id);
+		
+		// name setzen
+		tempUnit.addOrderAt(0, "BENENNEN EINHEIT Tarner ;dnt");
+		// script Setzen
+		tempUnit.addOrderAt(0, "// script Lernfix Talent=Tarnung");
+		
+		// rekrutieren
+		tempUnit.addOrderAt(0, "// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren 1", false);
+
+		this.selectionObserver.getClient().getDispatcher().fire(new TempUnitEvent(this, tempUnit, TempUnitEvent.CREATED));
 	}
+	
+	
 }

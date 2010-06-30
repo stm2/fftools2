@@ -77,6 +77,8 @@ public class DepotWahrnehmerAction extends MenuAction {
 		u.addOrderAt(0, order);
 		order = "// script Lernfix Talent=Wahrnehmung";
 		u.addOrderAt(0, order);
+		order = "// setTag eTag1 Depot";
+		u.addOrderAt(0, order);
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

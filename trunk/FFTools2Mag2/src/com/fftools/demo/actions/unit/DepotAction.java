@@ -75,6 +75,8 @@ public class DepotAction extends MenuAction {
 	private void setMaterial(Unit u){
 		String order = "// script Depot";
 		u.addOrderAt(0, order);
+		order = "// setTag eTag1 Depot";
+		u.addOrderAt(0, order);
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

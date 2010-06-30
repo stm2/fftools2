@@ -84,7 +84,7 @@ public class TransporterAction extends MenuAction {
 		// name setzen
 		tempUnit.addOrderAt(0, "BENENNEN EINHEIT Transport ;dnt");
 		// script Setzen
-		tempUnit.addOrderAt(0, "// script Transport minReitTalent=2");
+		tempUnit.addOrderAt(0, "// script Transport minReitTalent=2 mode=auto");
 		
 		// rekrutieren
 		tempUnit.addOrderAt(0, "// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren 3", false);
