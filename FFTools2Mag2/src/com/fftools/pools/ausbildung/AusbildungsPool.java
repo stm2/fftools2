@@ -236,11 +236,18 @@ private MatPool matPool = null;
 		   for (Iterator<AusbildungsRelation> iter = liste.iterator(); iter.hasNext();){
 			   AusbildungsRelation kandidat = (AusbildungsRelation) iter.next();
 			   int teuerstesTalent =0;
-			   for (Iterator<Skill> iter2 = kandidat.getStudyRequest().values().iterator(); iter2.hasNext();){
-				   Skill skill = (Skill) iter2.next();
-			   // Zählen nur das teuerste teure Talent...und merken uns den Preis in Variable..
-				   if (kandidat.getLernKosten(skill)>teuerstesTalent){
-					   teuerstesTalent = kandidat.getLernKosten(skill);
+			   
+			   if (kandidat.getStudyRequest()==null) {
+				   // kandidat.getScriptUnit().doNotConfirmOrders();
+				   kandidat.getScriptUnit().addComment("DEBUG: no Study Request");
+			   } else {
+			   
+				   for (Iterator<Skill> iter2 = kandidat.getStudyRequest().values().iterator(); iter2.hasNext();){
+					   Skill skill = (Skill) iter2.next();
+				   // Zählen nur das teuerste teure Talent...und merken uns den Preis in Variable..
+					   if (kandidat.getLernKosten(skill)>teuerstesTalent){
+						   teuerstesTalent = kandidat.getLernKosten(skill);
+					   }
 				   }
 			   }
 			   gesamtKosten = gesamtKosten + teuerstesTalent;
