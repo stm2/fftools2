@@ -24,6 +24,7 @@ import magellan.library.utils.Regions;
 import magellan.library.utils.Umlaut;
 
 import com.fftools.OutTextClass;
+import com.fftools.ReportSettings;
 import com.fftools.ScriptMain;
 import com.fftools.ScriptUnit;
 
@@ -38,6 +39,7 @@ public class FFToolsRegions {
 	private static long cntCacheHits = 0;
 	private static long cntCacheRequests = 0;
 	
+	private static boolean notUseRegionNames = false;
 	
 	/**
 	 * a cache for the calls to getPathDistLand with no(!) nextstepInfo!
@@ -768,8 +770,31 @@ public class FFToolsRegions {
 	public static CoordinateID getRegionCoordFromName (GameData data, String regionName) {
 		String currentName = null;
 		CoordinateID currentCoord = null;
+		
+		// usage of RegionNames as switch via reportSettiungs
+		ReportSettings reportSettings = ReportSettings.getInstance();
+		if (reportSettings.getOptionBoolean("notUseRegionNames")){
+			notUseRegionNames=true;
+		} else {
+			notUseRegionNames=false;
+		}
+		
+		
+		if (notUseRegionNames){
+			return null;
+		}
+		
+		// be aware of spaces in the name
+		// FFTools wide consept: use '_' for spaces (Ring_der_Unsichtbarkeit)
+		// we have the correct names in the map - we need to replace '_' with ' ' 
+		// in  the search string
+		regionName = regionName.replace('_',' ');
+		
+		
 		// If the translation map has not yet been initialized, do it:
 		if (regionMap==null) {
+			outText.addOutLine("Erzeuge neue Map RegionNames");
+			System.out.println("Erzeuge neue Map RegionNames\n");
 			regionMap = new HashMap<String, CoordinateID>();
 			for (Iterator<Region> iter = data.regions().values().iterator();iter.hasNext();){
 				Region r = (Region)iter.next();
@@ -777,11 +802,20 @@ public class FFToolsRegions {
 				currentCoord = r.getCoordinate();
 				regionMap.put(currentName, currentCoord);
 			}
-			
+			outText.addOutLine("Map RegionNames erzeugt");
+			System.out.println("Map RegionNames erzeugt\n");
 		}
 		// Translation map has been initialized, now return the coordinate for the name
 		// CAREFUL WITH THE RESULT: May be NULL if region name cannot be found!
 		return regionMap.get(regionName.replace("_", " "));
+	}
+
+	public static boolean isNotUseRegionNames() {
+		return notUseRegionNames;
+	}
+
+	public static void setNotUseRegionNames(boolean useRegionNames) {
+		FFToolsRegions.notUseRegionNames = useRegionNames;
 	}
 	
 }
