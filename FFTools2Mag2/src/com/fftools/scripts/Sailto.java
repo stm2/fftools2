@@ -115,7 +115,7 @@ public class Sailto extends Script{
 	
 	private void makeOrderNACH(CoordinateID act,CoordinateID dest){
 		
-		int meerManBonus = 0;
+		
 		
 		// FF 20070103: eingebauter check, ob es actDest auch gibt?!
 		if (!com.fftools.utils.FFToolsRegions.isInRegions(this.gd_Script.regions(), dest)){
@@ -126,17 +126,12 @@ public class Sailto extends Script{
 			return;
 		} 
 
-		try {
-			if(super.scriptUnit.getUnit().getFaction().getRace().toString().equalsIgnoreCase("MEERMENSCHEN")) {
-				meerManBonus = 1;
-			}
-		} catch(Exception exc) {
-		}
+		int speed = super.gd_Script.getGameSpecificStuff().getGameSpecificRules().getShipRange(this.ship);
 		
 		BuildingType harbour = super.gd_Script.rules.getBuildingType(StringID.create("Hafen"));
 
 		List<Region> pathL = Regions.planShipRoute(this.ship, dest,super.gd_Script.regions(), harbour,
-										  meerManBonus);
+										  speed);
 		
 		String path = null;
 		if (pathL!=null){
