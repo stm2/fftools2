@@ -181,53 +181,32 @@ public class Lernen extends MatPoolScript{
 
 		/**
 		 * Gibt Lerkosten für teures Talent zurück.. eressea.rules gibt da nix her...
+		 * FF: 20100912 Das war falsch, wurde ergänzt zwischenzeitlich
 		*/
 	 
 	public int getLernKosten(Skill _skill){
 		
-		if (_skill!=null){
-			if (_skill.getName().equals("Alchemie")){
-			 
-				if (this.akademie==null){
-					return super.getUnit().getModifiedPersons()*200;
-				}else{
-					return super.getUnit().getModifiedPersons()*400;	
-				}
-			}
-			
-	        if (_skill.getName().equals("Taktik")){
-	        	if (this.akademie==null){
-					return super.getUnit().getModifiedPersons()*200;
-				}else{
-					return super.getUnit().getModifiedPersons()*400;	
-				}
-			}
-			
-	        
-	        if (_skill.getName().equals("Kräuterkunde")){
-	        	if (this.akademie==null){
-					return super.getUnit().getModifiedPersons()*200;
-				}else{
-					return super.getUnit().getModifiedPersons()*400;	
-				}
-			}
-			
-	        if (_skill.getName().equals("Magie")){
+		// für Magie extra...
+		 if (_skill.getName().equals("Magie")){
 	        	return FFToolsUnits.calcMagieLernKosten(this.getUnit(), this.gd_Script);
-			}
-	        
-	       
-		  if (akademie!=null){
-			  return super.getUnit().getModifiedPersons() *50;
-		  }
-	      
-		  return 0;
 		}
-	return 0;	
+
+		SkillType _skillType = null;
+		_skillType = _skill.getSkillType();
+		int basicCost = 0;
+		basicCost = _skillType.getCost(1);
 		
+		if (this.akademie!=null){
+			if (basicCost>0){
+				basicCost *= 2;
+			} else {
+				basicCost = 50;
+			}
+		} 
+	
+		// Personenanzahl
+		basicCost *= super.getUnit().getModifiedPersons();
+		
+		return basicCost;
 	}
-	 
-	
-	
-	
 }
