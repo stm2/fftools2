@@ -5,6 +5,8 @@ import magellan.library.CoordinateID;
 import magellan.library.Ship;
 import magellan.library.Unit;
 
+import com.fftools.utils.FFToolsRegions;
+
 public class Route extends Script{
 	
 	private static final int Durchlauf = 3;
@@ -26,7 +28,14 @@ public class Route extends Script{
 			addOutLine("X....fehlendes ROUTE Ziel bei " + this.scriptUnit.getUnit().toString(true) + " in " + this.scriptUnit.getUnit().getRegion().toString());
 		} else {
 			// wir haben zumindest ein Ziel
-			CoordinateID actDest = CoordinateID.parse(super.getArgAt(0),",");
+			// TH: Prüfen, ob Koordinate oder Regionsname, falls Komma in Regionsangabe sind es wohl Koordinaten...
+			CoordinateID actDest = null;
+			if (super.getArgAt(0).indexOf(',') > 0) {
+				actDest = CoordinateID.parse(super.getArgAt(0),",");
+			} else {
+			// Keine Koordinaten, also Region in Koordinaten konvertieren
+				actDest = FFToolsRegions.getRegionCoordFromName(this.gd_Script, super.getArgAt(0));
+			}
 			if (actDest!=null){
 				// wir haben ein Ziel...sind wir da?
 				CoordinateID actRegCoordID = super.scriptUnit.getUnit().getRegion().getCoordinate();
