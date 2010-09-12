@@ -45,6 +45,12 @@ public class FFToolsRegions {
 	private static HashMap<PathDistLandInfo,Integer> pathDistCache = null;
 	
 	/**
+	 * TH: A translation map of region names to region coordinates
+	 */
+
+	private static HashMap<String,CoordinateID> regionMap = null;
+	
+	/**
 	 * Gibt es eine Koordinate in den übergebenen Regionen?
 	 * @param regions die übliche magellan map <ID,Region>
 	 * @param c zu prüfende Region Coord (zu gebrauchen wenn bspw. geparst
@@ -651,7 +657,7 @@ public class FFToolsRegions {
 	 *
 	 * @param rules Rules of the game
 	 *
-	 * @return map of all non ocean RegionTypes
+	 * @return map of all ocean RegionTypes
 	 */
 	public static Map<ID,RegionType> getNonOceanRegionTypes(Rules rules) {
 		Map<ID,RegionType> ret = new Hashtable<ID, RegionType>();
@@ -666,30 +672,6 @@ public class FFToolsRegions {
 
 		return ret;
 	}
-	
-	
-	/**
-	 * Returns a map of all RegionTypes that are flagged as <tt>ocean</tt>.
-	 *
-	 * @param rules Rules of the game
-	 *
-	 * @return map of all non ocean RegionTypes
-	 */
-	public static Map<ID,RegionType> getOceanRegionTypes(Rules rules) {
-		Map<ID,RegionType> ret = new Hashtable<ID, RegionType>();
-
-		for(Iterator<RegionType> iter = rules.getRegionTypeIterator(); iter.hasNext();) {
-			RegionType rt = (RegionType) iter.next();
-
-			if(rt.isOcean()) {
-				ret.put(rt.getID(), rt);
-			}
-		}
-
-		return ret;
-	}
-	
-	
 	
 	/**
 	 * liefert Wert eines zusätzlich verbauten Steines in die Burg der Region bis zur 
@@ -774,6 +756,32 @@ public class FFToolsRegions {
 			}
 		}
 		return erg;
+	}
+
+	/**
+	 * TODO Inserted by TH
+	 * Returns coordinates of the region whose name was passed as argument, or NULL if not found
+	 * @param data
+	 * @param regionName
+	 * @return
+	 */
+	public static CoordinateID getRegionCoordFromName (GameData data, String regionName) {
+		String currentName = null;
+		CoordinateID currentCoord = null;
+		// If the translation map has not yet been initialized, do it:
+		if (regionMap==null) {
+			regionMap = new HashMap<String, CoordinateID>();
+			for (Iterator<Region> iter = data.regions().values().iterator();iter.hasNext();){
+				Region r = (Region)iter.next();
+				currentName = r.getName();
+				currentCoord = r.getCoordinate();
+				regionMap.put(currentName, currentCoord);
+			}
+			
+		}
+		// Translation map has been initialized, now return the coordinate for the name
+		// CAREFUL WITH THE RESULT: May be NULL if region name cannot be found!
+		return regionMap.get(regionName.replace("_", " "));
 	}
 	
 }

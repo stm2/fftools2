@@ -34,6 +34,7 @@ public class Ifnotregion extends Script{
 		
 		// hier code fuer Script
 		boolean parseOK = true;
+		boolean rightRegion = true;
 		// zur Sicherheit..falls parsen schief geht, wird keine Region gefunden...
 		
 		// Integer xInt = Integer.MIN_VALUE;
@@ -49,25 +50,46 @@ public class Ifnotregion extends Script{
 		}
 		
 		if (super.getArgCount()>1) {
-			CoordinateID actDest = CoordinateID.parse(super.getArgAt(0),",");
-			
-			if (actDest == null){
-				// komische Regionsangabe
-				super.addComment("Fehler beim Erkennen der Regionskoordinaten", true);
-				super.addComment("Unit wurde durch IfNotRegion NICHT bestaetigt", true);
-				super.scriptUnit.doNotConfirmOrders();
-				parseOK=false;
-				addOutLine("X....Fehler beim Erkennen der Regionskoordinaten: " + this.scriptUnit.getUnit().toString(true) + " in " + this.scriptUnit.getUnit().getRegion().toString());
-			}
-			// sind wir in der richtigen Region ? == andere als angegeben
-			// erst dann macht es Sinn, sich mit den sonstigen Argumenten zu beschäftigen...
-			boolean rightRegion = true;
-			if (parseOK) {
-				CoordinateID regionCoordinateID = super.scriptUnit.getUnit().getRegion().getCoordinate();
-				if (regionCoordinateID.equals(actDest)){
-					rightRegion = false;
+
+			// Falls Komma in Regionsangabe sind es wohl Koordinaten...
+			if (super.getArgAt(0).indexOf(',') > 0) {
+				CoordinateID actDest = CoordinateID.parse(super.getArgAt(0),",");
+				if (actDest == null){
+					// komische Regionsangabe
+					super.addComment("Fehler beim Erkennen der Regionskoordinaten", true);
+					super.addComment("Unit wurde durch IfNotRegion NICHT bestaetigt", true);
+					super.scriptUnit.doNotConfirmOrders();
+					parseOK=false;
+					addOutLine("X....Fehler beim Erkennen der Regionskoordinaten: " + this.scriptUnit.getUnit().toString(true) + " in " + this.scriptUnit.getUnit().getRegion().toString());
+				}
+				// sind wir in der richtigen Region ? == andere als angegeben
+				// erst dann macht es Sinn, sich mit den sonstigen Argumenten zu beschäftigen...
+				if (parseOK) {
+					CoordinateID regionCoordinateID = super.scriptUnit.getUnit().getRegion().getCoordinate();
+					if (regionCoordinateID.equals(actDest)){
+						rightRegion = false;
+					}
+				}
+			} else {
+				String regionWanted = super.getArgAt(0).replace("_", " ");
+				if (regionWanted == null) {
+					super.addComment("Fehler beim Erkennen des Regionsnamens", true);
+					super.addComment("Unit wurde durch IfNotRegion NICHT bestaetigt", true);
+					super.scriptUnit.doNotConfirmOrders();
+					parseOK=false;
+					addOutLine("X....Fehler beim Erkennen des Regionsnamens: " + this.scriptUnit.getUnit().toString(true) + " in " + this.scriptUnit.getUnit().getRegion().toString());
+				}
+				// Ok, Name eingelesen, also Prüfung auf gewünschte Region --> NICHT die Region, in der wir gerade sind!
+				if (parseOK) {
+					String regionName = super.scriptUnit.getUnit().getRegion().getName();
+					if (regionName.equals(regionWanted)) {
+						rightRegion = false;
+					}
 				}
 			}
+				
+				
+				
 			// rightRegion ist nur dann true, wenn nicht in Richtiger Region und ParsenOK..somit alles fein
 			// nächsten Parameter anschaunen..entweder eressea-befgehl = irgendetwas
 			// oder schlüsselwort script...

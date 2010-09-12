@@ -3,6 +3,8 @@ package com.fftools.scripts;
 
 import java.util.List;
 
+import com.fftools.utils.FFToolsRegions;
+
 import magellan.library.CoordinateID;
 import magellan.library.Region;
 import magellan.library.Ship;
@@ -36,7 +38,14 @@ public class Sailto extends Script{
 				addOutLine("X....fehlendes SAILTO Ziel bei " + this.scriptUnit.getUnit().toString(true) + " in " + this.scriptUnit.getUnit().getRegion().toString());
 			} else {
 				// wir haben zumindest ein Ziel
-				CoordinateID actDest = CoordinateID.parse(super.getArgAt(0),",");
+				// TH: Prüfen, ob Koordinate oder Regionsname, falls Komma in Regionsangabe sind es wohl Koordinaten...
+				CoordinateID actDest = null;
+				if (super.getArgAt(0).indexOf(',') > 0) {
+					actDest = CoordinateID.parse(super.getArgAt(0),",");
+				} else {
+				// Keine Koordinaten, also Region in Koordinaten konvertieren
+					actDest = FFToolsRegions.getRegionCoordFromName(this.gd_Script, super.getArgAt(0));
+				}
 				if (actDest!=null){
 					// wir haben ein Ziel...sind wir da?
 					CoordinateID actRegCoordID = super.scriptUnit.getUnit().getRegion().getCoordinate();
@@ -106,7 +115,7 @@ public class Sailto extends Script{
 	
 	private void makeOrderNACH(CoordinateID act,CoordinateID dest){
 		
-		
+		int meerManBonus = 0;
 		
 		// FF 20070103: eingebauter check, ob es actDest auch gibt?!
 		if (!com.fftools.utils.FFToolsRegions.isInRegions(this.gd_Script.regions(), dest)){
@@ -117,12 +126,17 @@ public class Sailto extends Script{
 			return;
 		} 
 
-		int speed = super.gd_Script.getGameSpecificStuff().getGameSpecificRules().getShipRange(this.ship);
+		try {
+			if(super.scriptUnit.getUnit().getFaction().getRace().toString().equalsIgnoreCase("MEERMENSCHEN")) {
+				meerManBonus = 1;
+			}
+		} catch(Exception exc) {
+		}
 		
 		BuildingType harbour = super.gd_Script.rules.getBuildingType(StringID.create("Hafen"));
 
 		List<Region> pathL = Regions.planShipRoute(this.ship, dest,super.gd_Script.regions(), harbour,
-										  speed);
+										  meerManBonus);
 		
 		String path = null;
 		if (pathL!=null){
