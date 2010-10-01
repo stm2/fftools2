@@ -57,8 +57,13 @@ public class Route extends Script{
 					// ersetzen
 					if (super.scriptUnit.replaceScriptOrder(newROUTE, "ROUTE ".length())) {
 						// OK...soweit alles klar
-						// neues Ziel setzen
-						actDest = CoordinateID.parse(super.getArgAt(1),",");
+						// neues Ziel setzen; TH: wieder mit Unterscheidung Coordinate vs. Region
+						if (super.getArgAt(1).indexOf(',') > 0) {
+							actDest = CoordinateID.parse(super.getArgAt(1),",");
+						} else {
+						// Keine Koordinaten, also Region in Koordinaten konvertieren
+							actDest = FFToolsRegions.getRegionCoordFromName(this.gd_Script, super.getArgAt(1));
+						}
 						if (actDest == null) {
 							zielParseFehler();
 						} else {
@@ -94,7 +99,7 @@ public class Route extends Script{
 	}
 	
 	private void setGOTO(CoordinateID dest){
-		// lediglich ein GOTO script zum dest erzeugen...wird in späterem Lauf dort bearbeitet
+		// lediglich ein GOTO script zum dest erzeugen...wird in sp?terem Lauf dort bearbeitet
 		// naja...wenn Kapitän, dann ein SAILTO....
 		if (this.checkShip()){
 			super.scriptUnit.findScriptClass("Sailto",dest.toString(","));
@@ -104,8 +109,8 @@ public class Route extends Script{
 	}
 	
 	/**
-	 * überprüft, ob einheit Kapitän eines schiffes
-	 * versucht, das shiff zu setzen (wird für pathbuilding enötigt)
+	 * ?berpr?ft, ob einheit Kapitän eines schiffes
+	 * versucht, das shiff zu setzen (wird für pathbuilding en?tigt)
 	 * wenn beides OK -> true, sonst false
 	 * @return
 	 */
