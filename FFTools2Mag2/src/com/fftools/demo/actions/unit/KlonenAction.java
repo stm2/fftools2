@@ -47,7 +47,7 @@ public class KlonenAction extends MenuAction {
 	 */
 	public KlonenAction(SelectionObserver selectionObserver) {
         super(selectionObserver.getClient());
-        setName("Konen");
+        setName("Klonen");
         this.selectionObserver = selectionObserver; 
 	}
 
