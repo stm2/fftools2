@@ -38,7 +38,13 @@ public class FFToolsUnits {
 				raceBonus = u.getRace().getSkillBonus(mageSkillType);
 			}
 		}
-    	int relevant_skill = mageLevel.getLevel() - raceBonus;
+    	int relevant_skill = 0;
+    	if (mageLevel!=null){
+    		relevant_skill = mageLevel.getLevel() - raceBonus;
+    		if (relevant_skill<0){
+    			relevant_skill=0;
+    		}
+    	}
     	erg = (50+25*(1+relevant_skill+1)*(relevant_skill+1))*u.getModifiedPersons();
     	if (u.getModifiedBuilding()!=null){
     		if (u.getModifiedBuilding().getBuildingType().getName().equalsIgnoreCase("Akademie")){
