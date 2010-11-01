@@ -75,10 +75,10 @@ public class OutTextClass {
 			if (cntPoints>maxRowPoints){
 				cntPoints=0;
 				if (txtOutput!=null){
-					txtOutput.append("*\n");
+					txtOutput.append("*\r\n");
 					txtOutput.setCaretPosition((txtOutput.getText().length()));
 				} else {
-					System.out.print("*\n");
+					System.out.print("*\r\n");
 					System.out.flush();
 				}
 				
@@ -91,12 +91,12 @@ public class OutTextClass {
 	 * @param s
 	 */
 	public void addOutLine(String s) {
-		String sS = "\n" + s;
+		String sS = "\r\n" + s;
 		this.addOutChars(sS);
 	}
 	
 	public void addNewLine(){
-		this.addOutChars("\n");
+		this.addOutChars("\r\n");
 	}
 	
 	
@@ -183,9 +183,9 @@ public class OutTextClass {
 	
 	
 	private String getVersionsString(){
-		String versionS = "\nVersions:\n";
-		versionS+="FFTools2: " + VersionInfo.getVersionInfo() + "\n";
-		versionS+="Magellan: " + magellan.library.utils.VersionInfo.getVersion(null) + "\n";
+		String versionS = "\r\nVersions:\r\n";
+		versionS+="FFTools2: " + VersionInfo.getVersionInfo() + "\r\n";
+		versionS+="Magellan: " + magellan.library.utils.VersionInfo.getVersion(null) + "\r\n";
 		return versionS;
 	}
 	
@@ -193,7 +193,7 @@ public class OutTextClass {
 	 * 
 	 */
 	public void closeOut() {
-		String s = getDateS() + " closing log.\n";
+		String s = getDateS() + " closing log.\r\n";
 		this.addOutLine(s);
 	}
 	
@@ -202,6 +202,9 @@ public class OutTextClass {
 	 */
 	
 	public void writeToLog(String s){
+		if (s==null){
+			s = "null - line";
+		}
 		if (actFileName==null){
 			actFileName=defaultFileName;
 		}
@@ -211,6 +214,7 @@ public class OutTextClass {
 		}
 		if (fileWriter==null){
 			try {
+				actFileName = actFileName.replace("?", "_");
 				fileWriter = new FileWriter(actFileName + ".txt",true);
 				
 				if (fileWriters==null){
@@ -218,12 +222,14 @@ public class OutTextClass {
 				}
 				fileWriters.put(actFileName, fileWriter);
 				
-				fileWriter.write("\n\n\n");
-				fileWriter.write("***** " + getDateS() + " new logentries follow....******\n");
+				fileWriter.write("\r\n\r\n\r\n");
+				fileWriter.write("***** " + getDateS() + " new logentries follow....******\r\n");
 				fileWriter.write(getVersionsString());
-				fileWriter.write("\n");
+				fileWriter.write("\r\n");
 			} catch (IOException e) {
 				// pech
+				System.out.print("Fehler beim anlegen der Datei: " + actFileName);
+				System.out.print(e.toString());
 			}
 		}
 		try {
@@ -231,6 +237,8 @@ public class OutTextClass {
 			fileWriter.flush();
 		} catch (IOException e) {
 			// dumm
+			System.out.print("Fehler beim Schreiben in die Datei: " + actFileName);
+			System.out.print(e.toString());
 		}
 	}
 	
