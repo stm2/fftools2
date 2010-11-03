@@ -523,6 +523,15 @@ public class MatPoolRequest extends MatPoolRelation  implements Comparable<MatPo
 	public int getOriginalGefordert() {
 		return gefordert;
 	}
+	
+	/**
+	 * setzt gefordert - nur VOR dem MP zu setzen
+	 * @param _gefordert
+	 */
+	public void setOriginalGefordert(int _gefordert){
+		this.gefordert = _gefordert;
+	}
+	
 
 	/**
 	 * @return the originalGegenstand
