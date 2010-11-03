@@ -420,6 +420,7 @@ public void runScript(int scriptDurchlauf){
 						MPR2.setPrio((int)((double)MPR2.getPrio()*(double)0.75));
 						MPR2.setPrioTM((int)((double)MPR2.getPrioTM()*(double)0.75));
 						MPR2.setKommentar(MPR2.getKommentar().concat(" - Vorplanung " + x));
+						MPR2.setOriginalGefordert(this.targetSize * actItem.getAmount());
 						this.addMatPoolRequest(MPR2);
 					}
 				}
