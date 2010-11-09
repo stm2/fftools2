@@ -1,5 +1,7 @@
 package com.fftools.scripts;
 
+import java.text.NumberFormat;
+
 import magellan.library.rules.ItemType;
 
 import com.fftools.pools.matpool.relations.MatPoolRequest;
@@ -19,6 +21,11 @@ public class Trankeffekt extends MatPoolScript{
 	private int requestPrio = 20;
 	
 	private int vorratsRunden = 2;
+	
+	private int otherPersons = 0;
+	
+	private int personenWirkung=10;
+	
 	private String trank = null;
 	
 	private ItemType itemType=null;
@@ -74,8 +81,7 @@ public class Trankeffekt extends MatPoolScript{
 			return;
 		}
 		this.trank = trankName;
-		// wieviel Trank braucht die einheit pro runde?
-		double usagePerRound = (double)this.scriptUnit.getUnit().getModifiedPersons() / 10;
+		
 		// wieviel trank auf Vorrat
 		
 		int userVorrat = OP.getOptionInt("vorrat",-1);
@@ -83,14 +89,40 @@ public class Trankeffekt extends MatPoolScript{
 			this.vorratsRunden = userVorrat;
 		}
 		
+		int userOtherPersons = OP.getOptionInt("other", -1);
+		if (userOtherPersons>0){
+			this.otherPersons = userOtherPersons;
+		}
+		
+		int persZahl = this.scriptUnit.getUnit().getModifiedPersons()+this.otherPersons;
+		
+		if (this.trank.equalsIgnoreCase("Bauernblut")){
+			this.personenWirkung = 100;
+		}
+		
+		
+		// wieviel Trank braucht die einheit pro runde?
+		double usagePerRound = (double)(persZahl)/ this.personenWirkung;
 		
 		int usageNeeded = (int)Math.ceil(usagePerRound * (double)this.vorratsRunden);
+
+		NumberFormat NF = NumberFormat.getInstance();
+		NF.setMaximumFractionDigits(0);
+		NF.setMinimumFractionDigits(0);
+		NF.setMinimumIntegerDigits(1);
+		NF.setMaximumIntegerDigits(5);
+		
+		
+		this.addComment("Vorrat " + this.trank + ": daher benötigt: " + usageNeeded + " Tränke (mit Prio=" + this.requestPrio + ")");
+		this.addComment("Vorrat: " + this.trank + " pro Runde benötigt:" + usagePerRound + " (bei " + persZahl + " berücksichtigten Personen)");
+		
 		
 		// priorität
 		int userPrio = OP.getOptionInt("Prio",-1);
 		if (userPrio>0){
 			this.requestPrio=userPrio;
 		}
+		
 		
 		// notSuccessACK
 		this.notSuccessACK = OP.getOptionBoolean("notSuccessACK", this.notSuccessACK);
@@ -101,11 +133,10 @@ public class Trankeffekt extends MatPoolScript{
 		this.addMatPoolRequest(this.myMPR);
 		// Effekt feststellen.
 		int effects = this.scriptUnit.getEffekte(this.trank);
-		if (effects<this.scriptUnit.getUnit().getModifiedPersons()){
+		if (effects<persZahl){
 //			 Trank benutzen
-			for (int i = 0;i<Math.ceil((double)this.scriptUnit.getUnit().getModifiedPersons()/10);i++){
-				this.addOrder("BENUTZEN " +  this.trank,false);
-			}
+			this.addOrder("BENUTZEN " +  NF.format(Math.ceil((double)persZahl/this.personenWirkung)) + " " + this.trank,false);
+			
 		} else {
 			this.addComment("Trank " + this.trank + " ausreichend.");
 		}
