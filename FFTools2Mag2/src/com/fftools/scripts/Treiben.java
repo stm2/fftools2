@@ -50,6 +50,9 @@ public class Treiben extends TransportScript{
 	private int mindestAuslastung = defaultMindestAuslastung; 
 	private Skill skill=null;
 	
+	
+	private boolean noWeapons = false;
+	
 	private boolean confirmIfunemployed = false;
 	
 	private ArrayList<MatPoolRequest> requests = new ArrayList<MatPoolRequest>();
@@ -129,6 +132,7 @@ public void runScript(int scriptDurchlauf){
 					this.addComment("Keine Waffen für Treiber gefunden.");
 					this.addOrder("LERNEN Steuereintreiben", true);
 					this.doNotConfirmOrders();
+					this.noWeapons=true;
 				}
 				
 				
@@ -304,47 +308,50 @@ public void runScript(int scriptDurchlauf){
 			}
 			
 			
-			// Nun Befehle setzen!
+			if (!this.noWeapons){
 			
-			// Möglicher Verdienst größer als das was Pool erlaubt?
-			
-			// FF: ?!? mögliches Risiko: ist sicher, das Relation != null ?
-			
-			if (treiberPoolRelation.getVerdienst() > treiberPoolRelation.getDoTreiben()){
+				// Nun Befehle setzen!
 				
-				// Negativ wäre ein überzähliger Unterhalter!
-				if (treiberPoolRelation.getDoTreiben() < 0 ){
-					this.lerneTalent("Warnung: Überzählige Treiber Einheit!");
-					if (!this.confirmIfunemployed){
-						super.scriptUnit.doNotConfirmOrders();
-					}
-				} else{
+				// Möglicher Verdienst größer als das was Pool erlaubt?
+				
+				// FF: ?!? mögliches Risiko: ist sicher, das Relation != null ?
+				
+				if (treiberPoolRelation.getVerdienst() > treiberPoolRelation.getDoTreiben()){
 					
-					// postiv aber nicht ausgelastet!
-					super.addComment("Warnung: Einheit ist NICHT ausgelastet!");
-					super.addComment("" + Math.round((treiberPoolRelation.getVerdienst()-treiberPoolRelation.getDoTreiben())/treiberPoolRelation.getProKopfVerdienst()) + " Treiber überflüssig");		
-					super.addOrder("TREIBEN " + treiberPoolRelation.getDoTreiben(), true);			
-					
-					double auslastung = ((double)treiberPoolRelation.getDoTreiben()/(double)treiberPoolRelation.getVerdienst());
-					
-					// unter 90% auslastung unbestätigt. 
-					if ( auslastung < ((double)this.mindestAuslastung/100)){
+					// Negativ wäre ein überzähliger Unterhalter!
+					if (treiberPoolRelation.getDoTreiben() < 0 ){
+						this.lerneTalent("Warnung: Überzählige Treiber Einheit!");
 						if (!this.confirmIfunemployed){
 							super.scriptUnit.doNotConfirmOrders();
 						}
+					} else{
+						
+						// postiv aber nicht ausgelastet!
+						super.addComment("Warnung: Einheit ist NICHT ausgelastet!");
+						super.addComment("" + Math.round((treiberPoolRelation.getVerdienst()-treiberPoolRelation.getDoTreiben())/treiberPoolRelation.getProKopfVerdienst()) + " Treiber überflüssig");		
+						super.addOrder("TREIBEN " + treiberPoolRelation.getDoTreiben(), true);			
+						
+						double auslastung = ((double)treiberPoolRelation.getDoTreiben()/(double)treiberPoolRelation.getVerdienst());
+						
+						// unter 90% auslastung unbestätigt. 
+						if ( auslastung < ((double)this.mindestAuslastung/100)){
+							if (!this.confirmIfunemployed){
+								super.scriptUnit.doNotConfirmOrders();
+							}
+						}
+						
+						// FF: unter 100% angabe
+						if ( auslastung < 1){
+							this.addComment("Auslastung: " + (int)Math.floor(auslastung*100) + "%, unbestätigt unter " + this.mindestAuslastung + "%");	
+						}				
+						
 					}
-					
-					// FF: unter 100% angabe
-					if ( auslastung < 1){
-						this.addComment("Auslastung: " + (int)Math.floor(auslastung*100) + "%, unbestätigt unter " + this.mindestAuslastung + "%");	
-					}				
-					
+		
+				} else {
+				 super.addOrder("TREIBEN " + treiberPoolRelation.getDoTreiben(), true);
 				}
-	
-			} else {
-			 super.addOrder("TREIBEN " + treiberPoolRelation.getDoTreiben(), true);
 			}
-		}
+		}	
 	}
 	  
 		
