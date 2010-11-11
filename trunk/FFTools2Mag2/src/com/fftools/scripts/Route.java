@@ -99,7 +99,7 @@ public class Route extends Script{
 	}
 	
 	private void setGOTO(CoordinateID dest){
-		// lediglich ein GOTO script zum dest erzeugen...wird in sp?terem Lauf dort bearbeitet
+		// lediglich ein GOTO script zum dest erzeugen...wird in späterem Lauf dort bearbeitet
 		// naja...wenn Kapitän, dann ein SAILTO....
 		if (this.checkShip()){
 			super.scriptUnit.findScriptClass("Sailto",dest.toString(","));
