@@ -139,6 +139,9 @@ public class Sailto extends Script{
 		}
 		if (path!=null && path.length()>0) {
 			// path gefunden
+			// Reisezeitinfo
+			this.addComment("Distance to target: " + (pathL.size()-1) + ", ETA in " + ((int)Math.ceil(((double)pathL.size()-1)/speed)) + " turns.");
+			// NACH-Order	
 			super.addOrder("NACH " + path, true);
 			super.addComment("Einheit durch SAILTO bestätigt.",true);
 		} else {
