@@ -72,10 +72,31 @@ public class Rekrutieren extends MatPoolScript{
 		}
 		
 		
+		// Silber berechen...Race rausfinden
+		// Race r = super.scriptUnit.getUnit().race;
+		Race ra = super.scriptUnit.getUnit().getDisguiseRace();
+		if (ra==null){
+			ra = super.scriptUnit.getUnit().getRace();
+		}
+		
+		
 		int anzahl = 0;
 		// check -> max
 		if (super.getArgAt(0).equalsIgnoreCase("max")){
 			anzahl = this.region().modifiedRecruit();
+			// bei Orks verdoppeln
+			// Hinweis von Argelas 20111114
+			Race orkRace = this.gd_Script.rules.getRace("Orks",false);
+			if (orkRace==null){
+				this.doNotConfirmOrders();
+				this.addComment("Ork-Rasse nicht in den Regeln gefunden - FFTools braucht ein Update");
+			} else {
+				if (ra.equals(orkRace)){
+					anzahl = anzahl*2;
+					this.addComment("Rekrutieren: Orks erkannt. Maximal mögliche Rekruten verdoppelt auf:" + anzahl);
+				}
+			}
+			
 		} else {
 			// falls nicht Anzahl angegeben wurde....
 			anzahl = Integer.valueOf(super.getArgAt(0));
@@ -106,13 +127,9 @@ public class Rekrutieren extends MatPoolScript{
 		}		
 		
 		
-		// Silber berechen...Race rausfinden
-		// Race r = super.scriptUnit.getUnit().race;
-		Race r = super.scriptUnit.getUnit().getDisguiseRace();
-		if (r==null){
-			r = super.scriptUnit.getUnit().getRace();
-		}
-		this.silber_benoetigt = anzahl * r.getRecruitmentCosts();
+		// Silber berechen
+		
+		this.silber_benoetigt = anzahl * ra.getRecruitmentCosts();
 		
 		
 		// silberprio eventuell anders?
