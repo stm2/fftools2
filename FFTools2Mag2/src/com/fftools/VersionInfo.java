@@ -19,7 +19,7 @@ public class VersionInfo {
 	private static final OutTextClass outText = OutTextClass.getInstance();
 	
 	
-	private static final String versionInfo = "0.46";
+	private static final String versionInfo = "0.47";
 
 	private static String toAdd = "";
 	
