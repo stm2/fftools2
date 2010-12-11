@@ -310,9 +310,36 @@ public class ScriptMain {
 					ignoreList = new ArrayList<String>();
 				}
 				ignoreList.add(ss);
-				outText.addOutLine("Faction to be ignored: " + ss);
+				outText.addOutLine("Faction to be ignored (from ini file: " + ss);
 			}
 		}
+		
+		// Neu: ignore List aus befehle ergänzen
+		// -> // private final static String FFTools2_ignoreFactions = "FFTools2.ignoreFactions";
+		// durch die Regionen wandern..
+		String ids = "// " + ScriptMain.FFTools2_ignoreFactions + " ";
+		for (Iterator<Region> i=gd_ScriptMain.regions().values().iterator(); i.hasNext(); ){
+			Region r = (Region) i.next();			
+			for (Iterator<Unit> i2=r.units().iterator();i2.hasNext();){
+				Unit u = (Unit) i2.next();
+				if (u.getOrders()!=null && u.getOrders().size()>0){
+					for (String so:u.getOrders()){
+						if (so.startsWith(ids)){
+							String factionToAdd =  so.substring(ids.length());
+							if (factionToAdd.length()>1){
+								if (ignoreList==null){
+									ignoreList = new ArrayList<String>();
+								}
+								ignoreList.add(factionToAdd);
+								outText.addOutLine("Faction to be ignored (from unitorder): " + factionToAdd + " (" + u.toString() + ")");
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		
 		
 		// durch die Regionen wandern..
 		for (Iterator<Region> i=gd_ScriptMain.regions().values().iterator(); i.hasNext(); ){
