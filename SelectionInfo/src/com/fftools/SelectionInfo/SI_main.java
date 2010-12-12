@@ -101,7 +101,7 @@ public class SI_main {
 		int anzImportant = fillImportantRegions(s, gd);
 		// kompletter check
 		String lastOuttextFile =outText.getActFileName();
-		outText.setFile("../selections/_work/analysis.txt");
+		outText.setFile("../selections/_work/analysis");
 		outText.addOutLine("Starte Analyse der wichtigen Regionen: ");
 		outText.addOutLine("Anzahl wichtiger gefundener Regionen: " + anzImportant);
 		outText.addOutLine("Anzahl der Regionen in Spielerselektionen: " + allSelectedRegions.size());
@@ -157,7 +157,7 @@ public class SI_main {
 		
 		// kompletter check
 		String lastOuttextFile =outText.getActFileName();
-		outText.setFile("../selections/_work/analysis.txt");
+		outText.setFile("../selections/_work/analysis");
 		outText.addOutLine("Starte Analyse der Selektionen: ");
 		for (String actFileName:selFiles.keySet()){
 			Hashtable<CoordinateID,Region> ActSel = selFiles.get(actFileName);
