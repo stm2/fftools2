@@ -24,6 +24,12 @@ public class Regions {
 	private static final OutTextClass outText = OutTextClass.getInstance();
 	
 	private Hashtable<CoordinateID,Region> selectedRegions = null;
+	
+	
+	private Hashtable<String,Hashtable<CoordinateID,Region>> selFiles = new Hashtable<String, Hashtable<CoordinateID,Region>>();
+	
+	
+
 	// der megagrosse report
 	private GameData data = null;
 	
@@ -69,6 +75,7 @@ public class Regions {
 	private int workFile(File actF){
 		List<CoordinateID> coordinates = new LinkedList<CoordinateID>();
 		int result = 0;
+		Hashtable<CoordinateID,Region> actSelectedRegions = new Hashtable<CoordinateID, Region>();
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(actF));
 
@@ -100,11 +107,14 @@ public class Regions {
 					this.selectedRegions = new Hashtable<CoordinateID,Region>();
 				}
 				selectedRegions.put(c, (Region)data.regions().get(c));
+				actSelectedRegions.put(c, (Region)data.regions().get(c));
 				result +=1;
 			} else {
 				outText.addOutLine("unknown Region in sel file " + actF.getName() + ":" + c.toString());
 			}
 		}
+		
+		selFiles.put(actF.getName(), actSelectedRegions);
 		return result;
 	}
 	
@@ -139,6 +149,11 @@ public class Regions {
 			return 0;
 		}
 		return this.data.regions().size();
+	}
+	
+
+	public Hashtable<String, Hashtable<CoordinateID, Region>> getSelFiles() {
+		return selFiles;
 	}
 	
 }
