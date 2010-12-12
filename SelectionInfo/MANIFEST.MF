@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Class-Path: magellan_act.jar FFToolsTool1.jar FFTools2.jar
+Main-Class: com.fftools.SelectionInfo.SI_main
