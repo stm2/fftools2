@@ -280,6 +280,11 @@ public class OutTextClass {
 		}
 	}
 	
+	public String getActFileName(){
+		return actFileName;
+	}
+	
+	
 	public void setFileStandard(){
 		actFileName = defaultFileName;
 	}
