@@ -1,9 +1,13 @@
 package com.fftools.SelectionInfo;
 
 import java.io.File;
+import java.util.Hashtable;
 import java.util.Iterator;
 
+import magellan.library.CoordinateID;
 import magellan.library.GameData;
+import magellan.library.Region;
+import magellan.library.Unit;
 import magellan.library.utils.PropertiesHelper;
 import magellan.library.utils.Resources;
 
@@ -18,6 +22,9 @@ public class SI_main {
 	private static final OutTextClass outText = OutTextClass.getInstance();
 	
 	private static File settingsDir = null;
+	
+	private static Hashtable<CoordinateID,Region> importantRegions = new Hashtable<CoordinateID, Region>();
+	private static Hashtable<CoordinateID,Region> allSelectedRegions = new Hashtable<CoordinateID, Region>();
 	
 	/**
 	 * @param args
@@ -73,9 +80,70 @@ public class SI_main {
     			File tempF = new File("../selections/_work/selektion_" + myGD.getDate().getDate() + "_" + FileCopy.getDateSDay()+"_" + u.getName() + ".sel");
     			int selWrote = r.saveSelection(tempF);
     			outText.addOutLine("Regionen geschrieben: " + selWrote);
+    			allSelectedRegions.putAll(r.getSelectedRegions());
     		}
     	}
+    	
+    	
+    	outText.addOutLine(FileCopy.getDateS() + " starta Analysis");
+    	checkImportantRegionsInSelections(s,myGD);
     	outText.addOutLine(FileCopy.getDateS() + " end Selection Info");
 	}
-
+	
+	private static void checkImportantRegionsInSelections(Settings s, GameData gd){
+		int anzImportant = fillImportantRegions(s, gd);
+		// kompletter check
+		String lastOuttextFile =outText.getActFileName();
+		outText.setFile("../selections/_work/analysis.txt");
+		outText.addOutLine("Starte Analyse der wichtigen Regionen: ");
+		outText.addOutLine("Anzahl wichtiger gefundener Regionen: " + anzImportant);
+		outText.addOutLine("Anzahl der Regionen in Spielerselektionen: " + allSelectedRegions.size());
+		
+		for (CoordinateID c:importantRegions.keySet()){
+			Region r = allSelectedRegions.get(c);
+			if (r==null){
+				// Problem erkannt
+				r = gd.getRegion(c);
+				if (r==null){
+					// kompletter humbug
+					outText.addOutLine("Unselektierte Koordinaten ohne Region in Gamedata ?!: " + c.toString(",", true));
+				} else {
+					outText.addOutLine("Unselektierte Koordinaten: " + c.toString(",", true) + ": " + r.toString());
+				}
+			}
+		}
+		outText.addOutLine("Ende Analysis");
+		outText.setFile(lastOuttextFile);
+		
+	}
+	
+	
+	
+	
+	/**
+	 * Baut die Liste wichtiger Regionen, die Parteien enthalten, von denen 
+	 * der Server das Passwort kennt und über die Befehle eingeschickt werden können
+	 * @param s
+	 * @param gd
+	 */
+	private static int fillImportantRegions(Settings s, GameData gd){
+		int erg=0;
+		importantRegions.clear();
+		// kompletter durchlauf
+		for (Region r:gd.regions().values()){
+			if (r.units()!=null && r.units().size()>0){
+				for (Unit u:r.units()){
+					String actFactionName = u.getFaction().getID().toString();
+			    	if (s.isFactionWithPassword(actFactionName)) {
+			    		// wichtige region
+			    		importantRegions.put(r.getCoordinate(), r);
+			    		erg++;
+			    		break;
+			    	}
+				}
+			}
+		}
+		return erg;
+	}
+	
 }
