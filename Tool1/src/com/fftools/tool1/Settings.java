@@ -318,5 +318,26 @@ public class Settings {
 		return erg;
 	}
 	
+	/**
+	 * Liefert true, wenn passwort für diese Partei bekannt ist
+	 * @param factionName (Base 36 number)
+	 * @return
+	 */
+	public boolean isFactionWithPassword(String factionName){
+		boolean erg = false;
+		
+		if (this.factions==null) {
+			return erg;
+		}
+		
+		for (Iterator<myFaction> iter = this.factions.iterator();iter.hasNext();){
+			myFaction actF = (myFaction)iter.next();
+			if (actF.getName().equalsIgnoreCase(factionName) && actF.getPass()!=null && actF.getPass().length()>1) {
+				return true;
+			}
+		}
+		return erg;
+	}
+	
 	
 }
