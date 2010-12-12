@@ -1,6 +1,7 @@
 package com.fftools.SelectionInfo;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 
@@ -25,6 +26,8 @@ public class SI_main {
 	
 	private static Hashtable<CoordinateID,Region> importantRegions = new Hashtable<CoordinateID, Region>();
 	private static Hashtable<CoordinateID,Region> allSelectedRegions = new Hashtable<CoordinateID, Region>();
+	
+	private static Hashtable<String,Hashtable<CoordinateID,Region>> selFiles = new Hashtable<String, Hashtable<CoordinateID,Region>>();
 	
 	/**
 	 * @param args
@@ -81,12 +84,14 @@ public class SI_main {
     			int selWrote = r.saveSelection(tempF);
     			outText.addOutLine("Regionen geschrieben: " + selWrote);
     			allSelectedRegions.putAll(r.getSelectedRegions());
+    			selFiles.putAll(r.getSelFiles());
     		}
     	}
     	
     	
     	outText.addOutLine(FileCopy.getDateS() + " starta Analysis");
     	checkImportantRegionsInSelections(s,myGD);
+    	checkOverlappingSelections(s,myGD);
     	outText.addOutLine(FileCopy.getDateS() + " end Selection Info");
 	}
 	
@@ -145,5 +150,51 @@ public class SI_main {
 		}
 		return erg;
 	}
+	
+	private static void checkOverlappingSelections(Settings s, GameData gd){
+		
+		// kompletter check
+		String lastOuttextFile =outText.getActFileName();
+		outText.setFile("../selections/_work/analysis.txt");
+		outText.addOutLine("Starte Analyse der Selektionen: ");
+		for (String actFileName:selFiles.keySet()){
+			Hashtable<CoordinateID,Region> ActSel = selFiles.get(actFileName);
+			if (ActSel!=null){
+				outText.addOutLine("Selektion " + actFileName + " mit " + ActSel.size() + " Regionen");
+			} else {
+				outText.addOutLine("Selektion " + actFileName + " ohne Regionen");
+			}
+		}
+		outText.addOutLine("Starte Komplettsuche ueber " + gd.regions().size() + " Regionen.");
+		// Alle Regionen durchlaufen, dürfen niemals mehr als 1x gefunden werden
+		ArrayList<String> ergList = new ArrayList<String>();
+		for (Region r:gd.regions().values()){
+			int cnt = 0;
+			ergList.clear();
+			CoordinateID actC = r.getCoordinate();
+			for (String actFileName:selFiles.keySet()){
+				Hashtable<CoordinateID,Region> ActSel = selFiles.get(actFileName);
+				if (ActSel!=null){
+					if (ActSel.get(actC)!=null){
+						cnt++;
+						ergList.add(actFileName);
+					}
+				}
+			}
+			if (cnt>1){
+				// Treffer
+				outText.addOutLine("Mehrfach gefundene Koordinaten: " + actC.toString(",", true) + " " + r.toString());
+				for (String dd:ergList){
+					outText.addOutLine("  gefunden in: " + dd);
+				}
+			}
+		}
+		
+		outText.addOutLine("Ende Analyse der Selektionen");
+		outText.setFile(lastOuttextFile);
+		
+	}
+	
+	
 	
 }
