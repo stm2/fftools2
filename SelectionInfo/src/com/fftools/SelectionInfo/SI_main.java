@@ -83,8 +83,10 @@ public class SI_main {
     			File tempF = new File("../selections/_work/selektion_" + myGD.getDate().getDate() + "_" + FileCopy.getDateSDay()+"_" + u.getName() + ".sel");
     			int selWrote = r.saveSelection(tempF);
     			outText.addOutLine("Regionen geschrieben: " + selWrote);
-    			allSelectedRegions.putAll(r.getSelectedRegions());
-    			selFiles.putAll(r.getSelFiles());
+    			if (!u.getName().equalsIgnoreCase("monopol")){
+	    			allSelectedRegions.putAll(r.getSelectedRegions());
+	    			selFiles.putAll(r.getSelFiles());
+    			}
     		}
     	}
     	
