@@ -16,6 +16,7 @@ import magellan.library.StringID;
 import magellan.library.TempUnit;
 import magellan.library.Unit;
 import magellan.library.gamebinding.EresseaConstants;
+import magellan.library.io.cr.CRParser;
 import magellan.library.rules.ItemType;
 import magellan.library.rules.Race;
 import magellan.library.rules.RegionType;
@@ -70,15 +71,8 @@ public class ScriptUnit {
 	
 	// Referenz auf den Client
 	private Client c = null; 
-	
-	// die beiden wichtigen Tags der Einheit
-	public String Tag1 = null;
-	public String Tag2 = null;
-	public String Tag3 = null;
-	public String Tag4 = null;
-	public String Tag5 = null;
-	
-	
+
+	// Sondereinsetllung für MatPool: darf Einheit was von sich weg geben?
 	private boolean gibNix = false;
 	
 	
@@ -1649,4 +1643,33 @@ public class ScriptUnit {
 		}
 		return erg;
 	}
+	
+	/**
+	 * prüft, ob Tags für die Scripte definiert sind und setzt diese ggf, wenn
+	 * noch nicht vorhanden
+	 */
+	public void autoTags(){
+		if (reportSettings.getOptionBoolean("useReportTags",this.unit.getRegion())){
+			for (Script s:this.foundScriptList){
+				String searchOption="tag1_" + s.getClass().getSimpleName().toLowerCase();
+				String reportOptionString = reportSettings.getOptionString(searchOption,this.unit.getRegion());
+				if (reportOptionString!=null){
+					// erster Buchstabe groß
+					reportOptionString = reportOptionString.substring(0,1).toUpperCase() + reportOptionString.substring(1).toLowerCase();
+					String actTag = this.unit.getTag(CRParser.TAGGABLE_STRING);
+					if (actTag==null || !actTag.equals(reportOptionString)){
+						this.unit.putTag(CRParser.TAGGABLE_STRING, reportOptionString);
+						this.addComment("autoTag gesetzt auf :" + reportOptionString);
+					} else {
+						this.addComment("autoTag ist bereits auf:" + reportOptionString);
+					}
+				} else {
+					// this.addComment("kein autotag eintrag für:" + searchOption);
+				}
+			}
+		} else {
+			// this.addComment("autoTag deactiviert");
+		}
+	}
+	
 }
