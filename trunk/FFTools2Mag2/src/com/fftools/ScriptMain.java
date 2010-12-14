@@ -163,9 +163,12 @@ public class ScriptMain {
 		
 		outText.addOutLine("unit final confirm");
 		// als Vorletztes den confirm-status der units setzen
+		// und autoTags setzen
 		for (Iterator<ScriptUnit> iter = scriptUnits.values().iterator();iter.hasNext();){
 			ScriptUnit scrU = (ScriptUnit)iter.next();
 			scrU.setFinalConfim();
+			// autoTags
+			scrU.autoTags();
 		}
 		
 		outText.addOutLine("setting tags");
