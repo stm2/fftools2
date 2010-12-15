@@ -43,6 +43,8 @@ Schmieden			50 Bestellen
 					100 Produzieren oder Lernen
 SetKapa				2
 SetLernPLan			0
+SetTradeAreaConnect 9      /* vor ersten Lauf setTradeAreaConnection	
+					38
 SetTrankOrder		0
 Trankeffekt			10
 					162 (Check)
@@ -64,11 +66,9 @@ AlchemieManager		40
 Ausbildungsmanager	7 Vorlauf, Lernsilber anfordern 
 					135 vorlaufRequest, maximal verf Silber ermitteln
 					145 eigentlicher PoolLauf
-SetTradeAreaConnect 15
-					38
-TradeAreaHandler	16
-					
-MatPool2			20
+MatPoolManager		20
 					80
 					140
 					150
+TradeAreaHandler	8 /* vor Vorrat
+					12 /* nach Vorrat, vor MP, nach SetTradeAreaConnect

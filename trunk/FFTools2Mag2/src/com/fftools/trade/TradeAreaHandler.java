@@ -1,6 +1,9 @@
 package com.fftools.trade;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -17,6 +20,8 @@ import com.fftools.ScriptMain;
 import com.fftools.ScriptUnit;
 import com.fftools.overlord.OverlordInfo;
 import com.fftools.overlord.OverlordRun;
+import com.fftools.scripts.Script;
+import com.fftools.scripts.Vorrat;
 import com.fftools.transport.TransportRequest;
 
 
@@ -32,9 +37,10 @@ import com.fftools.transport.TransportRequest;
 public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	private static final OutTextClass outText = OutTextClass.getInstance();
 	
-	private static final int Durchlauf1 = 16;
+	private static final int Durchlauf1 = 8;
+	private static final int Durchlauf2 = 12;
 	
-	private int[] runners = {Durchlauf1};
+	private int[] runners = {Durchlauf1,Durchlauf2};
 	
 	/**
 	 * List of TradeAreas
@@ -586,11 +592,38 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		if (durchlauf==TradeAreaHandler.Durchlauf1){
 			this.run1();
 		}
-		
+		if (durchlauf==TradeAreaHandler.Durchlauf2){
+			this.run2();
+		}
 	}
 	
 	
 	private void run1(){
+		// Löschen aller automatisch angelegten Vorratsscripte
+		for (ScriptUnit scu:this.scriptMain.getScriptUnits().values()){
+			if (scu.getFoundScriptList()!=null){
+				for (Script s:scu.getFoundScriptList()){
+					if (s instanceof Vorrat){
+						Vorrat v = (Vorrat)s;
+						if (v.isTAC_Vorrat()){
+							scu.delAScript(v);
+							scu.removeScriptOrder("Vorrat source=TAC");
+						}
+					}
+				}
+				scu.processScriptDeletions();
+			}
+		}
+		
+	}
+	
+	/**
+	 * Die eigentliche Arbeit:
+	 * Info über connectierte TAs und deren Balancen
+	 * Erster Schritt: relative Aufteilung der Überschüsse + info
+	 * Zweiter Schritt: Feinjustierung der Aufteilung + info
+	 */
+	private void run2(){
 		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0){
 			return;
 		}
@@ -600,9 +633,22 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 			this.infoSCU_TAC(2,TAC);
 		}
 		
+		// erste Stufe der Verteilung
+		this.process_easy_Distribution();
+		
+		// info darüber
+		for (TradeAreaConnector TAC:this.tradeAreaConnectors){
+			this.infoSCU_TAC_2(1,TAC);
+			this.infoSCU_TAC_2(2,TAC);
+		}
 		
 	}
 	
+	/**
+	 * informiert eine Scriptunit über durch sie connectierte TAs
+	 * @param number
+	 * @param TAC
+	 */
 	private void infoSCU_TAC(int number, TradeAreaConnector TAC){
 		ScriptUnit scu = null;
 		TradeArea TA1 = null;
@@ -621,7 +667,9 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		scu.addComment("Verbindung zum TA: " + TA2.getName() + "(Name: " + TAC.getName() + ")");
 		// die einzelnen Güter durchgehen und Verbindungen und Balancen aufzeigen
 		for (ItemType itemType:TradeUtils.handelItemTypes()){
-			String l = itemType.getName() + " (" + TA1.getAreaBalance(itemType) + ")<->:";
+			int actBalance = TA1.getAreaBalance(itemType);
+			TA1.setAdjustedBalance(itemType, actBalance);
+			String l = itemType.getName() + " (" + actBalance + ")<->:";
 			ArrayList<TradeArea> connectedTAs = getConnectedAreas(TA1);
 			if (connectedTAs!=null){
 				for (TradeArea otherTA:connectedTAs){
@@ -660,5 +708,184 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		}
 		return erg;
 	}
+	
+	/**
+	 * setzt erste Verteilung komplett um
+	 */
+	private void process_easy_Distribution(){
+		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0){
+			return;
+		}
+		// RequestListe bauen
+		ArrayList<TAC_request> allRequests = new ArrayList<TAC_request>();
+		// für alle TAs
+		for (TradeArea actTA:this.tradeAreas){
+			// für alle ItemTypes
+			for (ItemType itemType:TradeUtils.handelItemTypes()){
+				int actBal = actTA.getAreaBalance(itemType);
+				if (actBal<0){
+					// wir haben bedarf...
+					TAC_request actR = new TAC_request();
+					actR.targetTA = actTA;
+					actR.itemType = itemType;
+					actR.original_request_amount = Math.abs(actBal);
+					actR.act_request_amount = Math.abs(actBal);
+					actR.prio = actTA.getAreaWeightedMeanSellPrice(itemType) * actR.original_request_amount;
+					allRequests.add(actR);
+				}
+			}
+		}
+		
+		if (allRequests.size()==0){
+			return;
+		}
+		
+		// Sortierung
+		Collections.sort(allRequests, new Comparator<TAC_request>() {
+			public int compare(TAC_request o1,TAC_request o2){
+				return (o2.prio-o1.prio);
+			}
+		});
+		
+		// Abarbeitung
+		for (TAC_request actR:allRequests){
+			this.process_TAC_Request_relative(actR);
+		}
+	}
+	
+	
+	/**
+	 * helper class for sorting and managing TAH-Requests
+	 * @author Arndt
+	 *
+	 */
+	private class TAC_request{
+		// Ziel des Transfers, Wo was gebraucht wird!
+		public TradeArea targetTA = null;  
+		public ItemType itemType = null;
+		public int original_request_amount = 0;
+		public int act_request_amount = 0;
+		public int prio = 0;
+	}
+	
+	/**
+	 * helper class for sorting and managing TAH-Offers
+	 * @author Arndt
+	 *
+	 */
+	private class TAC_offer{
+		// Herkunft des Transfers, Wo was über ist!
+		public TradeArea sourceTA = null;
+		// Menge
+		public int amount = 0;
+		// Entfernung in Karavellenrunden
+		// Todo: später auch TransporterRunden?
+		public int dist = 0;
+		
+	}
+	
+	/**
+	 * Bearbeitet einen bestimmten Request
+	 * @param itemType
+	 * @param TA
+	 */
+	private void process_TAC_Request_relative(TAC_request actTAC_Request){
+		// habe ich da einen Überschuss?
+		int actBalance = actTAC_Request.targetTA.getAdjustedBalance(actTAC_Request.itemType);
+		if (actBalance>0){
+			// der Request ist gar kein request....
+			return;
+		}
+		// Ja, ich habe einen Bedarf: actBalance
+		// Liste der connectierten Spender bauen und sortieren
+		if (this.getConnectedAreas(actTAC_Request.targetTA)==null){
+			return;
+		}
+		
+		ArrayList <TAC_offer> allOffers = new ArrayList<TAC_offer>(); 
+		
+		for (TradeArea otherTA:this.getConnectedAreas(actTAC_Request.targetTA)){
+			if (otherTA.getAdjustedBalance(actTAC_Request.itemType)>0){
+				// Yep Spender gefunden
+				TAC_offer actTO = new TAC_offer();
+				actTO.sourceTA = otherTA;
+				actTO.amount = otherTA.getAdjustedBalance(actTAC_Request.itemType);
+				// Dist bestimmen
+				
+			}
+		}
+	}
+	
+	/**
+	 * liefert den passenden TAC
+	 * @param TA1
+	 * @param TA2
+	 * @return
+	 */
+	private TradeAreaConnector getTAC(TradeArea TA1, TradeArea TA2){
+		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0){
+			return null;
+		}
+		for (TradeAreaConnector actTA:this.tradeAreaConnectors){
+			if (actTA.getTA1().equals(TA1) && actTA.getTA2().equals(TA2)){
+				return actTA;
+			}
+			if (actTA.getTA1().equals(TA2) && actTA.getTA2().equals(TA1)){
+				return actTA;
+			}
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * informiert eine Scriptunit über durch sie connectierte TAs
+	 * @param number
+	 * @param TAC
+	 */
+	private void infoSCU_TAC_2(int number, TradeAreaConnector TAC){
+		ScriptUnit scu = null;
+		TradeArea TA1 = null;
+		
+		if (number==1){
+			scu=TAC.getSU1();
+			TA1 = TAC.getTA1();
+		}
+		if (number==2){
+			scu=TAC.getSU2();
+			TA1 = TAC.getTA2();
+		}
+		
+		// die scu über alle Beziehungen von und zu TA1 informieren
+		scu.addComment("Ergebnisse der ersten Verteilung...");
+		// die einzelnen Güter durchgehen und Verbindungen und Balancen aufzeigen
+		for (ItemType itemType:TradeUtils.handelItemTypes()){
+			String l = itemType.getName() + " (" + TA1.getAdjustedBalance(itemType) + ")<->:";
+			ArrayList<TradeArea> connectedTAs = getConnectedAreas(TA1);
+			if (connectedTAs!=null){
+				for (TradeArea otherTA:connectedTAs){
+					TradeAreaConnector actTAC = this.getTAC(TA1,otherTA);
+					if (actTAC!=null){
+						if (actTAC.getTransferAmount(otherTA, itemType, 1)>0){
+							l+=" ->" + otherTA.getName() + ":" + actTAC.getTransferAmount(otherTA, itemType, 1);
+						}
+						if (actTAC.getTransferAmount(TA1, itemType, 1)>0){
+							l+=" <-" + otherTA.getName() + ":" + actTAC.getTransferAmount(TA1, itemType, 1);
+						}
+					} else {
+						// ops
+						l += " kein TAC zwischen " + TA1.getName() + " und " + otherTA.getName();
+					}
+				}
+			} else {
+				l += "keine TAs verbunden";
+			}
+			
+			scu.addComment(l);
+		}
+		
+	}
+	
+	
 	
 }

@@ -4,6 +4,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -75,7 +76,37 @@ public class TradeArea {
 	
 	private ArrayList<TransportRequest> transportRequests = null;
 	
+	/**
+	 * die während der Optimierung angepasste Balance
+	 */
+	private HashMap<ItemType,Integer> adjustedBalance = null;
 	
+	
+	public int getAdjustedBalance(ItemType itemType) {
+		if (this.adjustedBalance==null){
+			return 0;
+		}
+		Integer I = this.adjustedBalance.get(itemType);
+		if (I==null){
+			return 0;
+		}
+		return I.intValue();
+	}
+
+	public void setAdjustedBalance(ItemType itemType,int amount) {
+		if (this.adjustedBalance==null){
+			this.adjustedBalance=new HashMap<ItemType, Integer>();
+		}
+		this.adjustedBalance.put(itemType, new Integer(amount));
+	}
+
+	
+	public void changeAdjustedBalance(ItemType itemType,int change){
+		int old = this.getAdjustedBalance(itemType);
+		old += change;
+		this.setAdjustedBalance(itemType, old);
+	}
+
 	/**
 	 * eine Liste aller Vorrat - scripts, die beachtet werden müssen
 	 */
