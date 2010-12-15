@@ -25,7 +25,11 @@ import magellan.client.Client;
 public abstract class MenuAction extends AbstractAction {
 	// private static final Logger log = Logger.getInstance(MenuAction.class);
     
-    protected Client client;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected Client client;
 
 	/**
 	 * Creates a new MenuAction object reading its name, mnemonic and accelerator from the

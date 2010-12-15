@@ -1320,6 +1320,7 @@ public class ScriptUnit {
 	 * @return the payload in GE  100, CAP_UNSKILLED if the unit is not sufficiently skilled in
 	 * 		   horse riding to travel on horseback.
 	 */
+	@SuppressWarnings("deprecation")
 	public int getPayloadOnFoot() {
 		int capacity = 0;
 		int horses = 0;
@@ -1457,6 +1458,7 @@ public class ScriptUnit {
 		return load;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private int getLoad() {
 		int load = 0;
 		ItemType horse = this.unit.getRegion().getData().rules.getItemType(EresseaConstants.I_HORSE);
@@ -1476,6 +1478,7 @@ public class ScriptUnit {
 		return load;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private int getWeight(){
 		int load = 0;
 		// Pferde und Wagen ergänzen

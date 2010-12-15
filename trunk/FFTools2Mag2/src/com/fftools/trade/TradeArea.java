@@ -1045,4 +1045,42 @@ public class TradeArea {
 		return null;
 	}
 	
+	
+	/**
+	 * Liefert die areaweite Zusammenfassung
+	 * @param itemType
+	 * @return
+	 */
+	public int getAreaBalance(ItemType itemType){
+		int erg  =  0;
+		// was kann selbst maximal gekauft werden...
+		erg = getAreaBuyMaxAmount(itemType);
+		// plus alle Vorräte...
+		erg += this.getAreaTotalAmount(itemType);
+		
+		// minus was hier verkauft werden kann für X Runden
+		erg -= (this.getAreaSellAmount(itemType) * 4);
+		
+		// minus was an Vorräten extern definiert worden ist
+		erg -=(this.getAreaVorratProRundeAmount(itemType) * 4);
+		
+		return erg;
+	}
+	
+	/**
+	 * liefert summe aller ScriptUnits
+	 * @param itemType
+	 * @return
+	 */
+	public int getAreaTotalAmount(ItemType itemType){
+		
+		if (this.tradeRegions==null){return 0;}
+		int erg = 0;
+		
+		for (TradeRegion r:this.tradeRegions){
+			erg += r.getTotalAmount(itemType);
+		}
+		return erg;
+	}
+	
 }
