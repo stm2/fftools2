@@ -270,4 +270,18 @@ public class Vorrat extends TransportScript{
 		return tradeArea;
 	}
 	
+	/**
+	 * Prüft, ob dieses Vorratsscript von source=TAC hat
+	 * @return
+	 */
+	public boolean isTAC_Vorrat(){
+		FFToolsOptionParser OP = new FFToolsOptionParser(this.scriptUnit);
+		OP.addOptionList(this.getArguments());
+		if (OP.getOptionString("source").equalsIgnoreCase("TAC")){
+			return true;
+		}
+		return false;
+	}
+	
+	
 }

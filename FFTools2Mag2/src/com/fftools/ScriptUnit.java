@@ -85,6 +85,8 @@ public class ScriptUnit {
 	// und vor dem Durchlauf gecleart wird
 	private ArrayList<Script> addScriptList = null;
 	
+	private ArrayList<Script> delScriptList = null;
+	
 	/**
 	 * Freie Kapazität der Unit, wird von MatPool genutzt
 	 */
@@ -359,6 +361,20 @@ public class ScriptUnit {
 		}
 		this.addScriptList.add(s);
 	}
+	
+	/**
+	 * entfernt ein script der scriptliste
+	 * gedacht für aufrufe aus anderen scripten
+	 * @param s
+	 */
+	public void delAScript(Script s){
+		
+		if (this.delScriptList==null){
+			this.delScriptList = new ArrayList<Script>(1);
+		}
+		this.delScriptList.add(s);
+	}
+	
 	
 	/**
 	 * falls sich orders irgendwann seit letztem Refresh geaendert haben
@@ -1673,6 +1689,19 @@ public class ScriptUnit {
 		} else {
 			// this.addComment("autoTag deactiviert");
 		}
+	}
+	
+	/**
+	 * setzt die DELs von der delScriptList um
+	 */
+	public void processScriptDeletions(){
+		if (this.delScriptList==null || this.delScriptList.size()==0){
+			return;
+		}
+		for (Script s : this.delScriptList){
+			this.foundScriptList.remove(s);
+		}
+		this.delScriptList.clear();
 	}
 	
 }
