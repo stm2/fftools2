@@ -520,61 +520,58 @@ public class MatPool2 implements MatPool{
 			}
 			Collections.sort(this.requests);
 		}
-		if (offeredItemTypes!=null){
-			// sortieren Ergs
-			// warum ? FF 20070625
-			// Collections.sort(offeredItemTypes);
-			int i = 0;
-			// und durchlaufen
-			for (Iterator<ItemType> iter = offeredItemTypes.iterator();iter.hasNext();){
-				ItemType itemType = (ItemType)iter.next();
-				outText.addOutLine("----------------------------------------------------");
-				outText.addOutLine(".......OFFER " + itemType.getName().toUpperCase());
-				i = 0;
-				if (this.offers!=null){
-					for (Iterator<MatPoolOffer> iter2 = this.offers.iterator();iter2.hasNext();){
-						MatPoolOffer mpr = (MatPoolOffer)iter2.next();
-						ItemType otherItemType = mpr.getItemType();
-						if (otherItemType!=null){
-							if (otherItemType.equals(itemType)){
-								String s = String.format("%8d",mpr.getAngebot());
-								outText.addOutLine(s + " " + otherItemType.getName() + " verbraucht: " + mpr.getBearbeitet() + "  (" + mpr.getUnit().toString(true) + ")");
-								i++;
-							}
+		
+		// sortieren Ergs
+		// warum ? FF 20070625
+		// Collections.sort(offeredItemTypes);
+		int i = 0;
+		// und durchlaufen
+		for (Iterator<ItemType> iter = offeredItemTypes.iterator();iter.hasNext();){
+			ItemType itemType = (ItemType)iter.next();
+			outText.addOutLine("----------------------------------------------------");
+			outText.addOutLine(".......OFFER " + itemType.getName().toUpperCase());
+			i = 0;
+			if (this.offers!=null){
+				for (Iterator<MatPoolOffer> iter2 = this.offers.iterator();iter2.hasNext();){
+					MatPoolOffer mpr = (MatPoolOffer)iter2.next();
+					ItemType otherItemType = mpr.getItemType();
+					if (otherItemType!=null){
+						if (otherItemType.equals(itemType)){
+							String s = String.format("%8d",mpr.getAngebot());
+							outText.addOutLine(s + " " + otherItemType.getName() + " verbraucht: " + mpr.getBearbeitet() + "  (" + mpr.getUnit().toString(true) + ")");
+							i++;
 						}
 					}
 				}
-				if (i==0){
-					outText.addOutLine("[no offers]");
-				}
-				outText.addOutLine(".......REQUEST " + itemType.getName().toUpperCase());
-				i = 0;
-				if (this.requests!=null){
-					for (Iterator<MatPoolRequest> iter2 = this.requests.iterator();iter2.hasNext();){
-						MatPoolRequest mpr = (MatPoolRequest)iter2.next();
-						if (mpr.getItemTypes()!=null){
-							for (Iterator<ItemType> iter3 = mpr.getItemTypes().iterator();iter3.hasNext();){
-								ItemType otherItemType = (ItemType) iter3.next();
-								if (otherItemType!=null){
-									if (otherItemType.equals(itemType)){
-										// String s = String.format("%8d",mpr.getForderung(otherItemType));
-										String s = String.format("%8d",mpr.getOriginalGefordert());
-										outText.addOutLine(s + " " + otherItemType.getName() + " Prio " + mpr.getPrio() + " zugeordnet: " + mpr.getBearbeitet() + "  (" + mpr.getUnit().toString(true) + ", " + mpr.getKommentar()+ ")");
-										i++;
-									}
+			}
+			if (i==0){
+				outText.addOutLine("[no offers]");
+			}
+			outText.addOutLine(".......REQUEST " + itemType.getName().toUpperCase());
+			i = 0;
+			if (this.requests!=null){
+				for (Iterator<MatPoolRequest> iter2 = this.requests.iterator();iter2.hasNext();){
+					MatPoolRequest mpr = (MatPoolRequest)iter2.next();
+					if (mpr.getItemTypes()!=null){
+						for (Iterator<ItemType> iter3 = mpr.getItemTypes().iterator();iter3.hasNext();){
+							ItemType otherItemType = (ItemType) iter3.next();
+							if (otherItemType!=null){
+								if (otherItemType.equals(itemType)){
+									// String s = String.format("%8d",mpr.getForderung(otherItemType));
+									String s = String.format("%8d",mpr.getOriginalGefordert());
+									outText.addOutLine(s + " " + otherItemType.getName() + " Prio " + mpr.getPrio() + " zugeordnet: " + mpr.getBearbeitet() + "  (" + mpr.getUnit().toString(true) + ", " + mpr.getKommentar()+ ")");
+									i++;
 								}
 							}
 						}
 					}
 				}
-				if (i==0){
-					outText.addOutLine("[no requests]");
-				}
 			}
-		} else {
-			// offeredItemTypes == null
-			outText.addOutLine("[no offers]");
+			if (i==0){
+				outText.addOutLine("[no requests]");
+			}
 		}
+	
 		outText.addOutLine("----------------------------------------------------");
 	}
 	
