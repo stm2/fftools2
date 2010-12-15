@@ -358,6 +358,7 @@ public class MatPoolRequest extends MatPoolRelation  implements Comparable<MatPo
 	}
 
 	
+	@SuppressWarnings("deprecation")
 	public void incBearbeitet(int amount,ItemType itemType){
 		// super.incBearbeitet(amount);
 		super.setBearbeitet(super.getBearbeitet()+ amount);

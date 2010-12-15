@@ -3,16 +3,22 @@ package com.fftools.trade;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import magellan.library.EntityID;
 import magellan.library.GameData;
 import magellan.library.ID;
 import magellan.library.Region;
+import magellan.library.Ship;
+import magellan.library.StringID;
+import magellan.library.impl.MagellanShipImpl;
+import magellan.library.rules.BuildingType;
 import magellan.library.rules.ItemType;
 import magellan.library.rules.RegionType;
+import magellan.library.utils.Direction;
 import magellan.library.utils.Regions;
 
 import com.fftools.OutTextClass;
@@ -628,11 +634,15 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 			return;
 		}
 		
+		String oldFile = outText.getActFileName();
+		outText.setFile("TAH_TAC");
+		
+		
 		for (TradeAreaConnector TAC:this.tradeAreaConnectors){
 			this.infoSCU_TAC(1,TAC);
 			this.infoSCU_TAC(2,TAC);
 		}
-		
+		outText.addOutLine("Starte Easy Distri");
 		// erste Stufe der Verteilung
 		this.process_easy_Distribution();
 		
@@ -642,6 +652,9 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 			this.infoSCU_TAC_2(2,TAC);
 		}
 		
+		
+		
+		outText.setFile(oldFile);
 	}
 	
 	/**
@@ -747,6 +760,14 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 			}
 		});
 		
+		// Kurze INfo
+		outText.addOutLine("sortierte TAH Requests:");
+		for (TAC_request actR:allRequests){
+			outText.addOutLine(actR.toString());
+		}
+		
+		
+		
 		// Abarbeitung
 		for (TAC_request actR:allRequests){
 			this.process_TAC_Request_relative(actR);
@@ -766,6 +787,11 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		public int original_request_amount = 0;
 		public int act_request_amount = 0;
 		public int prio = 0;
+		
+		
+		public String toString(){
+			return this.original_request_amount + " " + this.itemType.getName() + " nach " + this.targetTA.getName() + "(prio: " + this.prio + ")";
+		}
 	}
 	
 	/**
@@ -781,6 +807,10 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		// Entfernung in Karavellenrunden
 		// Todo: später auch TransporterRunden?
 		public int dist = 0;
+		
+		public String toString(){
+			return "dist: " + dist + " Menge: " + amount + " von: " + sourceTA.getName();
+		}
 		
 	}
 	
@@ -811,9 +841,82 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 				actTO.sourceTA = otherTA;
 				actTO.amount = otherTA.getAdjustedBalance(actTAC_Request.itemType);
 				// Dist bestimmen
-				
+				// Passenden TAC hoeln
+				actTO.dist=100;
+				TradeAreaConnector actTAC = this.getTAC(actTAC_Request.targetTA, otherTA);
+				if (actTAC!=null){
+					// @ToDo: Speed konfigurierbar machen (im TAC)
+					int speed = 6;
+					
+					BuildingType harbour = this.scriptMain.gd_ScriptMain.rules.getBuildingType(StringID.create("Hafen"));
+					// Wildes Konstrukt: Ship ergänzen um planShipRoute zu nutzen
+					Ship s = new MagellanShipImpl(EntityID.createEntityID(1, 36) , this.scriptMain.gd_ScriptMain);
+					s.setRegion(actTAC.getSU1().getUnit().getRegion());
+					s.setShoreId(Direction.DIR_INVALID);
+					List<Region> pathL = Regions.planShipRoute(s, actTAC.getSU2().getUnit().getRegion().getCoordinate(),this.scriptMain.gd_ScriptMain.regions(), harbour,
+													  speed);
+					int runden = (int)Math.ceil(((double)pathL.size()-1)/speed);
+					actTO.dist = runden;
+					// Und ship wieder wech
+					actTAC.getSU1().getUnit().getRegion().removeShip(s);
+				}
+				allOffers.add(actTO);
 			}
 		}
+		if (allOffers.size()==0){
+			return;
+		}
+		
+		// Sortieren
+		Collections.sort(allOffers, new Comparator<TAC_offer>() {
+			public int compare(TAC_offer o1,TAC_offer o2){
+				if (o1.dist!=o2.dist){
+					return o1.dist-o2.dist;
+				}
+				if (o1.amount!=o2.amount){
+					return o2.amount-o1.amount;
+				}
+				return 0;
+			}
+		});
+		
+		outText.addOutLine("**********");
+		outText.addOutLine("process_TAC_Request_relative: " + actTAC_Request.toString());
+		
+		for (TAC_offer actTO:allOffers){
+			outText.addOutLine(actTO.toString());
+		}
+		outText.addOutLine("------------");
+		outText.addOutLine("");
+		// Abarbeiten
+		for (TAC_offer actTO:allOffers){
+			process_TAC_offer(actTAC_Request,actTO);
+			if (actTAC_Request.act_request_amount<=0){
+				break;
+			}
+		}
+	}
+	
+	
+	/**
+	 * Setzt einen Transfer um, dabei wird aus der offer versucht, das request zu befriedigen
+	 * @param request
+	 * @param offer
+	 */
+	private void process_TAC_offer(TAC_request request, TAC_offer offer){
+		int transfer = Math.min(request.act_request_amount, offer.amount);
+		
+		// Angebot verringern....
+		offer.amount-=transfer;
+		offer.sourceTA.changeAdjustedBalance(request.itemType, transfer * -1);
+		
+		// Request befriedigen
+		request.act_request_amount-=transfer;
+		request.targetTA.changeAdjustedBalance(request.itemType, transfer);
+		
+		// entsprechenden Transfer dem TAC hinzufügen
+		TradeAreaConnector TAC = this.getTAC(offer.sourceTA,request.targetTA);
+		TAC.addTransfer(request.targetTA, request.itemType, transfer);
 	}
 	
 	/**
