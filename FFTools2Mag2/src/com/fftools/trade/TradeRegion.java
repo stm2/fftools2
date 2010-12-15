@@ -11,6 +11,7 @@ import magellan.library.Unit;
 import magellan.library.rules.ItemType;
 
 import com.fftools.ScriptUnit;
+import com.fftools.overlord.Overlord;
 
 /**
  * What we need to store about an region with scripting traders
@@ -23,7 +24,7 @@ public class TradeRegion {
 	
 	private ItemType buyItemType = null;
 	
-	
+	private Overlord ovi = null;
 	/**
 	 * wenn als origin explizit durch nutzer gesetzt
 	 * keine automatische zuordnung bzw neuverteilung
@@ -36,8 +37,9 @@ public class TradeRegion {
 	 */
 	private ArrayList<Trader> traders = null;
 	
-	public TradeRegion(Region r){
+	public TradeRegion(Region r, Overlord overlord){
 		this.region = r;
+		this.ovi=overlord;
 	}
 
 	/**
@@ -240,5 +242,25 @@ public class TradeRegion {
 		// nicht gefunden
 		return null;
 	}
+	
+	/**
+	 * liefert summe aller SCUs-Bestände
+	 * @param itemType
+	 * @return
+	 */
+	public int getTotalAmount(ItemType itemType){
+		int erg = 0;
+		for (Unit u:this.region.units()){
+			ScriptUnit scu = this.ovi.getScriptMain().getScriptUnit(u);
+			if (scu!=null){
+				Item item = u.getItem(itemType);
+				if (item!=null){
+					erg += item.getAmount();
+				}
+			}
+		}	
+		return erg;
+	}
+	
 	
 }

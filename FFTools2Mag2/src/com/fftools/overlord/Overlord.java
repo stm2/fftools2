@@ -341,7 +341,8 @@ public class Overlord {
 		if (tradeAreaHandler==null){
 			tradeAreaHandler = new TradeAreaHandler(scriptMain);
 			// diesen nur in die scripts mit aufnehmen
-			this.addOverlordInfo(tradeAreaHandler);
+			// this.addOverlordInfo(tradeAreaHandler);
+			this.addRunner(tradeAreaHandler);
 		}
 		return tradeAreaHandler;
 	}

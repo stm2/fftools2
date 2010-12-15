@@ -120,33 +120,28 @@ public class SailToAction extends MenuAction {
 			return;
 		}
 		
-		Region actRegion = null;
-	   String path = "";
+		String path = "";
 	   List<Region>regionList=null;
 	   int aquarianBonus = 0;
 	   BuildingType harbour = data.rules.getBuildingType(StringID.create("Hafen"));
 	   boolean PathNotFound = false;
 	   String order = "nix";
 	   
-  	     if (actRegion==null || !u.getRegion().equals(actRegion)){
-  	    	if (isSeaConnPossible(u)){
-	  	       // String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain.regions(), act, dest, excludeMap);
-	  	    	aquarianBonus = 0;
-	  	         try {
-	  	           aquarianBonus = u.getFaction().getRace().getAdditiveShipBonus();
-	  	         } catch(Exception exc) {}
-	  	    	 
-	  	       actRegion = u.getRegion();
-	  	       regionList = Regions.planShipRoute(u.getModifiedShip(), this.targetRegion.getCoordinate(), data.regions(), harbour, aquarianBonus);
-	           path=Regions.getDirections(regionList);
-  	       } else {
-  	    	   order = "; !!! nicht möglich (Kein Kapitän, ungünstige Zielregion)";
-  	    	   PathNotFound=true;
-  	       }
-  	     } else {
-  	    	order = "; !!! nicht möglich (Keine gültige Zielregion)";
-	    	PathNotFound=true;
-  	     }
+  	     
+    	if (isSeaConnPossible(u)){
+  	       // String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain.regions(), act, dest, excludeMap);
+  	    	aquarianBonus = 0;
+  	         try {
+  	           aquarianBonus = u.getFaction().getRace().getAdditiveShipBonus();
+  	         } catch(Exception exc) {}
+  	    	 
+  	       regionList = Regions.planShipRoute(u.getModifiedShip(), this.targetRegion.getCoordinate(), data.regions(), harbour, aquarianBonus);
+           path=Regions.getDirections(regionList);
+       } else {
+    	   order = "; !!! nicht möglich (Kein Kapitän, ungünstige Zielregion)";
+    	   PathNotFound=true;
+       }
+  	    
   	   
   	     if (path!=null && path.length()>0){
   	       // Pfad gefunden

@@ -16,6 +16,7 @@ import com.fftools.OutTextClass;
 import com.fftools.ScriptMain;
 import com.fftools.ScriptUnit;
 import com.fftools.overlord.OverlordInfo;
+import com.fftools.overlord.OverlordRun;
 import com.fftools.transport.TransportRequest;
 
 
@@ -28,9 +29,12 @@ import com.fftools.transport.TransportRequest;
  *
  */
 
-public class TradeAreaHandler implements OverlordInfo{
+public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	private static final OutTextClass outText = OutTextClass.getInstance();
 	
+	private static final int Durchlauf1 = 16;
+	
+	private int[] runners = {Durchlauf1};
 	
 	/**
 	 * List of TradeAreas
@@ -52,7 +56,7 @@ public class TradeAreaHandler implements OverlordInfo{
 	private Hashtable<ScriptUnit,Trader> traders = null;
 	
 	
-
+	private ArrayList<TradeAreaConnector> tradeAreaConnectors = null;
 	
 	
 	/**
@@ -370,7 +374,7 @@ public class TradeAreaHandler implements OverlordInfo{
 		if (this.tradeRegions.containsKey(r)){
 			return this.tradeRegions.get(r);
 		} else {
-			TradeRegion nTR = new TradeRegion(r);
+			TradeRegion nTR = new TradeRegion(r,this.scriptMain.getOverlord());
 			this.tradeRegions.put(r, nTR);
 			return nTR;
 		}
@@ -466,12 +470,13 @@ public class TradeAreaHandler implements OverlordInfo{
 	}
 	
 	/**
-	 * wird nicht bei einem bestimmten durchlauf aufgerufen
+	 * liefert den gewünschten Durchlauf...oder die Durchläufe 
+	 * an den Overlord
+	 * @return
 	 */
 	public int[] runAt(){
-		return null;
+		return runners;
 	}
-
 
 	/**
 	 * @return the tradeAreas
@@ -527,6 +532,133 @@ public class TradeAreaHandler implements OverlordInfo{
 		}
 		
 		
+	}
+	
+	/**
+	 * fügt einen neue TAC hinzu, nach Prüfung
+	 * @param u1
+	 * @param u2
+	 * @return Ergebnis (Fehlermeldung) der Prüfung, wenn OK, dann ""
+	 */
+	public String addTradeAreaConnector(ScriptUnit u1, ScriptUnit u2, String Name){
+		TradeAreaConnector TAC = new TradeAreaConnector(u1, u2, Name,this);
+		if (!TAC.isValid()){
+			return "Aktuelle Connection (TAC) ungültig";
+		}
+		if (isKnownTradeAreaConnector(TAC)){
+			return "Beziehung dieser TAs bereits vorhanden";
+		}
+		if (this.tradeAreaConnectors==null){
+			this.tradeAreaConnectors = new ArrayList<TradeAreaConnector>();
+		}
+		
+		this.tradeAreaConnectors.add(TAC);
+		return "";
+	}
+	
+	/**
+	 * Prüft, ob ein TAC schon inhaltlich existiert, also die beiden TAs schion verknüpft sind
+	 * @param TAC
+	 * @return
+	 */
+	private boolean isKnownTradeAreaConnector(TradeAreaConnector TAC){
+		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0 ){
+			return false;
+		}
+		for (TradeAreaConnector actTAC:this.tradeAreaConnectors){
+			if ((TAC.getTA1().equals(actTAC.getTA1()) && TAC.getTA2().equals(actTAC.getTA2())) ||(TAC.getTA1().equals(actTAC.getTA2()) && TAC.getTA2().equals(actTAC.getTA1()))){
+				return true;
+			}
+			if (actTAC.getName().equalsIgnoreCase(TAC.getName())){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * bearbeitet die TACs
+	 * informiert die SCUs
+	 *
+	 */
+	
+	public void run(int durchlauf){
+		if (durchlauf==TradeAreaHandler.Durchlauf1){
+			this.run1();
+		}
+		
+	}
+	
+	
+	private void run1(){
+		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0){
+			return;
+		}
+		
+		for (TradeAreaConnector TAC:this.tradeAreaConnectors){
+			this.infoSCU_TAC(1,TAC);
+			this.infoSCU_TAC(2,TAC);
+		}
+		
+		
+	}
+	
+	private void infoSCU_TAC(int number, TradeAreaConnector TAC){
+		ScriptUnit scu = null;
+		TradeArea TA1 = null;
+		TradeArea TA2 = null;
+		if (number==1){
+			scu=TAC.getSU1();
+			TA1 = TAC.getTA1();
+			TA2 = TAC.getTA2();
+		}
+		if (number==2){
+			scu=TAC.getSU2();
+			TA1 = TAC.getTA2();
+			TA2 = TAC.getTA1();
+		}
+		
+		scu.addComment("Verbindung zum TA: " + TA2.getName() + "(Name: " + TAC.getName() + ")");
+		// die einzelnen Güter durchgehen und Verbindungen und Balancen aufzeigen
+		for (ItemType itemType:TradeUtils.handelItemTypes()){
+			String l = itemType.getName() + " (" + TA1.getAreaBalance(itemType) + ")<->:";
+			ArrayList<TradeArea> connectedTAs = getConnectedAreas(TA1);
+			if (connectedTAs!=null){
+				for (TradeArea otherTA:connectedTAs){
+					l+=" " + otherTA.getName() + "(" + otherTA.getAreaBalance(itemType) + ")";
+				}
+			} else {
+				l += "keine TAs verbunden";
+			}
+			scu.addComment(l);
+		}
+	}
+	
+	/**
+	 * liefert eine Liste connectierter TAs
+	 * @param TA
+	 * @return
+	 */
+	private ArrayList<TradeArea> getConnectedAreas(TradeArea TA){
+		ArrayList<TradeArea> erg = null;
+		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0){
+			return null;
+		}
+		for (TradeAreaConnector TAC:this.tradeAreaConnectors){
+			if (TAC.getTA1().equals(TA)){
+				if (erg==null){
+					erg = new ArrayList<TradeArea>();
+				}
+				erg.add(TAC.getTA2());
+			}
+			if (TAC.getTA2().equals(TA)){
+				if (erg==null){
+					erg = new ArrayList<TradeArea>();
+				}
+				erg.add(TAC.getTA1());
+			}
+		}
+		return erg;
 	}
 	
 }

@@ -64,3 +64,11 @@ AlchemieManager		40
 Ausbildungsmanager	7 Vorlauf, Lernsilber anfordern 
 					135 vorlaufRequest, maximal verf Silber ermitteln
 					145 eigentlicher PoolLauf
+SetTradeAreaConnect 15
+					38
+TradeAreaHandler	16
+					
+MatPool2			20
+					80
+					140
+					150
