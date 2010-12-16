@@ -363,6 +363,16 @@ public class ScriptUnit {
 	}
 	
 	/**
+	 * fügt ein weiteres script der scriptliste hinzu
+	 * gedacht für aufrufe aus anderen scripten
+	 * Scripte dieser Unit dürfen nicht gerade abgearbeitet werden!
+	 * @param s
+	 */
+	public void addAScriptNow(Script s){
+		this.foundScriptList.add(s);
+	}
+	
+	/**
 	 * entfernt ein script der scriptliste
 	 * gedacht für aufrufe aus anderen scripten
 	 * @param s

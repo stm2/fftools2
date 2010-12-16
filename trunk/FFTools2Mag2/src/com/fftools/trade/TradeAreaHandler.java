@@ -29,6 +29,7 @@ import com.fftools.overlord.OverlordRun;
 import com.fftools.scripts.Script;
 import com.fftools.scripts.Vorrat;
 import com.fftools.transport.TransportRequest;
+import com.fftools.utils.FFToolsRegions;
 
 
 
@@ -79,7 +80,7 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	/**
 	 * keep reference to *all*
 	 */
-	private ScriptMain scriptMain = null;
+	public ScriptMain scriptMain = null;
 	
 	/**
 	 * constructs a new TAH
@@ -635,7 +636,9 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		}
 		
 		String oldFile = outText.getActFileName();
+		Boolean oldScreen = outText.isScreenOut();
 		outText.setFile("TAH_TAC");
+		outText.setScreenOut(false);
 		
 		
 		for (TradeAreaConnector TAC:this.tradeAreaConnectors){
@@ -653,9 +656,20 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		}
 		
 		
+		// hier eventuell optimierungen
+		// und dann weitere info
+		
+		// jetzt die Vorräte bestellen
+		for (TradeAreaConnector TAC:this.tradeAreaConnectors){
+			TAC.process_Transfers();
+		}
+		
+		
 		
 		outText.setFile(oldFile);
+		outText.setScreenOut(oldScreen);
 	}
+	
 	
 	/**
 	 * informiert eine Scriptunit über durch sie connectierte TAs
@@ -847,18 +861,8 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 				if (actTAC!=null){
 					// @ToDo: Speed konfigurierbar machen (im TAC)
 					int speed = 6;
-					
-					BuildingType harbour = this.scriptMain.gd_ScriptMain.rules.getBuildingType(StringID.create("Hafen"));
-					// Wildes Konstrukt: Ship ergänzen um planShipRoute zu nutzen
-					Ship s = new MagellanShipImpl(EntityID.createEntityID(1, 36) , this.scriptMain.gd_ScriptMain);
-					s.setRegion(actTAC.getSU1().getUnit().getRegion());
-					s.setShoreId(Direction.DIR_INVALID);
-					List<Region> pathL = Regions.planShipRoute(s, actTAC.getSU2().getUnit().getRegion().getCoordinate(),this.scriptMain.gd_ScriptMain.regions(), harbour,
-													  speed);
-					int runden = (int)Math.ceil(((double)pathL.size()-1)/speed);
+					int runden = FFToolsRegions.getShipPathSizeTurns_Virtuell(actTAC.getSU1().getUnit().getRegion().getCoordinate(),actTAC.getSU2().getUnit().getRegion().getCoordinate(), this.scriptMain.gd_ScriptMain, speed);
 					actTO.dist = runden;
-					// Und ship wieder wech
-					actTAC.getSU1().getUnit().getRegion().removeShip(s);
 				}
 				allOffers.add(actTO);
 			}
@@ -989,6 +993,8 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		
 	}
 	
-	
+	public GameData getData(){
+		return this.scriptMain.gd_ScriptMain;
+	}
 	
 }

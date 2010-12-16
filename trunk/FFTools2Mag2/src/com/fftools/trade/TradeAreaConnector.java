@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import magellan.library.rules.ItemType;
 
 import com.fftools.ScriptUnit;
+import com.fftools.scripts.Vorrat;
+import com.fftools.utils.FFToolsRegions;
 
 public class TradeAreaConnector {
 
@@ -42,6 +44,13 @@ public class TradeAreaConnector {
 	private ArrayList<TAC_Transfer> transfersTo2 = new ArrayList<TAC_Transfer>();
 	
 	
+	private int dist = -1;
+	private int speed = 6;
+	private int TAC_vorratsfaktor = 2;
+	private int prio=10;
+	private int prioTM=99;
+	
+	
 	public TradeAreaConnector(ScriptUnit u1,ScriptUnit u2,String _Name,TradeAreaHandler _TAH){
 		this.TAH = _TAH;
 		this.SU1 = u1;
@@ -60,6 +69,10 @@ public class TradeAreaConnector {
 			isValid = false;
 		}
 		if (isValid && this.Name.equalsIgnoreCase("not named")){
+			isValid = false;
+		}
+		
+		if (this.getDist()<=0){
 			isValid = false;
 		}
 		
@@ -135,5 +148,58 @@ public class TradeAreaConnector {
 		return 0;
 	}
 	
+	/**
+	 * erstellt die neuen Vorratsanfragen für alle Transfers
+	 */
+	public void process_Transfers(){
+		if (this.transfersTo1.size()>0){
+			process_Transfers_Dir(this.transfersTo1,this.getSU2());
+		}
+		if (this.transfersTo2.size()>0){
+			process_Transfers_Dir(this.transfersTo2,this.getSU1());
+		}
+	}
+	
+	/**
+	 * Erstellt die neuen Vorratsanfragen für eine Richtung des TAC
+	 * @param transfers
+	 * @param sourceSCU
+	 */
+	private void process_Transfers_Dir(ArrayList<TAC_Transfer> transfers, ScriptUnit sourceSCU){
+		for (TAC_Transfer actTF : transfers){
+			ArrayList<String> order = new ArrayList<String>(); 
+			order.add("source=TAC");
+			order.add("Ware=" + actTF.itemType.getName());
+			int summe = (actTF.amount_1 * this.getDist()) * 2 * TAC_vorratsfaktor;
+			order.add("Summe=" + summe);
+			order.add("proRunde=" + actTF.amount_1);
+			order.add("prio=" + prio);
+			order.add("prioTM=" + prioTM);
+			
+			
+			Vorrat vorrat = new Vorrat();
+			
+			this.TAH.scriptMain.getOverlord().addOverlordInfo(vorrat);
+			vorrat.setScriptUnit(sourceSCU);
+			if (this.TAH.scriptMain.client!=null){
+				vorrat.setClient(this.TAH.scriptMain.client);
+			}
+			vorrat.setGameData(this.TAH.getData());
+			vorrat.setArguments(order);
+			sourceSCU.addAScriptNow(vorrat);
+			
+			vorrat.vorMatpool();
+			
+			sourceSCU.addComment("TAC: Vorratsscript hinzugefügt: " + order.toString());
+		}
+	}
+	
+	
+	private int getDist(){
+		if (this.dist==-1){
+			this.dist = FFToolsRegions.getShipPathSizeTurns_Virtuell(this.getSU1().getUnit().getRegion().getCoordinate(), this.getSU2().getUnit().getRegion().getCoordinate(), this.TAH.getData(), speed);
+		} 
+		return this.dist;
+	}
 	
 }

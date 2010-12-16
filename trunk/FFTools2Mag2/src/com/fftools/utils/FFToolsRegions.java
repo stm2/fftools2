@@ -3,18 +3,24 @@ package com.fftools.utils;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import magellan.library.Border;
 import magellan.library.Building;
 import magellan.library.CoordinateID;
+import magellan.library.EntityID;
 import magellan.library.GameData;
 import magellan.library.ID;
 import magellan.library.Item;
 import magellan.library.Region;
 import magellan.library.Rules;
+import magellan.library.Ship;
 import magellan.library.Skill;
+import magellan.library.StringID;
 import magellan.library.Unit;
+import magellan.library.impl.MagellanShipImpl;
+import magellan.library.rules.BuildingType;
 import magellan.library.rules.CastleType;
 import magellan.library.rules.ItemType;
 import magellan.library.rules.RegionType;
@@ -162,83 +168,6 @@ public class FFToolsRegions {
 	
 	
 	/**
-	 * liefert den Abstand zweier Regionen in Anzahl Runden
-	 * wenn über See gefahren wird
-	 * @param regions Zur Verfügung stehende Regionen...
-	 * @param von Startregion
-	 * @param nach Zielregion
-	 * @param shipmovement
-	 * @param nextHold wenn Übergeben, wird darin CoordinateID des nächsten Halts der Unit abgelegt
-	 * @return Anzahl benötigter Runden
-	 */
-	public static int getPathDistOcean(GameData data, CoordinateID von, CoordinateID nach,int shipMovement,CoordinateID nextHold){
-		if (!data.regions().containsKey(von)){
-			return -1;
-		}
-		if (!data.regions().containsKey(nach)){
-			return -1;
-		}
-		if (von.equals(nach)){
-			return 0;
-		}
-		
-		// Path organisieren
-		Map<ID,RegionType> excludeMap = FFToolsRegions.getNonOceanRegionTypes(data.rules);
-		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
-		if (path==null || path.length()==0) {
-			return -1;
-		}
-		
-		int bewegungsPunkte = shipMovement;
-		
-		int anzRunden = 1;
-		int restBewegunspunkte = bewegungsPunkte;
-		String[] dirs = path.split(" ");
-		int step = 0;
-		CoordinateID lastCoord = null;
-		CoordinateID actCoord = null;
-		try {
-			lastCoord = (CoordinateID)von.clone();
-			actCoord = (CoordinateID)von.clone();
-		} catch (CloneNotSupportedException e){
-			
-		}
-		boolean reached = false;
-		boolean nextHoldSet = false;
-		while (!reached){
-			String actDir = dirs[step];
-			int actDirInt = Direction.toInt(actDir);
-			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
-			actCoord.translate(moveCoord);
-			int notwBewPunkte = 1;
-			restBewegunspunkte-=notwBewPunkte;
-			if (restBewegunspunkte<0) {
-				anzRunden++;
-				restBewegunspunkte = bewegungsPunkte-notwBewPunkte;
-				nextHoldSet = true;
-			} else {
-				if (!nextHoldSet && nextHold!=null){
-					nextHold.x = actCoord.x;
-					nextHold.y = actCoord.y;
-					nextHold.z = actCoord.z;
-				}
-			}
-			
-			if (actCoord.equals(nach)){
-				reached = true;
-			} else {
-				// schieben
-				lastCoord.x = actCoord.x;
-				lastCoord.y = actCoord.y;
-				lastCoord.z = actCoord.z;
-				step++;
-			}
-		}
-		
-		return anzRunden;
-	}
-	
-	/**
 	 * liefert komplette GotoInfo
 	 * berücksichtigt dabei Strassen
 	 * @param regions Zur Verfügung stehende Regionen...
@@ -336,99 +265,6 @@ public class FFToolsRegions {
 		return erg;
 	}
 	
-	
-	/**
-	 * liefert komplette GotoInfo
-	 * @param regions Zur Verfügung stehende Regionen...
-	 * @param von Startregion
-	 * @param nach Zielregion
-	 * @param reitend  reitet die Einheit oder zu Fuss?
-	 * @return GotoInfo
-	 */
-	public static GotoInfo getPathDistOceanGotoInfo(GameData data, CoordinateID von, CoordinateID nach,int shipMovement){
-		if (!data.regions().containsKey(von)){
-			return null;
-		}
-		if (!data.regions().containsKey(nach)){
-			return null;
-		}
-		GotoInfo erg = new GotoInfo();
-		erg.setDestRegion(data.getRegion(nach));
-		if (von.equals(nach)){
-			erg.setAnzRunden(0);
-			return erg;
-		}
-		
-		// Path organisieren
-		Map<ID,RegionType> excludeMap = FFToolsRegions.getNonOceanRegionTypes(data.rules);
-		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
-		if (path==null || path.length()==0) {
-			return null;
-		}
-		erg.setPath(path);
-		int bewegungsPunkte = 7;
-				int anzRunden = 1;
-		int restBewegunspunkte = bewegungsPunkte;
-		String[] dirs = path.split(" ");
-		int step = 0;
-		CoordinateID lastCoord = null;
-		CoordinateID actCoord = null;
-		try {
-			lastCoord = (CoordinateID)von.clone();
-			actCoord = (CoordinateID)von.clone();
-		} catch (CloneNotSupportedException e){
-			
-		}
-		CoordinateID nextHold = new CoordinateID(0,0);
-		Region lastHoldRegion = data.getRegion(von);
-		
-		boolean reached = false;
-		boolean nextHoldSet = false;
-		while (!reached){
-			String actDir = dirs[step];
-			int actDirInt = Direction.toInt(actDir);
-			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
-			actCoord.translate(moveCoord);
-
-			int notwBewPunkte = 3;
-			Region r1 = (Region)data.regions().get(lastCoord);
-			Region r2 = (Region)data.regions().get(actCoord);
-			if(r1==null || r2==null){
-				return null;
-			}
-			if (Regions.isCompleteRoadConnection(r1, r2)){
-				notwBewPunkte = 2;
-			}
-			restBewegunspunkte-=notwBewPunkte;
-			if (restBewegunspunkte<0) {
-				erg.setPathElement(anzRunden-1, lastHoldRegion, data.getRegion(lastCoord));
-				lastHoldRegion = data.getRegion(lastCoord);
-				anzRunden++;
-				restBewegunspunkte = bewegungsPunkte-notwBewPunkte;
-				nextHoldSet = true;
-				erg.setNextHold(data.getRegion(nextHold));
-			} else {
-				if (!nextHoldSet && nextHold!=null){
-					nextHold.x = actCoord.x;
-					nextHold.y = actCoord.y;
-					nextHold.z = actCoord.z;
-				}
-			}
-			
-			if (actCoord.equals(nach)){
-				reached = true;
-				erg.setPathElement(anzRunden-1, lastHoldRegion, data.getRegion(actCoord));
-			} else {
-				// schieben
-				lastCoord.x = actCoord.x;
-				lastCoord.y = actCoord.y;
-				lastCoord.z = actCoord.z;
-				step++;
-			}
-		}
-		erg.setAnzRunden(anzRunden);
-		return erg;
-	}
 	
 	/**
 	 * Aufruf ohne CoordinateID für ersten Aufenthalt
@@ -818,4 +654,46 @@ public class FFToolsRegions {
 		FFToolsRegions.notUseRegionNames = useRegionNames;
 	}
 	
+	/**
+	 * simuliert eine Schiffsbewegung, liefert die Entfernung
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	public static int getShipPathSize_Virtuell(CoordinateID from, CoordinateID to,GameData data, int speed){
+		
+		Region fromR = data.getRegion(from);
+		if (fromR==null){return -1;}
+		
+		
+		
+		BuildingType harbour = data.rules.getBuildingType(StringID.create("Hafen"));
+		// Wildes Konstrukt: Ship ergänzen um planShipRoute zu nutzen
+		Ship s = new MagellanShipImpl(EntityID.createEntityID(1, 36) , data);
+		s.setRegion(fromR);
+		s.setShoreId(Direction.DIR_INVALID);
+		List<Region> pathL = Regions.planShipRoute(s, to,data.regions(), harbour, speed);
+		if (pathL==null || pathL.size()<=0){
+			return -1;
+		}
+		int dist = pathL.size()-1;
+		// Und ship wieder wech
+		fromR.removeShip(s);
+		return dist;
+	}
+	
+	/**
+	 * simuliert eine Schiffsbewegung, liefert die Rundenanzahl
+	 * @param from
+	 * @param to
+	 * @return
+	 */
+	public static int getShipPathSizeTurns_Virtuell(CoordinateID from, CoordinateID to,GameData data, int speed){
+		int turns = getShipPathSize_Virtuell(from,to,data,speed);
+		if (turns<=0){
+			return -1;
+		}
+		turns = (int)Math.ceil(((double)turns)/speed); 
+		return turns;
+	}
 }

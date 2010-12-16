@@ -190,7 +190,7 @@ public class Trader {
 				outText.addOutLine("*Handeln: fehlerhafte Angabe der Prognoserunden: " + this.scriptUnit.getUnit().toString(true));
 			}
 		}
-		
+		this.scriptUnit.addComment("Debug: Verbrauchsprognose über " + this.prognoseRunden + " Runden.");
 		
 		if (OP.getOptionBoolean("inselinfo", false)){
 			this.setUserWishIslandInfo(true);

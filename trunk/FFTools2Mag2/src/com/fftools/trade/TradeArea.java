@@ -1087,16 +1087,21 @@ public class TradeArea {
 		// was kann selbst maximal gekauft werden...
 		erg = getAreaBuyMaxAmount(itemType);
 		
+		int rundenVerkauf = this.getAreaSellAmount(itemType) * 2;
 		// minus was hier verkauft werden kann für X Runden
-		erg -= (this.getAreaSellAmount(itemType) * 2);
+		erg -= (rundenVerkauf);
 		
+		int rundenVorrat = this.getAreaVorratProRundeAmount(itemType) * 1;
 		// minus was an Vorräten extern definiert worden ist
-		erg -=(this.getAreaVorratProRundeAmount(itemType) * 1);
+		erg -=(rundenVorrat);
 		
 		
 		// Abkapselung bei Vorrat für XX Runden (XX=10)
-		if (this.getAreaTotalAmount(itemType) > (erg * -10) && erg<0){
-			erg = -1;  // Symbolisch
+		int totalAmount = this.getAreaTotalAmount(itemType);
+		int neededRundenSumme = (rundenVerkauf + rundenVorrat) * 10; 
+		if (totalAmount > neededRundenSumme ){
+			erg = totalAmount - neededRundenSumme;
+			outText.addOutLine("uebervoll: " + itemType.getName() + " in " + this.getName());
 		}
 		
 		return erg;
