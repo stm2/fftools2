@@ -72,7 +72,7 @@ public class Vorrat extends TransportScript{
 		
 	}
 	
-	private void vorMatpool(){
+	public void vorMatpool(){
 		
 		// debug me
 		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("9rxs")){
