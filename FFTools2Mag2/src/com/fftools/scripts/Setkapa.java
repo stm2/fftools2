@@ -19,6 +19,16 @@ public class Setkapa extends Script {
 	
 	private static final int Durchlauf = 2;
 	
+	private int kapa=-1;
+	
+	/**
+	 * liefert den wahrscheinlichen Wert der resultierenden Kapa 
+	 * @return
+	 */
+	public int getKapa() {
+		return kapa;
+	}
+
 	/**
 	 * wichtig: parameterloser construktor..
 	 * bei jedem script dabei!
@@ -101,8 +111,8 @@ public class Setkapa extends Script {
 			this.doNotConfirmOrders();
 		} else {
 			this.scriptUnit.setSetKapaPolicy(kapaPolicy);
-			int freeKapa = this.scriptUnit.getFreeKapaMatPool2(kapaPolicy, kapaUser);
-			this.addComment("SetKapa: erkannte Kapazität: " + freeKapa + " GE");
+			this.kapa = this.scriptUnit.getFreeKapaMatPool2(kapaPolicy, kapaUser);
+			this.addComment("SetKapa: erkannte Kapazität: " + this.kapa + " GE");
 		}
 		
 	}
