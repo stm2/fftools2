@@ -944,6 +944,23 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		return null;
 	}
 	
+	/**
+	 * Liefert den passenden TAC
+	 * @param name
+	 * @return
+	 */
+	public TradeAreaConnector getTAC(String name){
+		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0){
+			return null;
+		}
+		for (TradeAreaConnector actTA:this.tradeAreaConnectors){
+			if (actTA.getName().equalsIgnoreCase(name)){
+				return actTA;
+			}
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * informiert eine Scriptunit über durch sie connectierte TAs
