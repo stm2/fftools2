@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import magellan.library.rules.ItemType;
 
 import com.fftools.ScriptUnit;
+import com.fftools.pools.matpool.relations.MatPoolRequest;
+import com.fftools.scripts.Ontradeareaconnection;
 import com.fftools.scripts.Vorrat;
 import com.fftools.utils.FFToolsRegions;
 
@@ -51,6 +53,13 @@ public class TradeAreaConnector {
 	private int prioTM=99;
 	
 	
+	private ArrayList<Ontradeareaconnection> movers = new ArrayList<Ontradeareaconnection>();
+	private String moverInfo = "not built";
+	
+	public String getMoverInfo() {
+		return moverInfo;
+	}
+
 	public TradeAreaConnector(ScriptUnit u1,ScriptUnit u2,String _Name,TradeAreaHandler _TAH){
 		this.TAH = _TAH;
 		this.SU1 = u1;
@@ -201,5 +210,80 @@ public class TradeAreaConnector {
 		} 
 		return this.dist;
 	}
+	
+	/**
+	 * fügt einen Mover dieser TAC hinzu
+	 * @param onTAC
+	 */
+	public void addMover(Ontradeareaconnection onTAC){
+		if (this.movers.contains(onTAC)){
+			onTAC.doNotConfirmOrders();
+			onTAC.addComment("!!!TAC:addMovver: bereits eingetragen!->unbestätigt");
+			return;
+		}
+		this.movers.add(onTAC);
+	}
+	
+	/**
+	 * liefert summe aller registrierten Mover-kapas
+	 * @return
+	 */
+	public int getOverallMoverKapa(){
+		int erg = 0;
+		if (this.movers.size()==0){
+			this.moverInfo = "keine Mover registriert";
+			return 0;
+		}
+		this.moverInfo = "";
+		for (Ontradeareaconnection onTAC:this.movers){
+			erg +=onTAC.getKapa();
+			if (moverInfo.length()>0){
+				moverInfo +=",";
+			}
+			moverInfo+=onTAC.unitDesc() + "(" + onTAC.getKapa() + ")";
+		}
+		moverInfo = "Summe " + erg + "GE: " + moverInfo;
+		return erg;
+	}
+	
+	/**
+	 * Setzt die Requests um, damit der Mover nach toDir aufbrechen kann
+	 * @param toDir
+	 * @param onTAC
+	 */
+	public void processMoverRequests(int toDir,Ontradeareaconnection onTAC){
+		ArrayList<TAC_Transfer> transfers = null;
+		String target = "";
+		if (toDir==1){
+			transfers = this.transfersTo1;
+			target = this.getTA1().getName();
+		}
+		if (toDir==2){
+			transfers = this.transfersTo2;
+			target = this.getTA2().getName();
+		}
+		
+		if (transfers==null){
+			return;
+		}
+		
+		int transportFaktor = this.dist * 2;
+		
+		for (TAC_Transfer actTransfer : transfers){
+			int actSumme = actTransfer.amount_1 * transportFaktor;
+			// anteil des Movers
+			actSumme = (int)Math.floor((double)actSumme * onTAC.getAnteil());
+			// Prio
+			int actPrio = this.prio + 1;
+			// Kommentar
+			String comment = "TAC nach " + target;
+			// Request basteln
+			MatPoolRequest MPR = new MatPoolRequest(onTAC, actSumme, actTransfer.itemType.getName(), actPrio, comment);
+			onTAC.addMatPoolRequest(MPR);
+			onTAC.addComment("TAC: " + actSumme + " " + actTransfer.itemType.getName() + " nach " + target + " mit Prio " + actPrio + " angefordert");
+		}
+		
+	}
+	
 	
 }
