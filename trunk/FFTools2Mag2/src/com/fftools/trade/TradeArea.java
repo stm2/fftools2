@@ -14,6 +14,7 @@ import magellan.library.Unit;
 import magellan.library.rules.ItemType;
 
 import com.fftools.OutTextClass;
+import com.fftools.ReportSettings;
 import com.fftools.overlord.Overlord;
 import com.fftools.pools.matpool.MatPool;
 import com.fftools.pools.matpool.MatPoolManager;
@@ -35,7 +36,7 @@ import com.fftools.utils.PriorityUser;
 public class TradeArea {
 	private static final OutTextClass outText = OutTextClass.getInstance();
 	
-	// private static final ReportSettings reportSettings = ReportSettings.getInstance();
+	private static final ReportSettings reportSettings = ReportSettings.getInstance();
 
 	/** 
 	 * Spezialfall, wenn Gut TA-weit nur gekauft werden kann, nicht verkauft....
@@ -542,6 +543,12 @@ public class TradeArea {
 		
 		
 		// Einfügen: Lagerbestand:
+		int suggestedLagerBetsand = this.suggestedAreaStorage(buyItemType, tR);
+		int Ta_VorratsFaktor = reportSettings.getOptionInt("ta-vorratsfaktor", tR.getRegion());
+		if (Ta_VorratsFaktor<0){
+			Ta_VorratsFaktor=0;
+		}
+		erg.addFirst("als Lagerbestand berücksichtigt: " + suggestedLagerBetsand + " (Vorratsfaktor=" + Ta_VorratsFaktor + "%)");
 		int lagerBestand =  this.getAreaStorageAmount(buyItemType);
 		erg.addFirst("auf Lager " + lagerBestand + ":" + this.areaStorageAmountInfo);
 		
@@ -613,7 +620,12 @@ public class TradeArea {
 		gesamtVerkauf += vorräte;
 		
 		// Einschub: auf Lager:
-		gesamtEinkauf += this.getAreaStorageAmount(itemType);
+		// gesamtEinkauf += this.getAreaStorageAmount(itemType);
+		// Einschub 2: nicht alle Vorräte ansätzen: VorratsFaktor beachten
+		// TA-Vorratsfaktor: ab welchem Anteil des Gesamteinkaufswertes 
+		// gelten Lagerbestände als Vorräte? Angabe in Prozent
+		
+		gesamtEinkauf += suggestedAreaStorage(itemType,r);
 		
 		// theoretische menge berechnen
 		double kaufTheoD = (double)r.getRegion().maxLuxuries()*(double)gesamtVerkauf / gesamtEinkauf;
@@ -648,6 +660,20 @@ public class TradeArea {
 		}
 		
 	}
+	
+	public int suggestedAreaStorage(ItemType itemType, TradeRegion r){
+		int areaStorage = this.getAreaStorageAmount(itemType);
+		int TA_Vorrat = reportSettings.getOptionInt("ta-vorratsfaktor", r.getRegion());
+		if (TA_Vorrat<0){
+			TA_Vorrat=0;
+		}
+		int gesamtEinkauf = this.getAreaBuyAmount(itemType);
+		int sockel = (int)Math.ceil((double)gesamtEinkauf * ((double)TA_Vorrat/100));
+		areaStorage-=sockel;
+		areaStorage = Math.max(0, areaStorage);
+		return areaStorage;
+	}
+	
 	
 	private int calcMaxAvailableAmount(TradeRegion r, ItemType itemType){
         // checken, ob es sich rechnet...dazu brauchen wir einen maximalen
