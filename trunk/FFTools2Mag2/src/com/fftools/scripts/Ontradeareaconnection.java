@@ -132,6 +132,8 @@ public class Ontradeareaconnection extends TradeAreaScript{
 		
 		int allSumme = myTAC.getOverallMoverKapa();
 		this.addComment(myTAC.getMoverInfo());
+		int allWeight = myTAC.getNeededGE();
+		this.addComment("GE insgesammt benötigt: " + allWeight + " (" + myTAC.getWeightInfo() + ")");
 		
 		// Anteil
 		this.anteil = (double)this.kapa / (double)allSumme;

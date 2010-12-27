@@ -667,8 +667,8 @@ public class TradeArea {
 		if (TA_Vorrat<0){
 			TA_Vorrat=0;
 		}
-		int gesamtEinkauf = this.getAreaBuyAmount(itemType);
-		int sockel = (int)Math.ceil((double)gesamtEinkauf * ((double)TA_Vorrat/100));
+		int gesamtVerkauf = this.getAreaSellAmount(itemType);
+		int sockel = (int)Math.ceil((double)gesamtVerkauf * ((double)TA_Vorrat/100));
 		areaStorage-=sockel;
 		areaStorage = Math.max(0, areaStorage);
 		return areaStorage;

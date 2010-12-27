@@ -120,6 +120,25 @@ public class CircusPool {
 		}	
 	
 	}
+	
+	/**
+	 * Zum Informieren über tatsächlich befohlene Unterhaltung
+	 */
+	public void runPool2(){
+		// gesamtsumme bestimmen
+		int summe = 0;
+		if (this.listOfRelations==null || this.listOfRelations.size()==0){
+			return;
+		}
+		for (CircusPoolRelation rel:this.listOfRelations){
+			summe += rel.getUnterhalten().getFinalOrderedUnterhaltung();
+		}
+		// informieren
+		for (CircusPoolRelation rel:this.listOfRelations){
+			ScriptUnit su = rel.getSkriptUnit();
+			su.addComment("tatsächlich befohlene Unterhaltung in der Region: " + summe);
+		}
+	}
 
 /**
  * 
