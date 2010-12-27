@@ -34,9 +34,10 @@ public class CircusPoolManager implements OverlordRun,OverlordInfo {
 	// private static final OutTextClass outText = OutTextClass.getInstance();
 	
 	private static final int Durchlauf1 = 6;
+	private static final int Durchlauf2 = 7;
 	
 	
-	private int[] runners = {Durchlauf1};
+	private int[] runners = {Durchlauf1,Durchlauf2};
 	
 	//  Verbindung zu FFtools halten über Scriptmain
 	public ScriptMain scriptMain;
@@ -100,6 +101,7 @@ public class CircusPoolManager implements OverlordRun,OverlordInfo {
  */	
 	
     public void run(int Durchlauf){
+    	if (Durchlauf == Durchlauf1){
     	if (circusPoolMap != null){
 	        for (Iterator<CircusPool> iter = circusPoolMap.values().iterator();iter.hasNext();){
 			     CircusPool cp = (CircusPool)iter.next();
@@ -110,6 +112,15 @@ public class CircusPoolManager implements OverlordRun,OverlordInfo {
 	        // die sollen dann im TA wandern dürfen
 	        workOnTradeAreas();
     	 }    
+    	}
+    	if (Durchlauf == Durchlauf2){
+    		if (circusPoolMap != null){
+    	        for (CircusPool iter : circusPoolMap.values()){
+    			     CircusPool cp = (CircusPool)iter;
+    			     cp.runPool2();
+    		     }
+        	 }    
+    	}
     }
     /**
      * Meldung an den Overlord

@@ -55,6 +55,7 @@ public class TradeAreaConnector {
 	
 	private ArrayList<Ontradeareaconnection> movers = new ArrayList<Ontradeareaconnection>();
 	private String moverInfo = "not built";
+	private String weightInfo = "not built";
 	
 	public String getMoverInfo() {
 		return moverInfo;
@@ -242,7 +243,7 @@ public class TradeAreaConnector {
 			}
 			moverInfo+=onTAC.unitDesc() + "(" + onTAC.getKapa() + ")";
 		}
-		moverInfo = "Summe " + erg + "GE: " + moverInfo;
+		moverInfo = "Summe Transporter " + erg + "GE: " + moverInfo;
 		return erg;
 	}
 	
@@ -283,6 +284,48 @@ public class TradeAreaConnector {
 			onTAC.addComment("TAC: " + actSumme + " " + actTransfer.itemType.getName() + " nach " + target + " mit Prio " + actPrio + " angefordert");
 		}
 		
+	}
+	
+	public String toString(){
+		return this.Name + " (" + this.getSU1().unitDesc() + "->" + this.getSU2().unitDesc()+")";
+	}
+	
+	/**
+	 * berechnet benötigte Menge an Transportkapa
+	 * setzt WeightInfo
+	 * @return
+	 */
+	public int getNeededGE(){
+		// maximales Richtungsgewicht pro Runde
+		// *2 
+		// * dist
+		// Richtung 1
+		int w1 = 0;
+		int w2 = 0;
+		if (this.transfersTo1!=null && this.transfersTo1.size()>0){
+			for (TAC_Transfer actT:this.transfersTo1){
+				w1+=actT.amount_1 * (int)actT.itemType.getWeight();
+			}
+		}
+		if (this.transfersTo2!=null && this.transfersTo2.size()>0){
+			for (TAC_Transfer actT:this.transfersTo2){
+				w2+=actT.amount_1 * (int)actT.itemType.getWeight();
+			}
+		}
+		this.weightInfo = "No cargo";
+		if ((w1==0) && (w2 == 0)){
+			return 0;
+		}
+		
+		this.weightInfo = w1 + "GE -> " + this.getTA1().getName() + "," + w2 + "GE -> " + this.getTA2().getName();
+		w1 = Math.max(w1, w2);
+		this.weightInfo += "; Dist: " + this.dist;
+		w1 = w1 * 2 * this.dist;
+		return w1;
+	}
+
+	public String getWeightInfo() {
+		return weightInfo;
 	}
 	
 	

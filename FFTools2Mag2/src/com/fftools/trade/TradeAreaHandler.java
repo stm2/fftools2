@@ -556,10 +556,10 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	public String addTradeAreaConnector(ScriptUnit u1, ScriptUnit u2, String Name){
 		TradeAreaConnector TAC = new TradeAreaConnector(u1, u2, Name,this);
 		if (!TAC.isValid()){
-			return "Aktuelle Connection (TAC) ungültig";
+			return "Aktuelle Connection (TAC) ungültig (" + Name + ": " + u1.unitDesc() + "->" + u2.unitDesc()+")";
 		}
 		if (isKnownTradeAreaConnector(TAC)){
-			return "Beziehung dieser TAs bereits vorhanden";
+			return "Beziehung dieser TAs bereits vorhanden (" + Name + ": " + u1.unitDesc() + "->" + u2.unitDesc()+")";
 		}
 		if (this.tradeAreaConnectors==null){
 			this.tradeAreaConnectors = new ArrayList<TradeAreaConnector>();

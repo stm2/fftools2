@@ -59,8 +59,8 @@ public class Settradeareaconnection extends TradeAreaScript{
 	}
 	
 	private void scriptStart(){
-		FFToolsOptionParser OP = new FFToolsOptionParser(this.scriptUnit,"SetTradeAreaConnection");
-		
+		FFToolsOptionParser OP = new FFToolsOptionParser(this.scriptUnit);
+		OP.addOptionList(this.getArguments());
 		// Pflichtfelder
 		// Zielunit
 		String targetUnitName = OP.getOptionString("ziel");

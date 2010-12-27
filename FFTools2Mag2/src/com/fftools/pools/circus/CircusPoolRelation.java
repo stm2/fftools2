@@ -52,10 +52,12 @@ public class CircusPoolRelation implements Comparable<CircusPoolRelation> {
 		SkillType unterhaltenSkillType =  circusPool.circusPoolManager.scriptMain.gd_ScriptMain.rules.getSkillType("Unterhaltung");
 		
 		// kann die Einheit unterhalten? Falls nicht kommt null zurück.
-		if (scriptUnit.getUnit().getSkill(unterhaltenSkillType) != null){
+		if (scriptUnit.getUnit().getModifiedSkill(unterhaltenSkillType) != null){
             // ja, dann kann man das talent abgreifen. 		
 			// sonst bleibt es eben bei Stufe 0.
-			talentStufe = scriptUnit.getUnit().getSkill(unterhaltenSkillType).getLevel();
+			// talentStufe = scriptUnit.getUnit().getSkill(unterhaltenSkillType).getLevel();
+			// FF 20101227: geändert auf modified skill 
+			talentStufe = scriptUnit.getUnit().getModifiedSkill(unterhaltenSkillType).getLevel();
         }	
 		
 		verdienst=personenZahl*talentStufe*20;

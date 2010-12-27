@@ -54,6 +54,8 @@ public class Unterhalten extends TransportScript{
 	private Region targetRegion = null;
 	private GotoInfo gotoInfo = null;
 	
+	private int finalOrderedUnterhaltung = 0;
+	
 	// Konstruktor
 	public Unterhalten() {
 		super.setRunAt(this.runners);
@@ -211,7 +213,7 @@ public void runScript(int scriptDurchlauf){
 						super.addComment("Warnung: Einheit ist NICHT ausgelastet!");
 						super.addComment("" + Math.round((circusPoolRelation.getVerdienst()-circusPoolRelation.getDoUnterhaltung())/circusPoolRelation.getProKopfVerdienst()) + " Unterhalter überflüssig");		
 						super.addOrder("UNTERHALTEN " + circusPoolRelation.getDoUnterhaltung(), true);			
-						
+						this.setFinalOrderedUnterhaltung(circusPoolRelation.getDoUnterhaltung());
 						double auslastung = ((double)circusPoolRelation.getDoUnterhaltung()/(double)circusPoolRelation.getVerdienst());
 						
 						// unter 90% auslastung unbestätigt. 
@@ -245,7 +247,8 @@ public void runScript(int scriptDurchlauf){
 						} else {
 							super.addComment("Warnung: Einheit ist NICHT ausgelastet!");
 							super.addComment("" + Math.round((circusPoolRelation.getVerdienst()-circusPoolRelation.getDoUnterhaltung())/circusPoolRelation.getProKopfVerdienst()) + " Unterhalter überflüssig");		
-							super.addOrder("UNTERHALTEN " + circusPoolRelation.getDoUnterhaltung(), true);			
+							super.addOrder("UNTERHALTEN " + circusPoolRelation.getDoUnterhaltung(), true);
+							this.setFinalOrderedUnterhaltung(circusPoolRelation.getDoUnterhaltung());
 						}
 
 					} else {
@@ -261,8 +264,8 @@ public void runScript(int scriptDurchlauf){
 	
 			}
 			else {
-			 super.addOrder("UNTERHALTEN " + circusPoolRelation.getDoUnterhaltung(), true);
-				
+				super.addOrder("UNTERHALTEN " + circusPoolRelation.getDoUnterhaltung(), true);
+				this.setFinalOrderedUnterhaltung(circusPoolRelation.getDoUnterhaltung());
 			}
 		}
 	}
@@ -323,6 +326,16 @@ public void runScript(int scriptDurchlauf){
 		}
 		
 		return erg;
+	}
+
+
+	public int getFinalOrderedUnterhaltung() {
+		return finalOrderedUnterhaltung;
+	}
+
+
+	public void setFinalOrderedUnterhaltung(int finalOrderedUnterhaltung) {
+		this.finalOrderedUnterhaltung = finalOrderedUnterhaltung;
 	}
 	
 }
