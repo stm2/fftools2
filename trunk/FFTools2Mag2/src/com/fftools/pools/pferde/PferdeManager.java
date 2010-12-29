@@ -7,6 +7,7 @@ import java.util.Iterator;
 import magellan.library.Region;
 
 import com.fftools.OutTextClass;
+import com.fftools.ReportSettings;
 import com.fftools.overlord.Overlord;
 import com.fftools.overlord.OverlordInfo;
 import com.fftools.overlord.OverlordRun;
@@ -28,9 +29,14 @@ import com.fftools.utils.GotoInfo;
 public class PferdeManager implements OverlordRun,OverlordInfo {
 	
 	private static final OutTextClass outText = OutTextClass.getInstance();
-	
+	private static final ReportSettings reportSettings = ReportSettings.getInstance();
 	
 	private Overlord overLord = null;
+	
+	/*
+	 * Ausgabe in Pferde_Name.txt ?
+	 */
+	private boolean reportOFF = false;
 	
 	/**
 	 * Wann soll er laufen
@@ -56,6 +62,7 @@ public class PferdeManager implements OverlordRun,OverlordInfo {
 	
 	public PferdeManager(Overlord overlord){
 		this.overLord = overlord;
+		this.reportOFF = reportSettings.getOptionBoolean("disable_report_Pferde");
 	}
 	
 	
@@ -295,18 +302,20 @@ public class PferdeManager implements OverlordRun,OverlordInfo {
 		for (Iterator<Region> iter = actRegions.iterator();iter.hasNext();){
 			Region actR = (Region)iter.next();
 			if (actR.getHorses()>0 && !this.regions.contains(actR)){
-				if (!setOuttextFile){
+				if (!setOuttextFile && !this.reportOFF){
 					outText.setFile("Pferde_" + actTA.getName());
 					outText.setScreenOut(false);
 					setOuttextFile=true;
 					outText.addOutLine("Bearbeite TA " + actTA.getName());
 				}
-				outText.addOutLine("Bearbeite Region " + actR.toString() + " (Pferde:" + actR.getHorses() + ")");
+				if (!this.reportOFF) {
+					outText.addOutLine("Bearbeite Region " + actR.toString() + " (Pferde:" + actR.getHorses() + ")");
+				}
 				processTA_Region(actR, actTA);
 			}
 		}
 		
-		if (setOuttextFile){
+		if (setOuttextFile && !this.reportOFF){
 			outText.setFileStandard();
 			outText.setScreenOut(oldScreenOut);
 		}
@@ -341,7 +350,9 @@ public class PferdeManager implements OverlordRun,OverlordInfo {
 					gotoInfo = FFToolsRegions.makeOrderNACH(actMover.scriptUnit, actMover.region().getCoordinate(),actR.getCoordinate(), true);
 					// aus der Liste der Mover entfernen
 					this.movingPferdeMacher.remove(actMover);
-					outText.addOutLine("dieser Region als Pferdemacher zugeordnet: " + actMover.unitDesc());
+					if (!this.reportOFF) {
+						outText.addOutLine("dieser Region als Pferdemacher zugeordnet: " + actMover.unitDesc());
+					}
 					actMover.setGotoInfo(gotoInfo);
 					// noch nen Pferde MPR hinzufügen
 					MatPoolRequest MPR = new MatPoolRequest(actMover,actMover.scriptUnit.getUnit().getModifiedPersons(), "Pferd", 20, "Pferdefänger unterwegs" );
@@ -349,14 +360,20 @@ public class PferdeManager implements OverlordRun,OverlordInfo {
 					
 					break;
 				} else {
-					outText.addOutLine("geeignet, aber keinen Weg gefunden?: " + actMover.unitDesc());
+					if (!this.reportOFF) {
+						outText.addOutLine("geeignet, aber keinen Weg gefunden?: " + actMover.unitDesc());
+					}
 					
 				}
 			} else {
-				outText.addOutLine("als ungeeignet erkannt: " + actMover.unitDesc() + " (" + grund + ")");
+				if (!this.reportOFF) {
+					outText.addOutLine("als ungeeignet erkannt: " + actMover.unitDesc() + " (" + grund + ")");
+				}
 			}
 		}
-		outText.addOutLine("Ende bei Region " + actR.toString());
+		if (!this.reportOFF) {
+			outText.addOutLine("Ende bei Region " + actR.toString());
+		}
 	}
 	
 	

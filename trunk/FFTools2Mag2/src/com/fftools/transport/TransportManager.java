@@ -34,6 +34,12 @@ import com.fftools.utils.GotoInfo;
  */
 public class TransportManager implements OverlordInfo,OverlordRun{
 	private static final OutTextClass outText = OutTextClass.getInstance();
+	private static final ReportSettings reportSettings = ReportSettings.getInstance();
+	
+	/*
+	 * Ausgabe in TransportRequests_Name_X.txt ?
+	 */
+	private boolean reportOFF = false;
 	
 	private static final int Durchlauf = 120;
 
@@ -71,6 +77,7 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 	
 	public TransportManager(ScriptMain _scriptMain){
 		this.scriptMain = _scriptMain;
+		this.reportOFF = reportSettings.getOptionBoolean("disable_report_TransportRequests");
 	}
 	
 	/**
@@ -117,6 +124,11 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 	 *
 	 */
 	public void informUs(){
+		
+		if (this.reportOFF) {
+			return;
+		}
+		
 		if (this.allTransporters==null || this.allTransporters.size()==0){
 			outText.addOutLine("TransportManager: keine Transporter bekannt.");
 		} else {
@@ -145,6 +157,10 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 	 * Overlord run
 	 */
 	public void run(int Durchlauf){
+		
+		
+		
+		
 		long startT1 = System.currentTimeMillis();
 		outText.addOutLine("TransportManager startet...generiere Anforderungen.");
 		if (this.transportRequests==null){
@@ -185,20 +201,22 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 	private void runByTradeAreas(TradeAreaHandler TAH){
 		
 		if (TAH.getTradeAreas()==null || TAH.getTradeAreas().size()==0){
-			outText.addOutLine("****** TransportManager: keine TadeAreas bekannt. Exit!");
+				outText.addOutLine("****** TransportManager: keine TadeAreas bekannt. Exit!");
 			return;
 		}
-		
+
 		outText.addOutLine("****** TransportManager: " + TAH.getTradeAreas().size() + " Areas bekannt.");
-		
 		for (Iterator<TradeArea> iter = TAH.getTradeAreas().iterator();iter.hasNext();){
 			TradeArea TA = (TradeArea)iter.next();
 			ArrayList<TradeRegion> tradeRegions = new ArrayList<TradeRegion>();
-			tradeRegions.addAll(TA.getTradeRegions());
+			// tradeRegions.addAll(TA.getTradeRegions());
 			
-			this.sortTransportersOutByTradeArea(TAH,TA);
+			// this.sortTransportersOutByTradeArea(TAH,TA);
+			
 			outText.setScreenOut(true);
 			outText.addOutLine("****** TransportManager bearbeitet TradeArea " + TA.getName() + " *******");
+			tradeRegions.addAll(TA.getTradeRegions());
+			this.sortTransportersOutByTradeArea(TAH,TA);
 			
 			if (this.allTransporters!=null){
 				outText.addOutLine("Transporter zu diesem Area: " + this.transporters.size() + " (von " + this.allTransporters.size() + " insg.)");
@@ -336,68 +354,99 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 			}
 		}
 		
-		
 		this.actLogName = "TransportRequests_" + infoName;
 		
 		// hier erstmal info ?!
-		outText.setScreenOut(false);
-		outText.setFile(this.actLogName + "_1");
+		if (!this.reportOFF) {
+			outText.setScreenOut(false);
+			outText.setFile(this.actLogName + "_1");
+		}
 		if (areaRequests!=null){
 			Collections.sort(areaRequests);
-			outText.addOutLine("Requests: " + areaRequests.size());
-			listRequests(areaRequests);
+			if (!this.reportOFF) {
+				outText.addOutLine("Requests: " + areaRequests.size());
+				listRequests(areaRequests);
+			}
 		} else {
-			outText.addOutLine("keine Requests vorhanden.");
+			if (!this.reportOFF) {
+				outText.addOutLine("keine Requests vorhanden.");
+			}
 		}
 		if (areaOffers!=null){
 			Collections.sort(areaOffers);
-			outText.addOutLine("Offers: " + areaOffers.size());
-			listOffers(areaOffers);
+			if (!this.reportOFF) {
+				outText.addOutLine("Offers: " + areaOffers.size());
+				listOffers(areaOffers);
+			}
 		} else {
-			outText.addOutLine("keine Offers vorhanden.");
+			if (!this.reportOFF) {
+				outText.addOutLine("keine Offers vorhanden.");
+			}
 		}	
-		outText.addOutLine("Warenarten: " + requestItemTypes.size());
+		if (!this.reportOFF) {
+			outText.addOutLine("Warenarten: " + requestItemTypes.size());
+		}
 		
 		if (areaRequests==null || areaOffers==null){
-			outText.addOutLine("leaving Transportmanager");
+			if (!this.reportOFF) {
+				outText.addOutLine("leaving Transportmanager");
+			}
 			return;
 		}
 		
 		long endT = System.currentTimeMillis();
-		outText.addOutLine("Vorbereitungen für " + infoName + " brauchten: " + (endT-startT) + "ms (R: " + areaRequests.size() + ", O: " + areaOffers.size() +")", true);
+		if (!this.reportOFF) {
+			outText.addOutLine("Vorbereitungen für " + infoName + " brauchten: " + (endT-startT) + "ms (R: " + areaRequests.size() + ", O: " + areaOffers.size() +")", true);
+		}
 		
 		
 		this.orderTransports(areaRequests, areaOffers);
 		
 		
 		// abschliessend wieder infos
-		outText.setScreenOut(false);
-		outText.setFile(this.actLogName + "_3");
+		if (!this.reportOFF) {
+			outText.setScreenOut(false);
+			outText.setFile(this.actLogName + "_3");
+		}
 		if (areaRequests!=null){
 			Collections.sort(areaRequests);
-			outText.addOutLine("Requests: " + areaRequests.size());
-			listRequests(areaRequests);
+			if (!this.reportOFF) {
+				outText.addOutLine("Requests: " + areaRequests.size());
+				listRequests(areaRequests);
+			}
 		} else {
-			outText.addOutLine("keine Requests vorhanden.");
+			if (!this.reportOFF) {
+				outText.addOutLine("keine Requests vorhanden.");
+			}
 		}
 		if (areaOffers!=null){
 			Collections.sort(areaOffers);
-			outText.addOutLine("Offers: " + areaOffers.size());
-			listOffers(areaOffers);
+			if (!this.reportOFF) {
+				outText.addOutLine("Offers: " + areaOffers.size());
+				listOffers(areaOffers);
+			}
 		} else {
-			outText.addOutLine("keine Offers vorhanden.");
+			if (!this.reportOFF) {
+				outText.addOutLine("keine Offers vorhanden.");
+			}
 		}
 		
 	    // Statistiken zu den abgearbeiteten Requests und offers
 		if (areaRequests!=null){
-			this.statRequests(areaRequests);
+			if (!this.reportOFF) {
+				this.statRequests(areaRequests);
+			}
 		}
 		
 		// und nu noch transporter infos
-		outText.setScreenOut(false);
-		outText.setFile(this.actLogName + "_Transporter");
+		if (!this.reportOFF) {
+			outText.setScreenOut(false);
+			outText.setFile(this.actLogName + "_Transporter");
+		}
 		if (this.transporters==null || this.transporters.size()==0){
-			outText.addOutLine("Keine transporter im TA");
+			if (!this.reportOFF) {
+				outText.addOutLine("Keine transporter im TA");
+			}
  		} else {
  			// Sortieren
  			ArrayList<Transporter> trans = new ArrayList<Transporter>();
@@ -415,7 +464,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
  			for (Iterator<Transporter> iter = trans.iterator();iter.hasNext();){
  				Transporter actTrans = (Transporter)iter.next();
  				if (actTrans.getMode()==Transporter.transporterMode_fullautomatic){
-	 				outText.addOutLine(actTrans.informLogTransporterStatus(NF));
+ 					if (!this.reportOFF) {
+ 						outText.addOutLine(actTrans.informLogTransporterStatus(NF));
+ 					}
 	 				allKapa+=actTrans.getKapa();
 	 				allKapa_frei += actTrans.getKapa_frei();
 	 				if (actTrans.getKapa_frei()==actTrans.getKapa()){
@@ -426,16 +477,19 @@ public class TransportManager implements OverlordInfo,OverlordRun{
  			if (allKapa>0){
  				double gesamtAuslastung = 0;
  				gesamtAuslastung = (1 - ((double)allKapa_frei/(double)allKapa))*100;
- 				outText.addOutLine("***");
- 				outText.addOutLine("GesamtAuslastung:" + NF.format(gesamtAuslastung) + "%");
- 				if (cnt_leerfahrten>0){
- 					outText.addOutLine("Leerfahrten:" + cnt_leerfahrten);
+ 				if (!this.reportOFF) {
+	 				outText.addOutLine("***");
+	 				outText.addOutLine("GesamtAuslastung:" + NF.format(gesamtAuslastung) + "%");
+	 				if (cnt_leerfahrten>0){
+	 					outText.addOutLine("Leerfahrten:" + cnt_leerfahrten);
+	 				}
  				}
  			}
  		}
-		
-		outText.setFileStandard();
-		outText.setScreenOut(true);
+		if (!this.reportOFF) {
+			outText.setFileStandard();
+			outText.setScreenOut(true);
+		}
 	}
 	
 	/**
@@ -550,9 +604,11 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		outText.addPoint();
 		
 		// log
-		outText.setScreenOut(false);
-		outText.setFile(this.actLogName + "_2");
-		outText.addOutLine("Request: " + request.getForderung() + " " + request.getOriginalGegenstand() + " (Prio:" + request.getPrio() + ") nach " + request.getRegion().toString());
+		if (!this.reportOFF) {
+			outText.setScreenOut(false);
+			outText.setFile(this.actLogName + "_2");
+			outText.addOutLine("Request: " + request.getForderung() + " " + request.getOriginalGegenstand() + " (Prio:" + request.getPrio() + ") nach " + request.getRegion().toString());
+		}
 		long startT = System.currentTimeMillis();
 		long start1=0;
 		long endT= 0;
@@ -580,17 +636,22 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		switch (request.getTM_sortMode()){
 		case MatPoolRequest.TM_sortMode_dist:
 			Collections.sort(offers, transportOfferComparator);
-			outText.addOutLine("offer sort benutzt offerComparator DIST");
+			if (!this.reportOFF) {
+				outText.addOutLine("offer sort benutzt offerComparator DIST");
+			}
 			break;
 		case MatPoolRequest.TM_sortMode_amount:
 			Collections.sort(offers, transportOfferComparatorAmount);
-			outText.addOutLine("offer sort benutzt offerComparator AMOUNT");
+			if (!this.reportOFF) {
+				outText.addOutLine("offer sort benutzt offerComparator AMOUNT");
+			}
 			break;
 		}
 		endT = System.currentTimeMillis();
-		outText.addOutLine("Sortieren der Offer (" + offers.size() + " Stück), benötigt:" + (endT-start1) + " ms. (setDist:" + (start1-vorDist) + "ms");
-		FFToolsRegions.informUs();
-		
+		if (!this.reportOFF) {
+			outText.addOutLine("Sortieren der Offer (" + offers.size() + " Stück), benötigt:" + (endT-start1) + " ms. (setDist:" + (start1-vorDist) + "ms");
+			FFToolsRegions.informUs();
+		}
 		// die einzelnen Offers abarbeiten, bis request erfüllt oder offers alle
 		for (Iterator<TransportOffer> iter = offers.iterator();iter.hasNext();){
 			TransportOffer offer = (TransportOffer)iter.next();
@@ -603,7 +664,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 			}
 		}
 		endT = System.currentTimeMillis();
-		outText.addOutLine("insgesamt benötigt:" + (endT-startT) + " ms.");
+		if (!this.reportOFF) {
+			outText.addOutLine("insgesamt benötigt:" + (endT-startT) + " ms.");
+		}
 		// request abgearbeitet ODER keine Offers mehr da
 	}
 	
@@ -625,13 +688,17 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		}
 		// ok, nicht in gleicher Region oder noch was offen
 		
-		outText.addOutLine("++" + offer.getAnzahl_nochOfferiert() + " " + offer.getItemName() + " von " + offer.getRegion().toString() + " nach " + request.getRegion().toString());
+		if (!this.reportOFF) {
+			outText.addOutLine("++" + offer.getAnzahl_nochOfferiert() + " " + offer.getItemName() + " von " + offer.getRegion().toString() + " nach " + request.getRegion().toString());
+		}
 		
 		// bereits festgelegte Transporter nach Mitfahrgelegenheit suchen
 		long start1 = System.currentTimeMillis();
 		this.searchForAvailableUsedTransports(request, offer);
 		long end1 = System.currentTimeMillis();
-		outText.addOutLine("Suche nach bereits benutzten Ts:" + (end1-start1) + " ms.");
+		if (!this.reportOFF) {
+			outText.addOutLine("Suche nach bereits benutzten Ts:" + (end1-start1) + " ms.");
+		}
 		if (request.getForderung()<=0){
 			return;
 		}
@@ -640,7 +707,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		long start1a = System.currentTimeMillis();
 		this.searchForAvailableLeerfahrtTransports_Planungsziel(request, offer);
 		long end1a = System.currentTimeMillis();
-		outText.addOutLine("Suche nach Leerfahrten:" + (end1a-start1a) + " ms.");
+		if (!this.reportOFF) {
+			outText.addOutLine("Suche nach Leerfahrten:" + (end1a-start1a) + " ms.");
+		}
 		if (request.getForderung()<=0){
 			return;
 		}
@@ -671,7 +740,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		// dann überall
 		this.searchForAvailableFreeTransports(request, offer,false);
 		long end2 = System.currentTimeMillis();
-		outText.addOutLine("Suche nach freien Ts:" + (end2-start2) + " ms.");
+		if (!this.reportOFF) {
+			outText.addOutLine("Suche nach freien Ts:" + (end2-start2) + " ms.");
+		}
 		
 	}
 	
@@ -739,7 +810,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 			}
 		}
 		long mid1 = System.currentTimeMillis();
-		outText.addOutLine("Filtern der unbenutzten Transporter dauerte: " + (mid1-start1) + "ms");
+		if (!this.reportOFF) {
+			outText.addOutLine("Filtern der unbenutzten Transporter dauerte: " + (mid1-start1) + "ms");
+		}
 		
 		
 		if (actTransporters.isEmpty()){
@@ -758,7 +831,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		long mid2 = System.currentTimeMillis();
 		Collections.sort(actTransporters, this.transporterComparatorForOffer);
 		long end1 = System.currentTimeMillis();
-		outText.addOutLine("Sortieren der unbenutzten Transporter (" + actTransporters.size() + " Stück) dauerte: " + (end1-mid2) + "ms, Anzahl Comparatoraufrufe: " + this.transporterComparatorForOffer.getCallCount());
+		if (!this.reportOFF) {
+			outText.addOutLine("Sortieren der unbenutzten Transporter (" + actTransporters.size() + " Stück) dauerte: " + (end1-mid2) + "ms, Anzahl Comparatoraufrufe: " + this.transporterComparatorForOffer.getCallCount());
+		}
 		
 		// Transporter durchgehen
 		for (Iterator<Transporter> iter = actTransporters.iterator();iter.hasNext();){
@@ -819,7 +894,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		this.checkTakeOverTransports(transporter);
 		// transporter informieren
 		// transporter.informUser(Anzahl, request, offer,"TMo");
-		outText.addOutLine("neuer Trans: " + transporter.getScriptUnit().unitDesc() + " schafft " + Anzahl + ", noch offen:" + request.getForderung());	
+		if (!this.reportOFF) {
+			outText.addOutLine("neuer Trans: " + transporter.getScriptUnit().unitDesc() + " schafft " + Anzahl + ", noch offen:" + request.getForderung());	
+		}
 	}
 	
 	/**
@@ -902,7 +979,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		
 		if (actTransporters.isEmpty()){
 			// keine TRansporter verfügbar
-			outText.addOutLine("keine benutzten Transporter verfügbar.");
+			if (!this.reportOFF) {
+				outText.addOutLine("keine benutzten Transporter verfügbar.");
+			}
 			return;
 		}
 		
@@ -928,7 +1007,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		long start1 = System.currentTimeMillis();
 		Collections.sort(actTransporters, this.transporterComparatorForOfferUsed);
 		long end1 = System.currentTimeMillis();
-		outText.addOutLine("Sortieren der bereits benutzten Ts (" + actTransporters.size() + " Stück) benötigt: " + (end1-start1) + " ms. Anzahl Comparatoraufrufe: " + this.transporterComparatorForOfferUsed.getCallCount());
+		if (!this.reportOFF) {
+			outText.addOutLine("Sortieren der bereits benutzten Ts (" + actTransporters.size() + " Stück) benötigt: " + (end1-start1) + " ms. Anzahl Comparatoraufrufe: " + this.transporterComparatorForOfferUsed.getCallCount());
+		}
 
 		// Transporter durchgehen
 		for (Iterator<Transporter> iter = actTransporters.iterator();iter.hasNext();){
@@ -982,7 +1063,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		
 		if (actTransporters.isEmpty()){
 			// keine TRansporter verfügbar
-			outText.addOutLine("keine Leerfahrten verfügbar.");
+			if (!this.reportOFF) {
+				outText.addOutLine("keine Leerfahrten verfügbar.");
+			}
 			return;
 		}
 		
@@ -997,7 +1080,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		long start1 = System.currentTimeMillis();
 		Collections.sort(actTransporters, this.transporterComparatorForOfferUsed);
 		long end1 = System.currentTimeMillis();
-		outText.addOutLine("Sortieren der Leerfahrten (" + actTransporters.size() + " Stück) benötigt: " + (end1-start1) + " ms. Anzahl Comparatoraufrufe: " + this.transporterComparatorForOfferUsed.getCallCount());
+		if (!this.reportOFF) {
+			outText.addOutLine("Sortieren der Leerfahrten (" + actTransporters.size() + " Stück) benötigt: " + (end1-start1) + " ms. Anzahl Comparatoraufrufe: " + this.transporterComparatorForOfferUsed.getCallCount());
+		}
 
 		// Transporter durchgehen
 		for (Iterator<Transporter> iter = actTransporters.iterator();iter.hasNext();){
@@ -1082,7 +1167,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		
 		// transporter informieren
 		// transporter.informUser(Anzahl, request, offer,"TMu");
-		outText.addOutLine("Benutze Trans: " + transporter.getScriptUnit().unitDesc() + ", schafft " + Anzahl + ", noch offen:" + request.getForderung());
+		if (!this.reportOFF) {
+			outText.addOutLine("Benutze Trans: " + transporter.getScriptUnit().unitDesc() + ", schafft " + Anzahl + ", noch offen:" + request.getForderung());
+		}
 	}
 	
 	
@@ -1119,7 +1206,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		
 		// transporter informieren
 		// transporter.informUser(Anzahl, request, offer,"TMo2");
-		outText.addOutLine("Benutze Leerfahrt: " + transporter.getScriptUnit().unitDesc() + ", schafft " + Anzahl + ", noch offen:" + request.getForderung());
+		if (!this.reportOFF) {
+			outText.addOutLine("Benutze Leerfahrt: " + transporter.getScriptUnit().unitDesc() + ", schafft " + Anzahl + ", noch offen:" + request.getForderung());
+		}
 	}
 	
 	
@@ -1136,7 +1225,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 			request.getScriptUnit().addComment("TM: von dieser Region: " + anzahl + " " + offer.getItemName() + " (Prio " + request.getPrio() + " von " + offer.getScriptUnit().getUnit().toString(true) + ")");
 			offer.incBearbeitet(anzahl);
 			offer.getScriptUnit().addComment("TM: für diese Region: " + anzahl + " " + offer.getItemName()+ " (Prio " + request.getPrio() + " für " + request.getScriptUnit().getUnit().toString(true) + ")");
-			outText.addOutLine("Bereits in " + request.getRegion().toString() + ": " + anzahl + " " + offer.getItemName() + ". Noch offen:" + request.getForderung());
+			if (!this.reportOFF) {
+				outText.addOutLine("Bereits in " + request.getRegion().toString() + ": " + anzahl + " " + offer.getItemName() + ". Noch offen:" + request.getForderung());
+			}
 		}
 	}
 	
@@ -1223,7 +1314,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 			s += " nach " + TR.getRegion().toString();
 			s += " PRIO:" + TR.getPrio();
 			s += " (" + TR.getKommentar() + ")";
-			outText.addOutLine(s);
+			if (!this.reportOFF) {
+				outText.addOutLine(s);
+			}
 		}
 	}
 	
@@ -1234,7 +1327,9 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 			s += TO.getItem().getAmount() + "(" + TO.getAnzahl_nochOfferiert() + ") ";
 			s += TO.getItem().getName();
 			s += " in " + TO.getRegion().toString();
-			outText.addOutLine(s);
+			if (!this.reportOFF) {
+				outText.addOutLine(s);
+			}
 		}
 	}
 	

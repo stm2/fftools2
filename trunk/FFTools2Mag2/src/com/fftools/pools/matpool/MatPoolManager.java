@@ -9,6 +9,7 @@ import java.util.Iterator;
 import magellan.library.Region;
 
 import com.fftools.OutTextClass;
+import com.fftools.ReportSettings;
 import com.fftools.ScriptMain;
 import com.fftools.ScriptUnit;
 import com.fftools.overlord.OverlordInfo;
@@ -18,6 +19,12 @@ import com.fftools.pools.matpool.relations.MatPoolRequest;
 
 public class MatPoolManager implements OverlordRun,OverlordInfo{
 	private static final OutTextClass outText = OutTextClass.getInstance();
+	private static final ReportSettings reportSettings = ReportSettings.getInstance();
+	
+	/*
+	 * Ausgabe in .txt ?
+	 */
+	private boolean reportOFF = false;
 	
 	private static final int Durchlauf1 = 20;
 	private static final int Durchlauf2 = 80;
@@ -35,6 +42,7 @@ public class MatPoolManager implements OverlordRun,OverlordInfo{
 	
 	public MatPoolManager (ScriptMain _scriptMain){
 		this.scriptMain = _scriptMain;
+		this.reportOFF = reportSettings.getOptionBoolean("disable_report_MatPoolManager");
 	}
 	
 	/**
@@ -104,7 +112,9 @@ public class MatPoolManager implements OverlordRun,OverlordInfo{
 	}
 	
 	public void informUs(){
-		
+		if (this.reportOFF) {
+			return;
+		}
 		// if (outText.getTxtOut()==null) {return;}
 		outText.setFile("MatPoolInfos_" + this.run_counter);
 		
@@ -152,9 +162,10 @@ public class MatPoolManager implements OverlordRun,OverlordInfo{
 		
 		
 		
-		
-		outText.setScreenOut(false);
-		outText.setFile("MatPoolManager_" + durchlauf);
+		if (!this.reportOFF) {
+			outText.setScreenOut(false);
+			outText.setFile("MatPoolManager_" + durchlauf);
+		}
 		for (Iterator<MatPool> iter = matPoolMap.values().iterator();iter.hasNext();){
 			MatPool mp = (MatPool)iter.next();
 			mp.runPool(durchlauf);
@@ -167,8 +178,10 @@ public class MatPoolManager implements OverlordRun,OverlordInfo{
 		outText.setScreenOut(false);
 		informUs();
 		*/
-		outText.setScreenOut(true);
-		outText.setFileStandard();
+		if (!this.reportOFF) {
+			outText.setScreenOut(true);
+			outText.setFileStandard();
+		}
 		long endT = System.currentTimeMillis();
 		outText.addOutLine("MatPoolManager benötigte " + (endT-startT) + " ms!");
 		
@@ -247,6 +260,10 @@ public class MatPoolManager implements OverlordRun,OverlordInfo{
 	 */
 	public int[] runAt(){
 		return runners;
+	}
+
+	public boolean isReportOFF() {
+		return reportOFF;
 	}
 
 	

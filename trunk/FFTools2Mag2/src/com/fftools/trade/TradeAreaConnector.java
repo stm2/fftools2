@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import magellan.library.rules.ItemType;
 
+import com.fftools.OutTextClass;
 import com.fftools.ScriptUnit;
 import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.scripts.Ontradeareaconnection;
@@ -11,7 +12,8 @@ import com.fftools.scripts.Vorrat;
 import com.fftools.utils.FFToolsRegions;
 
 public class TradeAreaConnector {
-
+	private static final OutTextClass outText = OutTextClass.getInstance();
+	
 	private ScriptUnit SU1 = null;
 	private ScriptUnit SU2 = null;
 	
@@ -413,5 +415,22 @@ public class TradeAreaConnector {
 		return weightInfo;
 	}
 	
+	/**
+	 * eine Zeile...info
+	 */
+	public void informUsShort(){
+		outText.addOutChars(this.Name, 20);
+		outText.addOutChars(": Mover:");
+		// Anzahl movers
+		outText.addOutChars(this.movers.size()+"", 2);
+		outText.addOutChars(" kapa ist:");
+		// Anzahl Kapa on it
+		outText.addOutChars(this.getOverallMoverKapa()+"", 10);
+		outText.addOutChars(" kapa soll:");
+		outText.addOutChars(this.getNeededGE()+"", 10);
+		
+		outText.addNewLine();
+		
+	}
 	
 }
