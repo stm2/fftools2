@@ -45,11 +45,13 @@ public class TradeAreaConnector {
 	private ArrayList<TAC_Transfer> transfersTo1 = new ArrayList<TAC_Transfer>();
 	private ArrayList<TAC_Transfer> transfersTo2 = new ArrayList<TAC_Transfer>();
 	
+	private ArrayList<TAC_usage> usagesIn1 = new ArrayList<TradeAreaConnector.TAC_usage>();
+	private ArrayList<TAC_usage> usagesIn2 = new ArrayList<TradeAreaConnector.TAC_usage>();
 	
 	private int dist = -1;
 	private int speed = 6;
 	private int TAC_vorratsfaktor = 2;
-	private int prio=10;
+	private int prio=50;
 	private int prioTM=99;
 	
 	
@@ -96,7 +98,11 @@ public class TradeAreaConnector {
 		return SU2;
 	}
 	
-	
+	/**
+	 * kleine private Klasse zum Erfassen von Transfers zwischen TAs
+	 * @author Fiete
+	 *
+	 */
 	private class TAC_Transfer{
 		public ItemType itemType;
 		// Menge nach relativer Distru
@@ -109,6 +115,38 @@ public class TradeAreaConnector {
 			this.amount_1 = _amount_1;
 			this.amount_2 = _amount_2;
 		}	
+	}
+	
+	/**
+	 * Kleine private Klasse zum Verwalten von Zusätzlichen Requests der Mover
+	 * in den Startregionen
+	 * @author Fiete
+	 *
+	 */
+	private class TAC_usage{
+		private String Name = "";
+		private int Menge = 0;
+		private int prio = 0;
+		
+		public TAC_usage(String _Name,int _Menge,int _Prio){
+			this.Name = _Name;
+			this.Menge = _Menge;
+			this.prio = _Prio;
+			
+		}
+
+		public String getName() {
+			return Name;
+		}
+
+		public int getMenge() {
+			return Menge;
+		}
+
+		public int getPrio() {
+			return prio;
+		}
+		
 	}
 	
 	/**
@@ -126,6 +164,17 @@ public class TradeAreaConnector {
 			this.transfersTo2.add(actT);
 		}
 	}
+	
+	public void addUsage(TradeArea sourceTA, String Ware, int Menge, int Prio){
+		TAC_usage actU = new TAC_usage(Ware, Menge, Prio);
+		if (sourceTA.equals(this.getTA1())){
+			this.usagesIn1.add(actU);
+		}
+		if (sourceTA.equals(this.getTA2())){
+			this.usagesIn2.add(actU);
+		}
+	}
+	
 	
 	/**
 	 * liefert den entsprechenden Betrag des Transfers in diesem TAC zum TA!
@@ -285,6 +334,42 @@ public class TradeAreaConnector {
 		}
 		
 	}
+	
+	/**
+	 * Setzt die Requests um, die der Mover in inDir mitnehmen kann
+	 * @param inDir
+	 * @param onTAC
+	 */
+	public void processMoverUsages(int inDir,Ontradeareaconnection onTAC){
+		ArrayList<TAC_usage> transfers = null;
+		String target = "";
+		if (inDir==1){
+			transfers = this.usagesIn1;
+			target = this.getTA1().getName();
+		}
+		if (inDir==2){
+			transfers = this.usagesIn2;
+			target = this.getTA2().getName();
+		}
+		
+		if (transfers==null){
+			return;
+		}
+		
+		
+		
+		for (TAC_usage actTransfer : transfers){
+			// Kommentar
+			String comment = "TAC nach " + target + " auf " + onTAC.getMyTAC().getName();
+			// Request basteln
+			MatPoolRequest MPR = new MatPoolRequest(onTAC, actTransfer.getMenge(), actTransfer.getName(), actTransfer.getPrio(), comment);
+			MPR.setPrioChange(false);
+			onTAC.addMatPoolRequest(MPR);
+			onTAC.addComment("TAC-Usage: " + actTransfer.getMenge() + " " + actTransfer.getName() + " nach " + target + " mit Prio " + actTransfer.getPrio() + " angefordert");
+		}
+		
+	}
+	
 	
 	public String toString(){
 		return this.Name + " (" + this.getSU1().unitDesc() + "->" + this.getSU2().unitDesc()+")";
