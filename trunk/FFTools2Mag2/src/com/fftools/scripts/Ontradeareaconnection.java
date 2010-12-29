@@ -2,9 +2,11 @@ package com.fftools.scripts;
 
 import java.text.DecimalFormat;
 
+import magellan.library.Item;
+
+import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.trade.TradeAreaConnector;
 import com.fftools.utils.FFToolsOptionParser;
-import com.fftools.scripts.Setkapa;
 
 
 
@@ -23,10 +25,17 @@ public class Ontradeareaconnection extends TradeAreaScript{
 	private static final int Durchlauf_vorMP1 = 15;
 	private static final int Durchlauf_vorMP1_2 = 16;
 	
+	private static final int onRouteRequestPrio=10;
 	
 	private int[] runners = {Durchlauf_vorMP1,Durchlauf_vorMP1_2};
 	
 	private TradeAreaConnector myTAC = null;
+	public TradeAreaConnector getMyTAC() {
+		return myTAC;
+	}
+
+
+
 	private int kapa = -1;
 	private double anteil = -1;
 	
@@ -146,23 +155,38 @@ public class Ontradeareaconnection extends TradeAreaScript{
 		if (this.getUnit().getRegion().equals(myTAC.getSU1().getUnit().getRegion())){
 			// wir sind bei SCU1 und werden danach nach TA2 fahren
 			this.myTAC.processMoverRequests(2, this);
+			// usage in TA1
+			this.myTAC.processMoverUsages(1, this);
 			return;
 		}
 		
 		if (this.getUnit().getRegion().equals(myTAC.getSU2().getUnit().getRegion())){
 			// wir sind bei SCU2 und werden danach nach TA1 fahren
 			this.myTAC.processMoverRequests(1, this);
+			// usage in TA2
+			this.myTAC.processMoverUsages(2, this);
 			return;
 		}
 		
 		// wir sind auf hoher See....
-		// GibNix aktivieren?
-		this.scriptUnit.setGibNix(true);
-		this.addComment("TAC-unit unterwegs: GibNix aktiviert");
+		// alles aktuelle knapp requesten ?
+		saveMyGoods();
 		
 	}
 	
-	
+	/**
+	 * Fragt alle aktuelle Gegenstände selbst mit Prio an
+	 * damit sie nicht in irgendein depot wandern
+	 */
+	private void saveMyGoods(){
+		if (this.scriptUnit.getUnit().getItems()!=null){
+			for (Item item:this.scriptUnit.getUnit().getItems()){
+				MatPoolRequest mpr = new MatPoolRequest(this, item.getAmount(), item.getName(), onRouteRequestPrio, "on TAC-Route: save my goods!");
+				this.addMatPoolRequest(mpr);
+			}
+		}
+		this.addComment("TAC-Mover en route: saved my goods with prio=" + onRouteRequestPrio);
+	}
 	
 	/**
 	 * sollte falsch liefern, wenn nur jeweils einmal pro scriptunit

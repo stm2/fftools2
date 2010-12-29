@@ -167,6 +167,12 @@ public class Vorrat extends TransportScript{
 		// request INfo
 		this.scriptUnit.findScriptClass("RequestInfo");
 		
+		
+		// TradeArea mal feststellen, damit später danach sortiert werden kann
+		this.tradeArea = this.getTradeAreaHandler().getTAinRange(this.region());
+		// Eintrag ion requestAl
+		this.tradeArea.addVorratScript2ALL(this);
+		
 	}
 	
 	
@@ -190,7 +196,7 @@ public class Vorrat extends TransportScript{
 		
 		
 		// TradeArea mal feststellen, damit später danach sortiert werden kann
-		this.tradeArea = this.getTradeAreaHandler().getTAinRange(this.region());
+		// this.tradeArea = this.getTradeAreaHandler().getTAinRange(this.region());
 		
 		if (this.tradeArea==null){
 			// oopsa...das ist ungewöhnlich

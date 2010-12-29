@@ -5,20 +5,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import magellan.library.EntityID;
 import magellan.library.GameData;
 import magellan.library.ID;
 import magellan.library.Region;
-import magellan.library.Ship;
-import magellan.library.StringID;
-import magellan.library.impl.MagellanShipImpl;
-import magellan.library.rules.BuildingType;
 import magellan.library.rules.ItemType;
 import magellan.library.rules.RegionType;
-import magellan.library.utils.Direction;
 import magellan.library.utils.Regions;
 
 import com.fftools.OutTextClass;

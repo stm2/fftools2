@@ -113,6 +113,12 @@ public class TradeArea {
 	 */
 	private ArrayList<Vorrat> vorratRequests = null;
 	
+	/**
+	 * eine Liste *aller* requests, auch die nicht beachtet werden müssen
+	 * (wird gebraucht, um TradeAreaBalance auszurechnen...mit allen Vorräten
+	 */
+	private ArrayList<Vorrat> vorratRequestsAll = null;
+	
 	private Overlord overlord = null;
 	
 	/**
@@ -747,6 +753,28 @@ public class TradeArea {
 		return erg;
 	}
 	
+	/**
+	 * liefert Summe aller pro Runde zu berücksichtigender
+	 * Abgaben zum Vorratsaufbau
+	 * @param itemType
+	 * @return
+	 */
+	public int getAreaVorratProRundeAmountAll(ItemType itemType){
+		int erg = 0;
+		if (this.vorratRequestsAll==null || this.vorratRequestsAll.size()==0){
+			return erg;
+		}
+		for (Iterator<Vorrat> iter = this.vorratRequestsAll.iterator();iter.hasNext();){
+			Vorrat vorratScript = (Vorrat)iter.next();
+			if (vorratScript.getItemType()!=null && vorratScript.getItemType().equals(itemType)){
+				erg+=vorratScript.getProRunde();
+			}
+		}
+		return erg;
+	}
+	
+	
+	
 	
 	/**
 	 * liefert summe aller Einkaufsmglk
@@ -1061,6 +1089,19 @@ public class TradeArea {
 	}
 	
 	/**
+	 * fügt ein Vorrat - Script zum TAH hinzu
+	 * @param vorrat
+	 */
+	public void addVorratScript2ALL(Vorrat vorrat){
+		if (this.vorratRequestsAll==null){
+			this.vorratRequestsAll = new ArrayList<Vorrat>();
+		}
+		if (!this.vorratRequestsAll.contains(vorrat)){
+			this.vorratRequestsAll.add(vorrat);
+		}
+	}
+	
+	/**
 	 * Prüft, ob das Depot der Region ausreichend Ware auf Vorrat hat 
 	 * @param r
 	 * @return
@@ -1113,11 +1154,11 @@ public class TradeArea {
 		// was kann selbst maximal gekauft werden...
 		erg = getAreaBuyMaxAmount(itemType);
 		
-		int rundenVerkauf = this.getAreaSellAmount(itemType) * 2;
+		int rundenVerkauf = this.getAreaSellAmount(itemType) * 1;
 		// minus was hier verkauft werden kann für X Runden
 		erg -= (rundenVerkauf);
 		
-		int rundenVorrat = this.getAreaVorratProRundeAmount(itemType) * 1;
+		int rundenVorrat = this.getAreaVorratProRundeAmountAll(itemType) * 1;
 		// minus was an Vorräten extern definiert worden ist
 		erg -=(rundenVorrat);
 		
