@@ -34,7 +34,7 @@ public class OutTextClass {
 	private long setPointEveryMilliseks = 300;
 	
 	private int cntPoints = 0;
-	private int maxRowPoints = 20;
+	private int maxRowPoints = 30;
 	
 	private HashMap<String,FileWriter> fileWriters = null; 
 	
@@ -97,6 +97,7 @@ public class OutTextClass {
 	
 	public void addNewLine(){
 		this.addOutChars("\r\n");
+		cntPoints=0;
 	}
 	
 	
@@ -115,7 +116,7 @@ public class OutTextClass {
 				System.out.print(sS);
 				System.out.flush();
 			}
-			cntPoints=0;
+			cntPoints=maxRowPoints;
 		}
 		this.writeToLog(originalString);
 	}
@@ -136,7 +137,7 @@ public class OutTextClass {
 				System.out.print(sS);
 				System.out.flush();
 			}
-			cntPoints=0;
+			cntPoints=maxRowPoints;
 		}
 		this.writeToLog(originalString);
 	}

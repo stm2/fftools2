@@ -183,7 +183,9 @@ public class MatPool2 implements MatPool{
 			this.offerEverything();
 			this.generatedOffers=true;
 			long endT1 = System.currentTimeMillis();
-			outText.addOutLine("**** " + this.region.toString() + " - First inits took: " + (endT1-startT) + " ms");
+			if (!this.matPoolManager.isReportOFF()) {
+				outText.addOutLine("**** " + this.region.toString() + " - First inits took: " + (endT1-startT) + " ms");
+			}
 		}
 		
 		if (this.requests== null){return;}
@@ -203,7 +205,9 @@ public class MatPool2 implements MatPool{
 		}
 		s+=" Offers, ";
 		
-		outText.addOutLine(s);
+		if (!this.matPoolManager.isReportOFF()) {
+			outText.addOutLine(s);
+		}
 		
 		
 		
@@ -236,7 +240,9 @@ public class MatPool2 implements MatPool{
 		
 		
 		long endT2 = System.currentTimeMillis();
-		outText.addOutLine("ms to process requests: " + (endT2-startT) + " ms");
+		if (!this.matPoolManager.isReportOFF()) {
+			outText.addOutLine("ms to process requests: " + (endT2-startT) + " ms");
+		}
 		
 		// alle Requests durchlaufen, sortierung stellt Priorisierung sicher, 
 		for (MatPoolRequest actRequest : this.requests){
@@ -246,8 +252,10 @@ public class MatPool2 implements MatPool{
 		
 		
 		long endT = System.currentTimeMillis();
-		outText.addOutLine("MatPool2 " + region.toString() + ": " + (endT-startT) + " ms");
-		outText.addOutLine("ms for sorting offers: " + this.timeSortOffers + " ms, for processing:" + this.timeProcessOffers+ " ms"); 
+		if (!this.matPoolManager.isReportOFF()) {
+			outText.addOutLine("MatPool2 " + region.toString() + ": " + (endT-startT) + " ms");
+			outText.addOutLine("ms for sorting offers: " + this.timeSortOffers + " ms, for processing:" + this.timeProcessOffers+ " ms");
+		}
 		
 	}
 	
@@ -458,7 +466,9 @@ public class MatPool2 implements MatPool{
 	
 	public void informUs(){
 		// if (outText.getTxtOut()==null){return;}
-		
+		if (this.matPoolManager.isReportOFF()) {
+			return;
+		}
 		outText.addOutLine("----------------------------------------------------");
 		outText.addOutLine(".......Region MatPool Info Service.......");
 		String regionname = "";
@@ -590,7 +600,9 @@ public class MatPool2 implements MatPool{
 		
 		if (m.getItemTypes()==null){
 			// hier Fehler abfangen!
-			outText.addOutLine("!!!! Request ohne ItemType (" + m.getOriginalGegenstand() + ") Script: " + m.getScript().toString() + ", Einheit:" + m.getUnit().toString(true));
+			if (!this.matPoolManager.isReportOFF()) {
+				outText.addOutLine("!!!! Request ohne ItemType (" + m.getOriginalGegenstand() + ") Script: " + m.getScript().toString() + ", Einheit:" + m.getUnit().toString(true));
+			}
 			return;
 		}
 		
@@ -610,7 +622,9 @@ public class MatPool2 implements MatPool{
 	 */
 	public boolean removeMatPoolRequest(MatPoolRequest m){
 		if (this.requests==null || this.requests.size()==0){
-			outText.addOutLine("!!! removeMatPoolRequest: requests empty!");
+			if (!this.matPoolManager.isReportOFF()) {
+				outText.addOutLine("!!! removeMatPoolRequest: requests empty!");
+			}
 			return false;
 		}
 		return this.requests.remove(m);
@@ -625,7 +639,9 @@ public class MatPool2 implements MatPool{
 		// doch mal ein check
 		if (m.getAngebot()<=0){
 			// warum den anbieten ?
-			outText.addOutLine("!!!! Offer ohne Angebot: " + m.getUnit().toString(true));
+			if (!this.matPoolManager.isReportOFF()) {
+				outText.addOutLine("!!!! Offer ohne Angebot: " + m.getUnit().toString(true));
+			}
 			return;
 		}
 		

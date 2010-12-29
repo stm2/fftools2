@@ -241,6 +241,8 @@ public class TradeArea {
 		// if (outText.getTxtOut()==null) {return;}
 		if (this.tradeRegions!=null && this.tradeRegions.size()>5){
 			outText.setFile("TradeArea_" + this.getName());
+		} else {
+			return;
 		}
 		if (this.name==null) {
 			outText.addOutLine("******Handelsgebiets-Info******(ohne Namen(!))");
@@ -264,6 +266,24 @@ public class TradeArea {
 			TradeRegion r = (TradeRegion)iter.next();
 			reportRegion(r);
 		}
+		
+		
+		this.informAreaWideInfos();
+		
+		outText.addOutLine("***Ende Handelsgebiets-Info***");
+		outText.setFile("TradeAreas");
+	}
+	
+	
+	public void informAreaWideInfos(){
+		
+		String oldFile = outText.getActFileName();
+		Boolean oldScreen = outText.isScreenOut();
+		
+		outText.setFile("TradeAreaSummary_" + this.name);
+		outText.setScreenOut(false);
+		
+		
 		
 		outText.addOutLine("************************************");
 		outText.addOutLine("Regionen ohne Depots in " + this.name);
@@ -341,11 +361,10 @@ public class TradeArea {
 		} else {
 			outText.addOutLine("!!!Keine TradeRegions ???");
 		}
-		
-		
-		outText.addOutLine("***Ende Handelsgebiets-Info***");
-		outText.setFile("TradeAreas");
+		outText.setFile(oldFile);
+		outText.setScreenOut(oldScreen);
 	}
+	
 	
 	public void informUsTradeTransportRequests(Overlord OL){
 		// if (outText.getTxtOut()==null) {return;}
@@ -691,6 +710,10 @@ public class TradeArea {
 		double profit = 2;
 		// double maxEinkaufspreisD = (double)this.getAreaMinSellPrice(itemType) / profit;
 		double maxEinkaufspreisD = (double)this.getAreaWeightedMeanSellPrice(itemType) / profit;
+		if (maxEinkaufspreisD==0){
+			// kein Verkauf im TA...wir nehmen den reportweiten
+			maxEinkaufspreisD = (double)this.overlord.getTradeAreaHandler().getReportWeightedMeanSellPrice(itemType) / profit;
+		}
 		int maxEinkaufspreis = (int)Math.ceil(maxEinkaufspreisD);
 		return this.calcMaxAvailableAmount(maxEinkaufspreis, r, itemType);
 	}
@@ -1145,14 +1168,18 @@ public class TradeArea {
 	
 	
 	/**
-	 * Liefert die areaweite Zusammenfassung
+	 * Liefert die areaweite Zusammenfassung - mit Info
 	 * @param itemType
 	 * @return
 	 */
-	public int getAreaBalance(ItemType itemType){
+	public int getAreaBalance(ItemType itemType,boolean _informUs){
 		int erg  =  0;
+		
+		
+		
 		// was kann selbst maximal gekauft werden...
-		erg = getAreaBuyMaxAmount(itemType);
+		int AreaBuyMaxAmount = getAreaBuyMaxAmount(itemType);
+		erg = AreaBuyMaxAmount;
 		
 		int rundenVerkauf = this.getAreaSellAmount(itemType) * 1;
 		// minus was hier verkauft werden kann für X Runden
@@ -1168,11 +1195,53 @@ public class TradeArea {
 		int neededRundenSumme = (rundenVerkauf + rundenVorrat) * 10; 
 		if (totalAmount > neededRundenSumme ){
 			erg = totalAmount - neededRundenSumme;
-			outText.addOutLine("uebervoll: " + itemType.getName() + " in " + this.getName());
+			erg = Math.max(erg, AreaBuyMaxAmount);
+			if (_informUs){
+				// outText.addOutLine("uebervoll: " + itemType.getName() + " in " + this.getName());
+				outText.addOutChars(itemType.getName(), 15);
+				outText.addOutChars(" Balance:");
+				outText.addOutChars(erg + "", 6);
+				outText.addOutChars("  Total:");
+				outText.addOutChars(totalAmount + "", 6);
+				outText.addOutChars("  Max:");
+				outText.addOutChars(neededRundenSumme + "", 6);
+				outText.addOutChars(" MaxBuy:");
+				outText.addOutChars(AreaBuyMaxAmount + "", 6);
+				outText.addOutChars("    Sell:");
+				outText.addOutChars(rundenVerkauf + "", 6);
+				outText.addOutChars(" Vorräte:");
+				outText.addOutChars(rundenVorrat + "", 6);
+				outText.addNewLine();
+			}
+		} else {
+			// normales erg....
+			if (_informUs){
+				outText.addOutChars(itemType.getName(), 15);
+				outText.addOutChars(" Balance:");
+				outText.addOutChars(erg + "", 6);
+				outText.addOutChars("  MaxBuy:");
+				outText.addOutChars(AreaBuyMaxAmount + "", 6);
+				outText.addOutChars(" Sell:");
+				outText.addOutChars(rundenVerkauf + "", 6);
+				outText.addOutChars(" Vorräte:");
+				outText.addOutChars(rundenVorrat + "", 6);
+				outText.addNewLine();
+			}
 		}
+		
 		
 		return erg;
 	}
+	
+	/**
+	 * Liefert die areaweite Zusammenfassung - ohne Info
+	 * @param itemType
+	 * @return
+	 */
+	public int getAreaBalance(ItemType itemType){
+		return getAreaBalance(itemType,false);
+	}
+	
 	
 	/**
 	 * liefert summe aller ScriptUnits

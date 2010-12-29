@@ -15,6 +15,7 @@ import magellan.library.rules.RegionType;
 import magellan.library.utils.Regions;
 
 import com.fftools.OutTextClass;
+import com.fftools.ReportSettings;
 import com.fftools.ScriptMain;
 import com.fftools.ScriptUnit;
 import com.fftools.overlord.OverlordInfo;
@@ -36,11 +37,26 @@ import com.fftools.utils.FFToolsRegions;
 
 public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	private static final OutTextClass outText = OutTextClass.getInstance();
+	private static final ReportSettings reportSettings = ReportSettings.getInstance();
+	
+	/*
+	 * Ausgabe in TransportRequests_Name_X.txt ?
+	 */
+	private boolean reportOFF = false;
+	
+	/*
+	 * Ausgabe in TransportRequests_Name_X.txt ?
+	 */
+	private boolean reportOFF_TAH_TAC = false;
+	
 	
 	private static final int Durchlauf1 = 8;
-	private static final int Durchlauf2 = 12;
+	private static final int Durchlauf2 = 12; // Vor OnTAC
+	private static final int Durchlauf3 = 17; // Nach OnTAC
+	private static final int Durchlauf4 = 100; // irgendwann
 	
-	private int[] runners = {Durchlauf1,Durchlauf2};
+	
+	private int[] runners = {Durchlauf1,Durchlauf2,Durchlauf3,Durchlauf4};
 	
 	/**
 	 * List of TradeAreas
@@ -61,8 +77,15 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	 */
 	private Hashtable<ScriptUnit,Trader> traders = null;
 	
-	
+	/**
+	 * alle definierten TACs
+	 */
 	private ArrayList<TradeAreaConnector> tradeAreaConnectors = null;
+	
+	/**
+	 * TAs, für die extra reporte angefordert wurden mit IslandInfo
+	 */
+	private ArrayList<TradeArea> islandInfos = new ArrayList<TradeArea>();
 	
 	
 	/**
@@ -82,6 +105,8 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	public TradeAreaHandler(ScriptMain _scriptMain) {
 		this.scriptMain = _scriptMain;
 		this.data = _scriptMain.gd_ScriptMain;
+		this.reportOFF = reportSettings.getOptionBoolean("disable_report_TradeAreas");
+		this.reportOFF_TAH_TAC = reportSettings.getOptionBoolean("disable_report_TAH_TAC");
 	}
 	
 	
@@ -247,6 +272,10 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	
 	public void informUs(){
 		// if (outText.getTxtOut()==null) {return;}
+		
+		if (this.reportOFF){
+			return;
+		}
 		
 		outText.setFile("TradeAreas");
 		
@@ -499,18 +528,7 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 			outText.addOutLine("no trade areas known");
 			return;
 		}
-		
-		// Liste aller Luxusgüter bekommen
-		ArrayList<ItemType> lux = new ArrayList<ItemType>();
-		lux.add(data.rules.getItemType("Weihrauch", false));
-		lux.add(data.rules.getItemType("Öl", false));
-		lux.add(data.rules.getItemType("Myrrhe", false));
-		lux.add(data.rules.getItemType("Juwel", false));
-		lux.add(data.rules.getItemType("Gewürz", false));
-		lux.add(data.rules.getItemType("Balsam", false));
-		lux.add(data.rules.getItemType("Seide", false));
-		
-		
+
 		outText.addOutChars("Lux|", 10);
 		for (TradeArea tA : this.tradeAreas){
 			outText.addOutChars(tA.getName()+"|", 16);
@@ -518,13 +536,13 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		outText.addNewLine();
 		
 		outText.addOutChars("Balance|", 10);
-		for (TradeArea tA : this.tradeAreas){
+		for (int i=1;i<=this.tradeAreas.size();i++){
 			outText.addOutChars("normal|", 8);
 			outText.addOutChars("max|", 8);
 		}
 		outText.addNewLine();
 		
-		for (ItemType itemType : lux){
+		for (ItemType itemType : TradeUtils.handelItemTypes()){
 			outText.addOutChars(itemType.getName()+"|",10);
 			for (TradeArea tA : this.tradeAreas){
 				int normalBuy = tA.getAreaBuyAmount(itemType);
@@ -595,6 +613,12 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		if (durchlauf==TradeAreaHandler.Durchlauf2){
 			this.run2();
 		}
+		if (durchlauf==TradeAreaHandler.Durchlauf3){
+			this.run3();
+		}
+		if (durchlauf==TradeAreaHandler.Durchlauf4){
+			this.runIslandInfo();
+		}
 	}
 	
 	
@@ -627,18 +651,20 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0){
 			return;
 		}
-		
 		String oldFile = outText.getActFileName();
 		Boolean oldScreen = outText.isScreenOut();
-		outText.setFile("TAH_TAC");
-		outText.setScreenOut(false);
-		
+		if (!this.reportOFF_TAH_TAC){
+			outText.setFile("TAH_TAC");
+			outText.setScreenOut(false);
+		}
 		
 		for (TradeAreaConnector TAC:this.tradeAreaConnectors){
 			this.infoSCU_TAC(1,TAC);
 			this.infoSCU_TAC(2,TAC);
 		}
-		outText.addOutLine("Starte Easy Distri");
+		if (!this.reportOFF_TAH_TAC){
+			outText.addOutLine("Starte Easy Distri");
+		}
 		// erste Stufe der Verteilung
 		this.process_easy_Distribution();
 		
@@ -652,17 +678,56 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		// hier eventuell optimierungen
 		// und dann weitere info
 		
+		
+		
 		// jetzt die Vorräte bestellen
 		for (TradeAreaConnector TAC:this.tradeAreaConnectors){
 			TAC.process_Transfers();
 		}
 		
 		
-		
-		outText.setFile(oldFile);
-		outText.setScreenOut(oldScreen);
+		if (!this.reportOFF_TAH_TAC){
+			outText.setFile(oldFile);
+			outText.setScreenOut(oldScreen);
+		}
 	}
 	
+	
+	/**
+	 * Die eigentliche Arbeit:
+	 * Info über connectierte TAs und deren Balancen
+	 * Erster Schritt: relative Aufteilung der Überschüsse + info
+	 * Zweiter Schritt: Feinjustierung der Aufteilung + info
+	 */
+	private void run3(){
+		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0){
+			return;
+		}
+		String oldFile = outText.getActFileName();
+		Boolean oldScreen = outText.isScreenOut();
+		if (!this.reportOFF_TAH_TAC){
+			outText.setFile("TAH_TAC");
+			outText.setScreenOut(false);
+		}
+		
+		
+		// Statistik
+		// info darüber
+		if (!this.reportOFF_TAH_TAC){
+			outText.addOutLine(" ");
+			outText.addOutLine("**** Kapa Statistik TACs ***** ");
+			outText.addNewLine();
+			for (TradeAreaConnector TAC:this.tradeAreaConnectors){
+				TAC.informUsShort();
+			}
+			outText.addOutLine(" ");
+		}
+
+		if (!this.reportOFF_TAH_TAC){
+			outText.setFile(oldFile);
+			outText.setScreenOut(oldScreen);
+		}
+	}
 	
 	/**
 	 * informiert eine Scriptunit über durch sie connectierte TAs
@@ -739,10 +804,26 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		// RequestListe bauen
 		ArrayList<TAC_request> allRequests = new ArrayList<TAC_request>();
 		// für alle TAs
+		String oldFile = outText.getActFileName();
+		Boolean oldScreen = outText.isScreenOut();
+		if (!this.reportOFF_TAH_TAC){
+			outText.setFile("TAH_TAC_Balances");
+			outText.setScreenOut(false);
+			outText.addNewLine();
+			outText.addOutLine("+++*** TAH - getting Balances ***+++");
+		}
 		for (TradeArea actTA:this.tradeAreas){
 			// für alle ItemTypes
+			boolean withInfo=false;
+			if (this.hasTAC(actTA)){
+				withInfo=true;
+			}
+			if (!this.reportOFF_TAH_TAC && withInfo){
+				outText.addOutLine("*** TAH - Balance for " + actTA.getName() + " ***");
+				outText.addNewLine();
+			}
 			for (ItemType itemType:TradeUtils.handelItemTypes()){
-				int actBal = actTA.getAreaBalance(itemType);
+				int actBal = actTA.getAreaBalance(itemType,withInfo);
 				if (actBal<0){
 					// wir haben bedarf...
 					TAC_request actR = new TAC_request();
@@ -754,6 +835,12 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 					allRequests.add(actR);
 				}
 			}
+		}
+		
+		if (!this.reportOFF_TAH_TAC){
+			outText.addNewLine();
+			outText.setFile(oldFile);
+			outText.setScreenOut(oldScreen);
 		}
 		
 		if (allRequests.size()==0){
@@ -768,11 +855,12 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		});
 		
 		// Kurze INfo
-		outText.addOutLine("sortierte TAH Requests:");
-		for (TAC_request actR:allRequests){
-			outText.addOutLine(actR.toString());
+		if (!this.reportOFF){
+			outText.addOutLine("sortierte TAH Requests:");
+			for (TAC_request actR:allRequests){
+				outText.addOutLine(actR.toString());
+			}
 		}
-		
 		
 		
 		// Abarbeitung
@@ -938,6 +1026,26 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	}
 	
 	/**
+	 * liefert true, wenn dieses TA einen TAC hat
+	 * @param TA
+	 * @return
+	 */
+	private boolean hasTAC(TradeArea TA){
+		if (this.tradeAreaConnectors==null || this.tradeAreaConnectors.size()==0){
+			return false;
+		}
+		for (TradeAreaConnector actTA:this.tradeAreaConnectors){
+			if (actTA.getTA1().equals(TA)){
+				return true;
+			}
+			if (actTA.getTA2().equals(TA)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * Liefert den passenden TAC
 	 * @param name
 	 * @return
@@ -1005,6 +1113,49 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	
 	public GameData getData(){
 		return this.scriptMain.gd_ScriptMain;
+	}
+	
+	/**
+	 * fügt ein TA zu den islandInfos hinzu
+	 * @param s
+	 * @param TA
+	 */
+	public void addIslandInfo(Script s,TradeArea TA){
+		if (this.islandInfos.contains(TA)){
+			s.addComment("IslandInfo: TA " + TA.getName() + " ist bereits registriert");
+		} else {
+			this.islandInfos.add(TA);
+			s.addComment("IslandInfo: TA " + TA.getName() + " wurde registriert");
+		}
+	}
+	
+	/**
+	 * erstellt den Ausdruck für die IslandInfos
+	 */
+	private void runIslandInfo(){
+		for (TradeArea TA:this.islandInfos){
+			TA.informAreaWideInfos();
+		}
+	}
+	
+	
+	public int getReportWeightedMeanSellPrice(ItemType itemType){
+		int summe = 0;
+		int anzahl = 0;
+		if (this.tradeAreas==null || this.tradeAreas.size()==0){
+			return 0;
+		}
+		for (TradeArea TA:this.tradeAreas){
+			int actAWMSP = TA.getAreaWeightedMeanSellPrice(itemType);
+			if (actAWMSP>0){
+				summe+=actAWMSP;
+				anzahl+=1;
+			}
+		}
+		if (anzahl>0){
+			return (int)Math.floor((double)summe/(double)anzahl);
+		}
+		return 0;
 	}
 	
 }
