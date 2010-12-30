@@ -609,7 +609,7 @@ public class TradeArea {
 			return 0;
 		}
 		
-		if (r.getRegion().getName()!=null && r.getRegion().getName().equalsIgnoreCase("weststein")){
+		if (r.getRegion().getName()!=null && r.getRegion().getName().equalsIgnoreCase("Kecicobyr")){
 			int i222=0;
 			i222++;
 		}
@@ -624,7 +624,7 @@ public class TradeArea {
 		
 		// Einschub...was ist, wenn wir nirgends verkaufen können
 		// dann scheitert die berechnung der theoretischen menge
-		if (gesamtVerkauf==0 && vorräte>0){
+		if (gesamtVerkauf==0 && vorräte>0 && this.maxXfachÜberkauf>10){
 			// Sonderfall: reiner Vorratskauf
 			// soll heissen: eine insel mit NUR weihrauch (Mea, 10. Welt)
 			double relativeSollEinkauf = (double)vorräte/(double)gesamtEinkauf;
