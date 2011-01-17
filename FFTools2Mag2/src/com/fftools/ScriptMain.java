@@ -141,7 +141,7 @@ public class ScriptMain {
 		reportSettings.informUs();
 		
 		// gettimg some info from TRade Areas...
-		// this.getOverlord().getTradeAreaHandler().informUs();
+		this.getOverlord().getTradeAreaHandler().informUs();
 		
 		outText.setScreenOut(true);
 		
