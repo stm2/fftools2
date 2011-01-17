@@ -3,6 +3,7 @@ package com.fftools.scripts;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import magellan.library.Skill;
 import magellan.library.Unit;
@@ -68,7 +69,9 @@ public class Regionobserver extends MatPoolScript{
 		
 		// 1. Lernen nach Plan...
 		this.scriptUnit.findScriptClass("Lernfix", "Lernplan=RegionObserver");
-
+		this.addComment("Hinweis: das script RegionObserver erwartet einen gleichnamigen Lernplan: RegionObserver");
+		
+		
 		// 2. Geeignete Waffe anfordern (abgekupfert von "Treiben")
 		String comment = "RegionObserver-Waffen";
 		boolean didSomething = false;
@@ -125,24 +128,40 @@ public class Regionobserver extends MatPoolScript{
 		String tF = reportSettings.getOptionString("TrustedFactions", this.region());
 		if (tF==null) tF = "";
 		trustedFactions = tF.split(",");
-		Arrays.sort(trustedFactions);
-
+		List<String> trustedFactionList = Arrays.asList(trustedFactions);
+		List<String> embassyUnitsList = Arrays.asList(embassyUnits);
 		// Check all units in region
 		int alertStatus=0;
+		
 		for (Iterator<Unit> iter = this.region().units().iterator();iter.hasNext();){
 			Unit actU = (Unit)iter.next();
+			boolean badUnit=false;
 			String actF = actU.getFaction().getID().toString().toLowerCase();
+			
 			// Do we trust this faction?
-			if (Arrays.binarySearch(trustedFactions, actF)< 0) {
+			if (!trustedFactionList.contains(actF)) {
 				// No, but maybe we trust this unit?
-				if (Arrays.binarySearch(embassyUnits, actU.getID().toString()) < 0) {
-				// Uh-oh, suspicious unit found!
-					this.addComment("WARNUNG: Einheit " + actU.toString(true) + " wird nicht vertraut!");
-					alertStatus=1;
-					this.doNotConfirmOrders();
+				// if (Arrays.binarySearch(embassyUnits, actU.getID().toString()) < 0) {
+				if (!embassyUnitsList.contains(actU.getID().toString())) {
+					// Uh-oh, suspicious unit found!
+					badUnit=true;
 				}
 			}
+			
+			if (actU.isSpy()){
+				badUnit=true;
+			}
+			
+			if (badUnit){
+				// Uh-oh, suspicious unit found!
+				this.addComment("WARNUNG: Einheit " + actU.toString(true) + " wird nicht vertraut!");
+				alertStatus=1;
+				this.doNotConfirmOrders();
+			}
 		}
+		
+		
+		
 		// Alle gefundenen Einheiten vertrauenswürdig? Falls ja, bewachen und 
 		if (alertStatus==0) {
 			// Falls die Einheit noch nicht bewacht, setze Befehle

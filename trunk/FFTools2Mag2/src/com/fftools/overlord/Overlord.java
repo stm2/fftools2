@@ -121,7 +121,6 @@ public class Overlord {
 					outText.addPoint();
 				}
 			}
-			
 			// manager laufen lassen ?!
 			if (this.runnings!=null){
 				for (Iterator<OverlordRun> iter = this.runnings.iterator();iter.hasNext();){
