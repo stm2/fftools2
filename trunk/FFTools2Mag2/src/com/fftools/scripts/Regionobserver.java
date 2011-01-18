@@ -9,6 +9,7 @@ import magellan.library.Skill;
 import magellan.library.Unit;
 import magellan.library.rules.SkillType;
 
+import com.fftools.pools.ausbildung.Lernplan;
 import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.utils.FFToolsOptionParser;
 
@@ -68,8 +69,8 @@ public class Regionobserver extends MatPoolScript{
 	private void scriptStart(){
 		
 		// 1. Lernen nach Plan...
-		this.scriptUnit.findScriptClass("Lernfix", "Lernplan=RegionObserver");
-		this.addComment("Hinweis: das script RegionObserver erwartet einen gleichnamigen Lernplan: RegionObserver");
+		// this.scriptUnit.findScriptClass("Lernfix", "Lernplan=RegionObserver");
+		// this.addComment("Hinweis: das script RegionObserver erwartet einen gleichnamigen Lernplan: RegionObserver");
 		
 		
 		// 2. Geeignete Waffe anfordern (abgekupfert von "Treiben")
@@ -159,9 +160,7 @@ public class Regionobserver extends MatPoolScript{
 				this.doNotConfirmOrders();
 			}
 		}
-		
-		
-		
+
 		// Alle gefundenen Einheiten vertrauenswürdig? Falls ja, bewachen und 
 		if (alertStatus==0) {
 			// Falls die Einheit noch nicht bewacht, setze Befehle
@@ -176,11 +175,65 @@ public class Regionobserver extends MatPoolScript{
 				this.scriptUnit.getUnit().addOrders("KÄMPFE FLIEHE", false);
 			}
 		}
+
+		// war mal 1., jetzt 4.
+		// Feststellung, was und wie gelernt werden soll
+		boolean hasLearnOrder = false;
+		if (OP.getOptionString("Lernplan")!=""){
+			// es wurde ein LernplanName übergeben
+			String LP_Name = OP.getOptionString("Lernplan");
+			Lernplan LP = this.scriptUnit.getOverlord().getLernplanHandler().getLernplan(this.scriptUnit, LP_Name, false);
+			if (LP==null){
+				this.addComment("!!!Lernplan nicht bekannt: " + LP_Name);
+				this.doNotConfirmOrders();
+			} else {
+				// alles schön
+				this.scriptUnit.findScriptClass("Lernfix", "Lernplan=" + LP_Name);
+				hasLearnOrder = true;
+			}
+		}
 		
-		// 4. Further Tasks...
+		if (OP.getOptionString("Talent")!="" && !hasLearnOrder){
+			// es wurde ein LernplanName übergeben
+			String talent = OP.getOptionString("Talent");
+			talent = talent.substring(0, 1).toUpperCase() + talent.substring(1).toLowerCase();
+			SkillType skillType = super.gd_Script.rules.getSkillType(talent);
+			if (skillType==null){
+				this.addComment("!!!Lerntalent nicht bekannt: " + talent);
+				this.doNotConfirmOrders();
+			} else {
+				// alles schön
+				this.scriptUnit.findScriptClass("Lernfix", "Talent=" + talent);
+				hasLearnOrder = true;
+			}
+		}
+		
+		// existiert ein default-Lernplan RegionObserver?
+		if (!hasLearnOrder){
+			Lernplan LP = this.scriptUnit.getOverlord().getLernplanHandler().getLernplan(this.scriptUnit, "RegionObserver", false);
+			if (LP==null){
+				this.addComment("!!!Lernplan nicht bekannt: RegionObserver");
+				this.addComment("Hinweis: wenn ein Lernplan RegionObserver definiert wurde, so wird dieser genutzt.");
+				this.doNotConfirmOrders();
+			} else {
+				// alles schön
+				this.scriptUnit.findScriptClass("Lernfix", "Lernplan=RegionObserver");
+				hasLearnOrder = true;
+			}
+		}
+
+		// Tja, was nun? 
+		// Wenn keine Lernorder, dann unbestätigt Lassen und default anbieten
+		if (!hasLearnOrder){
+			this.doNotConfirmOrders();
+			this.addComment("!!! Dem RegionObserver ist nicht bekannt, was gelernt werden soll!!!");
+			this.addOrder("Lernen Wahrnehmung", true);
+		}
+		
+		// 5. Further Tasks...
 		// TODO oben: Lernplan für "Volks-Waffentalent" ermöglichen (Halbling=Armbrust,
 		//		Troll=Hiebwaffen, Insekt=Stangenwaffen, usw.
-	
+		
 	}
 	
 	/**
