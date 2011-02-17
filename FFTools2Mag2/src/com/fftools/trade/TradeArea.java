@@ -20,6 +20,7 @@ import com.fftools.pools.matpool.MatPool;
 import com.fftools.pools.matpool.MatPoolManager;
 import com.fftools.scripts.Vorrat;
 import com.fftools.transport.TransportRequest;
+import com.fftools.transport.Transporter;
 import com.fftools.utils.FFToolsArrayList;
 import com.fftools.utils.FFToolsRegions;
 import com.fftools.utils.PriorityUser;
@@ -73,6 +74,11 @@ public class TradeArea {
 	 * Liste der trader in diesem TradeArea
 	 */
 	private ArrayList<Trader> traders = null;
+	
+	/**
+	 * Liste der transporter in diesem TradeArea
+	 */
+	private ArrayList<Transporter> transporters = null;
 	
 	
 	private ArrayList<TransportRequest> transportRequests = null;
@@ -948,7 +954,18 @@ public class TradeArea {
 		}
 	}
 	
-	
+	/**
+	 * fügt einen Transporter zu transporters hinzu
+	 * @param t der Transporter
+	 */
+	public void addTransporter(Transporter t){
+		if (this.transporters==null){
+			this.transporters = new ArrayList<Transporter>();
+		}
+		if (!this.transporters.contains(t)){
+			this.transporters.add(t);
+		}
+	}
 	
 	/**
 	 * liefert TransportRequests aller Trader dieses Areas
@@ -1257,6 +1274,14 @@ public class TradeArea {
 			erg += r.getTotalAmount(itemType);
 		}
 		return erg;
+	}
+	
+	/**
+	 * liefert die Liste der Transporter
+	 * @return
+	 */
+	public ArrayList<Transporter> getTransporters() {
+		return transporters;
 	}
 	
 }
