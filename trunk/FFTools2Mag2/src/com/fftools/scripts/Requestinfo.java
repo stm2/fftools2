@@ -50,7 +50,7 @@ public class Requestinfo extends MatPoolScript{
 		if (TR!=null){
 			TradeArea TA = getOverlord().getTradeAreaHandler().getTradeArea(TR,false);
 			if (TA!=null){
-				addComment("Zugeordnetes TradeArea: " + TA.getName());
+				addComment("Zugeordnetes TradeArea: " + TA.getName() + " (def in Region: " + TA.getOriginRegion().toString()+")");
 			} else {
 				addComment("!! kein TA !!");
 			}

@@ -228,7 +228,13 @@ public class Transport extends TransportScript{
 			
 			
 			// fertig, pferde und wagen beantragt
+			
 		}
+		
+		
+		// später Einschub
+		this.getTradeArea().addTransporter(this.transporter);
+		
 	}
 	
 	/**

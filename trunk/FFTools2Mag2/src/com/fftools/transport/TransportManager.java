@@ -223,17 +223,23 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 			} else {
 				outText.addOutLine("keine Transporter im CR ?!?");
 			}
-			outText.setScreenOut(false);
-			long startT = System.currentTimeMillis();
-			this.runRegions(tradeRegions,TA.getName());
-			// Transporter inform UNits
-			for (Transporter transporter : this.transporters.values()){
-				transporter.informUnits();
+			if (this.transporters.size()>0){
+				outText.setScreenOut(false);
+				long startT = System.currentTimeMillis();
+				this.runRegions(tradeRegions,TA.getName());
+				// Transporter inform UNits
+				for (Transporter transporter : this.transporters.values()){
+					transporter.informUnits();
+				}
+				long endT = System.currentTimeMillis();
+				outText.setScreenOut(true);
+				outText.addOutLine("Für " + TA.getName() + " benötigt:" + (endT-startT) + " ms.");
+				outText.setScreenOut(false);
+			} else {
+				outText.setScreenOut(true);
+				outText.addOutLine("Für " + TA.getName() + " keine Transporter berücksichtigt.");
+				outText.setScreenOut(false);
 			}
-			long endT = System.currentTimeMillis();
-			outText.setScreenOut(true);
-			outText.addOutLine("Für " + TA.getName() + " benötigt:" + (endT-startT) + " ms.");
-			outText.setScreenOut(false);
 		}
 	}
 	
@@ -247,19 +253,13 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		if (this.allTransporters==null){
 			return;
 		}
-		// Liste durchlaufen und checken
-		for (Iterator<ScriptUnit> iter = this.allTransporters.keySet().iterator();iter.hasNext();){
-			ScriptUnit u = (ScriptUnit)iter.next();
-			Region r = u.getUnit().getRegion();
-			TradeArea actTA = TAH.getTAinRange(r);
-			if (actTA!=null && actTA.equals(TA)){
-				// ist wohl im richtigen TA
-				Transporter T = this.allTransporters.get(u);
-				this.transporters.put(u, T);
-			}
-			if (actTA==null){
-				outText.addOutLine(r.toString() + " kann keinem TA zugeordnet werden!?");
-			}
+		
+		if (TA.getTransporters()==null){
+			return;
+		}
+		
+		for (Transporter t:TA.getTransporters()){
+			this.transporters.put(t.getScriptUnit(),t);
 		}
 	}
 	
