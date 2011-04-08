@@ -72,54 +72,7 @@ public class LogMail {
 		this.mailBody = "Befehlsbearbeitung OK\n\nLog:\n" + this.mailBody;
 		this.sendLog();
 	}
-	/**
-	public boolean sendLog(){
-		boolean erg = true;
-		
-		MailMessage mailMessage=null;
-		 try {
-	        	// outText.addOutLine(FileCopy.getDateS() +  " trying to get new mailMessage");
-				mailMessage = new MailMessage("dasmonopol.de");
-				// outText.addOutLine(FileCopy.getDateS() +  " trying to AUTH with SERVER");
-				mailMessage.sendAUTH_PLAIN(this.settings.getDirectory("secret1"));
-				// outText.addOutLine(FileCopy.getDateS() +  " setting sender:" + myF.getEmail());
-				mailMessage.from("Monopol<monopol@dasmonopol.de>");
-				// outText.addOutLine(FileCopy.getDateS() +  " setting recipient:" + this.settings.getDirectory("eressea_server_email"));
-				mailMessage.to("Monopol-Server@googlegroups.com");
-				// outText.addOutLine(FileCopy.getDateS() +  " setting recipient: backup to sf");
-				mailMessage.to("sf@fietefietz.de");
-				// outText.addOutLine(FileCopy.getDateS() +  " setting Date");
-				mailMessage.setDate();
-				// outText.addOutLine(FileCopy.getDateS() +  " setting Header");
-				mailMessage.setHeader("Content-Type", "text/plain; charset=" +
-						Encoding.ISO.toString());
-				// outText.addOutLine(FileCopy.getDateS() +  " setting Subject");
-				mailMessage.setSubject(this.mySubject);
-				
-				Writer mailWriter = null;
-				// outText.addOutLine(FileCopy.getDateS() +  " body: new mail writer: ");
-				mailWriter = new OutputStreamWriter(mailMessage.getPrintStream(),
-						Encoding.ISO.toString());
-				
-				if (this.mailBody.length()>2){
-					mailWriter.write(this.mailBody);
-				} else {
-					mailWriter.write("kein log zum senden!");
-				}
-				
-				mailWriter.flush();
-				mailMessage.sendAndClose();
-				mailWriter.close();
-				
-			} catch(IOException e) {
-				
-				outText.addOutLine(e.toString());
-				return false;
-			}
-
-		return erg;
-	}
-	*/
+	
 	
 	public boolean sendLog(){
 		boolean erg = true;
@@ -138,7 +91,7 @@ public class LogMail {
 	    	
 	    	Message msg = new MimeMessage( session );
 	    	
-	        InternetAddress addressFrom=new InternetAddress("monopol@dasmonopol.de");
+	        InternetAddress addressFrom=new InternetAddress("monopol@gdr-group.com");
 	        
 	        String actFrom = server.getSender();
 	        if (actFrom!=null){
