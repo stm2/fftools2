@@ -1,16 +1,14 @@
 package com.fftools.pools.bau;
 
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.Iterator;
-
+import com.fftools.OutTextClass;
 import com.fftools.ScriptMain;
-import com.fftools.ScriptUnit;
 import com.fftools.overlord.OverlordInfo;
 import com.fftools.overlord.OverlordRun;
+import com.fftools.scripts.Bauauftrag;
 import com.fftools.scripts.Bauen;
+import com.fftools.trade.TradeArea;
+import com.fftools.trade.TradeAreaHandler;
 
 
 /**
@@ -18,21 +16,20 @@ import com.fftools.scripts.Bauen;
  *
  */
 public class BauManager implements OverlordRun,OverlordInfo{
-	// private static final OutTextClass outText = OutTextClass.getInstance();
+	private static final OutTextClass outText = OutTextClass.getInstance();
 	
+	private static final int Durchlauf0 = 9;
 	private static final int Durchlauf1 = 105;
 	
 	
-	private int[] runners = {Durchlauf1};
+	private int[] runners = {Durchlauf0,Durchlauf1};
 	
-	// private ScriptMain scriptMain = null;
-	
-	// merken wir uns zu jeder ScriptUnit doch einfach die bauScripte
-	private Hashtable<ScriptUnit, ArrayList<Bauen>> bauScripte = null;
-	
+	private ScriptMain scriptMain = null;
+	private TradeAreaHandler tradeAreaHandler = null;
 
 	public BauManager (ScriptMain _scriptMain){
-		// this.scriptMain = _scriptMain;
+		this.scriptMain = _scriptMain;
+		this.tradeAreaHandler = this.scriptMain.getOverlord().getTradeAreaHandler();
 	}
 	
 	
@@ -48,59 +45,20 @@ public class BauManager implements OverlordRun,OverlordInfo{
 	 */
 	
 	public void run(int durchlauf){
-		if (this.bauScripte==null){return;}
 		
-		BauScriptComparator bauC = new BauScriptComparator();
 		
-		for (Iterator<ScriptUnit> iter = this.bauScripte.keySet().iterator();iter.hasNext();){
-			ScriptUnit actUnit = (ScriptUnit)iter.next();
-			
-			// debug
-			if (actUnit.getUnitNumber().equalsIgnoreCase("y9jl")){
-				int i=0;
-				i++;
-			}
-			
-			boolean allFertig = true;
-			String lernTalent = "";
-			boolean hasCommand = false;
-			Bauen actBauen = null;
-			ArrayList<Bauen> actList = this.bauScripte.get(actUnit);
-			if (actList!=null && actList.size()>0){
-				// sortieren
-				Collections.sort(actList,bauC);
-				for (Iterator<Bauen> iter2 = actList.iterator();iter2.hasNext();){
-					actBauen = (Bauen)iter2.next();
-					if (!actBauen.isFertig()){
-						allFertig = false;
-						if (actBauen.getLernTalent().length()>0){
-							lernTalent=actBauen.getLernTalent();
-						}
-						if (actBauen.getBauBefehl().length()>0){
-							// Baubefehl
-							hasCommand = true;
-							actBauen.addOrder(actBauen.getBauBefehl(), true);
-							break;
-						}
-					}
+		
+		if (this.tradeAreaHandler.getTradeAreas()==null || this.tradeAreaHandler.getTradeAreas().size()==0){
+			return;
+		}
+		
+		for (TradeArea tA:this.tradeAreaHandler.getTradeAreas()){
+			if (tA.hasBauManager()){
+				if (durchlauf==Durchlauf0){
+					tA.getTradeAreaBauManager().run0();
 				}
-			}
-			if (allFertig){
-				// alle bauaufträge fertig
-				actUnit.addComment("Alle Bauaufträge erledigt");
-				actUnit.doNotConfirmOrders();
-			}
-			
-			if (!hasCommand){
-				// soll Lernen
-				if (lernTalent.length()>0 && actBauen!=null){
-					// alles fein
-					actBauen.addComment("Keine Bautätigkeit. Einheit soll Lernen.");
-					actBauen.lerneTalent(lernTalent,true);
-				} else {
-					// kann nicht lernen
-					actUnit.addComment("!!!Bauen: Unit soll Lernen, kann aber nicht!");
-					actUnit.doNotConfirmOrders();
+				if (durchlauf==Durchlauf1){
+					tA.getTradeAreaBauManager().run1();
 				}
 			}
 		}
@@ -108,17 +66,24 @@ public class BauManager implements OverlordRun,OverlordInfo{
 	
 	
 	public void addBauScript(Bauen bauen){
-		if (this.bauScripte==null){
-			this.bauScripte = new Hashtable<ScriptUnit, ArrayList<Bauen>>();
+		TradeArea tA = this.tradeAreaHandler.getTAinRange(bauen.region());
+		if (tA==null){
+			outText.addOutLine("!!!addBauscript nicht erfolgreich: kein TA :" + bauen.unitDesc());
+			return;
 		}
-		ArrayList<Bauen> actList = this.bauScripte.get(bauen.scriptUnit);
-		if (actList==null){
-			actList = new ArrayList<Bauen>();
-		} 
-		if (!actList.contains(bauen)){
-			actList.add(bauen);
-			this.bauScripte.put(bauen.scriptUnit,actList);
+		tA.getTradeAreaBauManager().addBauScript(bauen);
+		bauen.addComment("zugeordnet zum TA: " + tA.getName());
+	}
+	
+	
+	public void addBauAuftrag(Bauauftrag bauAuftrag){
+		TradeArea tA = this.tradeAreaHandler.getTAinRange(bauAuftrag.region());
+		if (tA==null){
+			outText.addOutLine("!!!addBauAuftrag nicht erfolgreich: kein TA :" + bauAuftrag.unitDesc());
+			return;
 		}
+		tA.getTradeAreaBauManager().addBauAuftrag(bauAuftrag);
+		bauAuftrag.addComment("zugeordnet zum TA: " + tA.getName());
 	}
 	
 	

@@ -23,13 +23,13 @@ import com.fftools.utils.FFToolsRegions;
  *
  */
 
-public class Bauen extends MatPoolScript{
+public class Bauen extends MatPoolScript implements Cloneable{
 	// private static final ReportSettings reportSettings = ReportSettings.getInstance();
-	
+	private int Durchlauf_Baumanager = 8;
 	private int Durchlauf_vorMatPool = 10;
 	private int Durchlauf_nachMatPool = 100;
 	
-	private int[] runners = {Durchlauf_vorMatPool,Durchlauf_nachMatPool};
+	private int[] runners = {Durchlauf_Baumanager,Durchlauf_vorMatPool,Durchlauf_nachMatPool};
 	
 	private boolean parseOK = false;
 	
@@ -90,6 +90,28 @@ public class Bauen extends MatPoolScript{
 	private String lernTalent = "Burgenbau";
 	
 	
+	private String statusInfo = "";
+	
+	
+	/**
+	 * wenn in planingMode, dann nur feststellen des Bedarfes
+	 * kein MPRs etc
+	 * genutzt von Bauauftrag
+	 */
+	private boolean planingMode=false;
+	
+	/**
+	 * mode=auto
+	 * Steuerung vom Baumanager
+	 */
+	private boolean automode=false;
+	
+	/**
+	 * wird vom TA-Baumanager genutzt
+	 */
+	private boolean automode_hasPlan = false;
+	
+	
 	/**
 	 * nix mehr zu tun!
 	 */
@@ -115,6 +137,11 @@ public class Bauen extends MatPoolScript{
 	
 public void runScript(int scriptDurchlauf){
 		
+	
+		if (scriptDurchlauf==Durchlauf_Baumanager){
+			this.BauManager();
+		}
+	
 		if (scriptDurchlauf==Durchlauf_vorMatPool){
 			this.vorMatPool();
 		}
@@ -126,14 +153,34 @@ public void runScript(int scriptDurchlauf){
 		
 	}
 	
-	
-	private void vorMatPool(){
+	/** lediglich registrierung und ob auto
+	 * 
+	 */
+	private void BauManager(){
+		if (!this.isInPlaningMode()){
+			super.addVersionInfo();
+			
+			// eintragen
+			this.getBauManager().addBauScript(this);
+			
+		}
 		
-		super.addVersionInfo();
+		FFToolsOptionParser OP = new FFToolsOptionParser(this.scriptUnit);
+		OP.addOptionList(this.getArguments());
+
+		// automode
+		if (OP.getOptionString("mode").equalsIgnoreCase("auto")){
+			this.setAutomode(true);
+		}
 		
-		// eintragen
-		this.getBauManager().addBauScript(this);
+	}
+
+
+	public void vorMatPool(){
 		
+		if (this.isAutomode()){
+			return;
+		}
 		this.parseOK = false;
 		
 		FFToolsOptionParser OP = new FFToolsOptionParser(this.scriptUnit);
@@ -164,6 +211,7 @@ public void runScript(int scriptDurchlauf){
 			if (this.buildingType==null){
 				// Abbruch
 				this.addComment("Bauen: unbekanntes Gebäude: " + s);
+				statusInfo+="Fehler: unbekanntes Gebäude: " + s;
 				this.doNotConfirmOrders();
 				return;
 			}
@@ -184,6 +232,7 @@ public void runScript(int scriptDurchlauf){
 				} else {
 					// nix ist OK
 					this.addComment("Bauen: bei " + this.buildingType.getName() + " MUSS eine Zielgrösse angegeben werden! (ziel=X)");
+					statusInfo+="Fehler: bei " + this.buildingType.getName() + " MUSS eine Zielgrösse angegeben werden! (ziel=X)";
 					this.doNotConfirmOrders();
 					return;
 				}
@@ -203,6 +252,7 @@ public void runScript(int scriptDurchlauf){
 			} else {
 				// nix ist OK
 				this.addComment("Bauen: beim Burgenbau MUSS eine Zielgrösse angegeben werden! (ziel=X)");
+				statusInfo+="Fehler: bei " + this.buildingType.getName() + " MUSS eine Zielgrösse angegeben werden! (ziel=X)";
 				this.doNotConfirmOrders();
 				return;
 			}
@@ -219,12 +269,14 @@ public void runScript(int scriptDurchlauf){
 			} catch (IllegalArgumentException e){
 				this.dir=null;
 				this.addComment("Bauen: Strassenrichtung nicht erkannt: " + s);
+				statusInfo+="Fehler: Strassenrichtung nicht erkannt: " + s;
 				this.doNotConfirmOrders();
 				return;
 			}
 			if (this.dir.getDir()==Direction.DIR_INVALID){
 				this.dir=null;
 				this.addComment("Bauen: Strassenrichtung nicht erkannt: " + s);
+				statusInfo+="Fehler: Strassenrichtung nicht erkannt: " + s;
 				this.doNotConfirmOrders();
 				return;
 			}
@@ -244,6 +296,7 @@ public void runScript(int scriptDurchlauf){
 				this.prioSteine = i;
 			} else {
 				this.addComment("Bauen: Prio nicht erkannt: " + i);
+				statusInfo+="Fehler: Prio nicht erkannt: " + i;
 				this.doNotConfirmOrders();
 			}
 		}
@@ -316,12 +369,15 @@ public void runScript(int scriptDurchlauf){
 			if (!foundNummber){
 				// problem
 				this.addComment("Bauen: " + s + " kann nicht gefunden werden.");
+				statusInfo+="Fehler: " + s + " kann nicht gefunden werden.";
 				this.doNotConfirmOrders();
 				return;
 			}
 		}
 		
-		this.scriptUnit.findScriptClass("RequestInfo");
+		if (!this.isInPlaningMode()){
+			this.scriptUnit.findScriptClass("RequestInfo");
+		}
 		
 		this.parseOK = true;
 		
@@ -331,6 +387,15 @@ public void runScript(int scriptDurchlauf){
 			case Bauen.BURG: this.vorMP_Burg();break;
 			case Bauen.STRASSE: this.vorMP_Strasse();break;
 		}
+		
+		if (this.isAutomode()){
+			statusInfo+=";automode";
+		}
+		if (this.isInPlaningMode()){
+			statusInfo+="(planing)";
+		}
+		
+		
 	}	
 	
 	/**
@@ -364,27 +429,42 @@ public void runScript(int scriptDurchlauf){
 			}
 			if (this.numberOfBuildings>1 && numberOfFinishedBuildings>=this.numberOfBuildings){
 				// nix mehr zu tun
-				this.addComment("Bauen: Fertig " + this.numberOfBuildings + " " + this.buildingType.getName());
+				String s = "Bauen: Fertig " + this.numberOfBuildings + " " + this.buildingType.getName();
+				this.addComment(s);
+				statusInfo+=s;
 				this.fertig=true;
 				return;
 			}
 		}
 		if (this.buildungNummer.length()<1){
 			// Neubau
-			this.addComment("Bauen: Neubau " + this.buildingType.getName() + " geplant.");
+			String s = "Bauen: Neubau " + this.buildingType.getName();
+			if (this.targetSize>0){
+				s += "(" + this.targetSize + ")";
+			}
+			s += " geplant.";
+			this.addComment(s);
+			statusInfo+=s;
 			this.actSize=0;
 		} else {
 			// checken der Grösse
 			if (this.actSize<this.targetSize){
-				this.addComment("Bauen: Weiterbau von " + (this.targetSize-this.actSize) + " Stufen an " + this.buildingType.getName() + "(" + this.buildungNummer + ") geplant.");
+				String s = "Bauen: Weiterbau von " + (this.targetSize-this.actSize) + " Stufen an " + this.buildingType.getName() + "(" + this.buildungNummer + ") geplant.";
+				statusInfo+=s;
+				this.addComment(s);
+				
 			} else {
 				// schon fertig
 				// haben wir eventuell mehrere? Dann vielleicht doch neubau?
-				this.addComment("Bauen: Fertig " + this.buildingType.getName() + "(" + this.buildungNummer + ")");
+				String s = "Bauen: Fertig " + this.buildingType.getName() + "(" + this.buildungNummer + ")";
+				this.addComment(s);
+				statusInfo+=s;
 				this.fertig=true;
 				return;
 			}
 		}
+		
+		
 		
 		int anzahl = this.targetSize - this.actSize;
 		int prio = 0;
@@ -404,10 +484,14 @@ public void runScript(int scriptDurchlauf){
 			if (actItem.getItemType().getName().equalsIgnoreCase("Stein") && this.steinSpec.length()>0){
 				MPR.addSpec(this.steinSpec);
 			}
-			// hier hinzufügen
-			this.addMPR(actItem, MPR);
-			// MatPool
-			this.addMatPoolRequest(MPR);
+			if (!this.isInPlaningMode()){
+				// hier hinzufügen
+				this.addMPR(actItem, MPR);
+				// MatPool
+				this.addMatPoolRequest(MPR);
+			} else {
+				this.addComment("Bauauftrag-Reuqest: " + MPR.toString());
+			}
 			
 			if (this.numberOfBuildings>1){
 				// allgemein noch fertigzustellen
@@ -421,7 +505,11 @@ public void runScript(int scriptDurchlauf){
 						MPR2.setPrioTM((int)((double)MPR2.getPrioTM()*(double)0.75));
 						MPR2.setKommentar(MPR2.getKommentar().concat(" - Vorplanung " + x));
 						MPR2.setOriginalGefordert(this.targetSize * actItem.getAmount());
-						this.addMatPoolRequest(MPR2);
+						if (!this.isInPlaningMode()){
+							this.addMatPoolRequest(MPR2);
+						} else {
+							this.addComment("Bauauftrag-Reuqest: " + MPR.toString());
+						}
 					}
 				}
 				
@@ -447,15 +535,23 @@ public void runScript(int scriptDurchlauf){
 		
 		if (this.actSize<this.targetSize){
 			// Strasse noch zu machen
-			this.addComment("Bauen: noch " + (this.targetSize - this.actSize) + " Steine für Strasse nach " + this.dir.toString() + " einzubauen.");
+			String s = "Bauen: noch " + (this.targetSize - this.actSize) + " Steine für Strasse nach " + this.dir.toString() + " einzubauen.";
+			this.addComment(s);
+			statusInfo+=s;
 			this.steinRequest = new MatPoolRequest(this,(this.targetSize - this.actSize),"Stein",this.prioSteine,"Strassenbau " + this.dir.toString());
 			if (this.steinSpec.length()>0){
 				this.steinRequest.addSpec(this.steinSpec);
 			}
-			this.addMatPoolRequest(this.steinRequest);
+			if (!this.isInPlaningMode()){
+				this.addMatPoolRequest(this.steinRequest);
+			} else {
+				this.addComment("Bauauftrag-Reuqest: " + this.steinRequest.toString());
+			}
 		} else {
 			// Strasse fertig
-			this.addComment("Bauen: Strasse nach " + this.dir.toString() + " fertig.");
+			String s = "Bauen: Strasse nach " + this.dir.toString() + " fertig.";
+			this.addComment(s);
+			statusInfo+=s;
 			this.fertig = true;
 			return;
 		}
@@ -472,15 +568,25 @@ public void runScript(int scriptDurchlauf){
 		}
 		if (this.buildungNummer.length()<1){
 			// Neubau
-			this.addComment("Bauen: Neubau einer Burg geplant.");
+			String s = "Bauen: Neubau einer Burg";
+			if (this.targetSize>0){
+				s+="(" + this.getTargetSize() + ")";
+			}
+			s += " geplant.";
+			this.addComment(s);
+			statusInfo+=s;
 			this.actSize=0;
 		} else {
 			// checken der Grösse
 			if (this.actSize<this.targetSize){
-				this.addComment("Bauen: Weiterbau von " + (this.targetSize-this.actSize) + " Stufen an Burg (" + this.buildungNummer + ") geplant.");
+				String s = "Bauen: Weiterbau von " + (this.targetSize-this.actSize) + " Stufen an Burg (" + this.buildungNummer + ") geplant.";
+				this.addComment(s);
+				statusInfo+=s;
 			} else {
 				// schon fertig
-				this.addComment("Bauen: Fertig Burg (" + this.buildungNummer + ")");
+				String s = "Bauen: Fertig Burg (" + this.buildungNummer + ")";
+				this.addComment(s);
+				statusInfo+=s;
 				this.fertig=true;
 				return;
 			}
@@ -491,7 +597,13 @@ public void runScript(int scriptDurchlauf){
 		if (this.steinSpec.length()>0){
 			this.steinRequest.addSpec(this.steinSpec);
 		}
-		this.addMatPoolRequest(this.steinRequest);
+		
+		// this.addMatPoolRequest(this.steinRequest);
+		if (!this.isInPlaningMode()){
+			this.addMatPoolRequest(this.steinRequest);
+		} else {
+			this.addComment("Bauauftrag-Reuqest: " + this.steinRequest.toString());
+		}
 		
 	}
 	
@@ -502,6 +614,13 @@ public void runScript(int scriptDurchlauf){
 	private void nachMatPool(){
 		if (!this.parseOK){return;}
 		if (this.fertig){return;}
+		if (this.isInPlaningMode()){
+			return;
+		}
+		if (this.isAutomode()){
+			return;
+		}
+		
 		// Behandlung gleich nach Typ
 		switch (this.actTyp){
 			case Bauen.BUILDING: this.nachMP_Building();break;
@@ -792,6 +911,124 @@ public void runScript(int scriptDurchlauf){
 	public int getPrioSteine() {
 		return prioSteine;
 	}
+
+
+	/**
+	 * @return the planingMode
+	 */
+	public boolean isInPlaningMode() {
+		return planingMode;
+	}
+
+
+	/**
+	 * @param planingMode the planingMode to set
+	 */
+	public void setPlaningMode(boolean planingMode) {
+		this.planingMode = planingMode;
+	}
+
+
+	/**
+	 * @return the automode
+	 */
+	public boolean isAutomode() {
+		return automode;
+	}
+
+
+	/**
+	 * @param automode the automode to set
+	 */
+	private void setAutomode(boolean automode) {
+		this.automode = automode;
+	}
 	
+	
+	public String toString(){
+		String erg = "";
+		if (statusInfo==""){
+			erg = "Bauen ohne besonderen Status bei " + this.unitDesc();
+		} else {
+			erg = statusInfo;
+			if (this.getPrioSteine()>0){
+				erg = "(Prio " + this.getPrioSteine() + ") " + erg;
+			}
+		}
+		return erg;
+	}
+	
+	
+	public String getUnitBauInfo(){
+		String erg =this.unitDesc();
+		SkillType sT = this.gd_Script.rules.getSkillType("Burgenbau",false);
+		Skill s = this.scriptUnit.getUnit().getModifiedSkill(sT);
+		if (s==null){
+			erg += ",kein Burgenbau";
+		} else {
+			int tp = this.scriptUnit.getUnit().getModifiedPersons() * s.getLevel();
+			erg += ", " + tp + " Burgenbau (" + this.scriptUnit.getUnit().getModifiedPersons() + "x" + s.getLevel()+")";
+		}
+		sT = this.gd_Script.rules.getSkillType("Straßenbau",false);
+		s = this.scriptUnit.getUnit().getModifiedSkill(sT);
+		if (s==null){
+			erg += ",kein Strassenbau";
+		} else {
+			int tp = this.scriptUnit.getUnit().getModifiedPersons() * s.getLevel();
+			erg += ", " + tp + " Strassenbau (" + this.scriptUnit.getUnit().getModifiedPersons() + "x" + s.getLevel()+")";
+		}
+
+		return erg;
+	}
+
+
+	/**
+	 * @return the automode_hasPlan
+	 */
+	public boolean hasPlan() {
+		return automode_hasPlan;
+	}
+
+
+	/**
+	 * @param automode_hasPlan the automode_hasPlan to set
+	 */
+	public void setAutomode_hasPlan(boolean automode_hasPlan) {
+		this.automode_hasPlan = automode_hasPlan;
+	}
+
+
+	/**
+	 * @return the actTyp
+	 */
+	public int getActTyp() {
+		return actTyp;
+	}
+
+
+	/**
+	 * @return the buildingType
+	 */
+	public BuildingType getBuildingType() {
+		return buildingType;
+	}
+	
+	
+	public Bauen clone(){
+		try {
+			return (Bauen)super.clone();
+		}
+	      catch(CloneNotSupportedException e) {
+	      }
+	     return null;
+	}
+	
+	
+	/**
+	 * wird aufgerufen, wenn in Automode und keinen Auftrag erhalten
+	 */
+	public void autoLearn(){
+		
+	}
 	
 }
