@@ -38,6 +38,8 @@ public class Handeln extends TradeAreaScript{
 	private int adjustedBuyAmount = -1;
 	// private int prio = DEFAULT_REQUEST_PRIO;   moved to trader
 	
+	private int overallSellAmount = 0;
+	
 
 	private String default_silbervorrat_kommentar = "Händler - SilberDepot";
 
@@ -172,7 +174,7 @@ public class Handeln extends TradeAreaScript{
 		}
 		
 		
-		int overallSellAmount = 0;
+		
 		int neededTalent = 0;
 		// Verkaufen..
 		if(r.getPrices() != null && this.getTrader().isVerkaufen()) {
@@ -223,6 +225,9 @@ public class Handeln extends TradeAreaScript{
 				int vorMenge = getTradeArea().suggestedBuyAmount(getTradeRegion(),true);
 				if (vorMenge>0){
 					kaufMenge = vorMenge;
+				} else if (vorMenge==-1){
+					addComment("!! Es gibt keinen Grund, hier etwas einzukaufen!!");
+					kaufMenge=0;
 				} else {
 					addComment("!!unerwartete vorgeschlagene Einkaufsmenge!!");
 					this.scriptUnit.doNotConfirmOrders();
@@ -237,6 +242,9 @@ public class Handeln extends TradeAreaScript{
 					if (vorMenge>kaufMenge){
 						kaufMenge = vorMenge;
 					}
+				} else if (vorMenge==-1){
+					addComment("!! Es gibt keinen Grund, hier etwas einzukaufen!!");
+					kaufMenge=0;
 				} else {
 					addComment("!!unerwartete vorgeschlagene Einkaufsmenge!!");
 					this.scriptUnit.doNotConfirmOrders();
@@ -317,22 +325,38 @@ public class Handeln extends TradeAreaScript{
 		}	
 	}
 	
+	
+	private void privat_return(){
+		if (!doSomething){
+			super.addComment("Händler hat keinen Auftrag und lernt.");
+			super.lerneTalent("Handeln", true);
+		}
+	}
+	
 	/**
 	 * Bekommen wir genügend Silber?
 	 * Sonst warnen
 	 */
 	private void nachMatPool2(){
 		if (!this.getTrader().isKaufen()){
+			privat_return();
 			return;
 		}
 		if (this.getTrader().isLernen()){
+			privat_return();
 			return;
 		}
 		if (this.getTrader().getBuy()==null){
+			privat_return();
 			return;
 		}
 		
-		
+		if (this.getTrader().getBuy().getAmount()<=0){
+			super.addComment("Keinen Kaufbefehl gesetzt. Kein Bedarf", true);
+			privat_return();
+			return;
+		}
+			
 		ItemType silver =  super.gd_Script.rules.getItemType("Silber");
 		Item silverItem = this.scriptUnit.getModifiedItem(silver);
 		int silverAmount = 0;
@@ -359,8 +383,8 @@ public class Handeln extends TradeAreaScript{
 			// gehe davon aus, genug Silber zu haben
 			if (this.getTrader().getBuy().getAmount()>0){
 				super.addOrder("KAUFEN " + this.getTrader().getBuy().getAmount() + " " + this.getTrader().getBuy().getItemType().getName(),true);
+				doSomething=true;
 			}
-			doSomething=true;
 		}
 		
 		
@@ -369,9 +393,8 @@ public class Handeln extends TradeAreaScript{
 		
 		// überhaupt was getan?
 		// dann bisher kein langer Befehl erfolgt..schlagen wir lernen vor
-		if (!doSomething){
-			super.lerneTalent("Handeln", true);
-		}
+		
+		privat_return();
 	}
 	
 	/**

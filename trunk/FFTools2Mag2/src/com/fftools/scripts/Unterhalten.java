@@ -253,12 +253,23 @@ public void runScript(int scriptDurchlauf){
 
 					} else {
 						// wir haben doch tatsächlich ne Zielregion...
-						gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(),targetRegion.getCoordinate(), true);
-						addComment("dieser Region NEU als Unterhalter zugeordnet: " + targetRegion.toString());
-						addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
-						// Pferde requesten...
-						MatPoolRequest MPR = new MatPoolRequest(this,this.scriptUnit.getUnit().getModifiedPersons(), "Pferd", 20, "Unterhalter unterwegs" );
-						this.addMatPoolRequest(MPR);
+						
+						int reittalent=this.scriptUnit.getSkillLevel("Reiten");
+						if (reittalent>0){
+							gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(),targetRegion.getCoordinate(), true);
+							addComment("dieser Region NEU als Unterhalter zugeordnet: " + targetRegion.toString());
+							addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
+							// Pferde requesten...
+							MatPoolRequest MPR = new MatPoolRequest(this,this.scriptUnit.getUnit().getModifiedPersons(), "Pferd", 20, "Unterhalter unterwegs" );
+							this.addMatPoolRequest(MPR);
+						} else {
+							// neu, wir lernen auf T1 Reiten
+							gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(),targetRegion.getCoordinate(), false);
+							this.addComment("-> wir lernen aber erstmal reiten T1");
+							addComment("dieser Region NEU als Unterhalter zugeordnet: " + targetRegion.toString());
+							addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
+							this.lerneTalent("Reiten",false);
+						}
 					}
 				}
 	

@@ -16,6 +16,7 @@ import magellan.library.rules.ItemType;
 import com.fftools.OutTextClass;
 import com.fftools.ReportSettings;
 import com.fftools.overlord.Overlord;
+import com.fftools.pools.bau.TradeAreaBauManager;
 import com.fftools.pools.matpool.MatPool;
 import com.fftools.pools.matpool.MatPoolManager;
 import com.fftools.scripts.Vorrat;
@@ -87,6 +88,12 @@ public class TradeArea {
 	 * die während der Optimierung angepasste Balance
 	 */
 	private HashMap<ItemType,Integer> adjustedBalance = null;
+	
+	
+	/**
+	 * Zur Veraltung der Bauscripte in diesem TA
+	 */
+	private TradeAreaBauManager tradeAreaBauManager = null;
 	
 	
 	public int getAdjustedBalance(ItemType itemType) {
@@ -615,7 +622,7 @@ public class TradeArea {
 			return 0;
 		}
 		
-		if (r.getRegion().getName()!=null && r.getRegion().getName().equalsIgnoreCase("Kecicobyr")){
+		if (r.getRegion().getName()!=null && r.getRegion().getName().equalsIgnoreCase("Sócudol")){
 			int i222=0;
 			i222++;
 		}
@@ -647,6 +654,13 @@ public class TradeArea {
 			}
 			return actRelativeEinkauf;
 		}
+		
+		if (gesamtVerkauf==0 && vorräte==0){
+			// Sonderfall: wir können hier nicht verkaufen und brauchen auch keine Vorräte
+			// dann tatsächlich nicht einkaufen..wird mit -1 signalisiert.
+			return -1;
+		}
+		
 		
 		gesamtVerkauf += vorräte;
 		
@@ -1282,6 +1296,30 @@ public class TradeArea {
 	 */
 	public ArrayList<Transporter> getTransporters() {
 		return transporters;
+	}
+
+	
+	/**
+	 * Returns the TA-Baumanager
+	 * @return TradeAreaBauManager
+	 */
+	public TradeAreaBauManager getTradeAreaBauManager() {
+		if (this.tradeAreaBauManager==null){
+			this.tradeAreaBauManager = new TradeAreaBauManager(this);
+		}
+		return this.tradeAreaBauManager;
+	}
+	
+	
+	/**
+	 * Exists a BauManager ?
+	 * @return bool
+	 */
+	public boolean hasBauManager(){
+		if (this.tradeAreaBauManager==null){
+			return false;
+		}
+		return true;
 	}
 	
 }
