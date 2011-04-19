@@ -40,6 +40,8 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	public static final int BURG=2;
 	public static final int BUILDING=3;
 	
+	public static final int minReitLevel=-1;
+	
 	/**
 	 * Typ dieses Scriptes
 	 */
@@ -89,7 +91,6 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	
 	private String lernTalent = "Burgenbau";
 	
-	
 	private String statusInfo = "";
 	
 	
@@ -111,7 +112,22 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	 */
 	private boolean automode_hasPlan = false;
 	
+	/**
+	 * wird vom TA-Baumanager genutzt
+	 */
+	private boolean hasGotoOrder = false;
 	
+	
+	public boolean isHasGotoOrder() {
+		return hasGotoOrder;
+	}
+
+
+	public void setHasGotoOrder(boolean hasGotoOrder) {
+		this.hasGotoOrder = hasGotoOrder;
+	}
+
+
 	/**
 	 * nix mehr zu tun!
 	 */
@@ -348,7 +364,12 @@ public void runScript(int scriptDurchlauf){
 		this.minAuslastung = OP.getOptionInt("minAuslastung",this.minAuslastung);
 		
 		// lernTalent
-		this.lernTalent = OP.getOptionString("Talent");
+		// this.lernTalent = OP.getOptionString("Talent");
+		if (OP.getOptionString("Talent").length()>2){
+			this.lernTalent = OP.getOptionString("Talent");
+		}
+		
+		
 		
 		// Burg + Building können eine Nummer mitbekommen haben....checken
 		String s = OP.getOptionString("nummer");
@@ -1028,7 +1049,13 @@ public void runScript(int scriptDurchlauf){
 	 * wird aufgerufen, wenn in Automode und keinen Auftrag erhalten
 	 */
 	public void autoLearn(){
-		
+		this.addComment("Keine Aufträge vom Baumanager erhalten.");
+		if (this.scriptUnit.getSkillLevel("Reiten")<Bauen.minReitLevel){
+			this.addComment("Mindestreitlevel unterschritten. Lerne Reiten");
+			this.addOrder("LERNEN Reiten ;mindestReitlevel", true);
+			return;
+		}
+		this.addOrder("LERNEN " + this.lernTalent + " ;unbeschäftigt", true);
 	}
 	
 }

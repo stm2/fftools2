@@ -18,11 +18,14 @@ public class BauauftragScriptComparator implements Comparator<Bauen> {
 	private Region targetRegion;
 	private int level=1;
 	private String talentName;
+	private int builtSize=1;
 	
 	
-	public BauauftragScriptComparator(Region r, int _level,String _talentName){
+	
+	public BauauftragScriptComparator(Region r, int _level,String _talentName, int _builtSize){
 		this.targetRegion = r;
 		this.level=_level;
+		this.builtSize=_builtSize;
 		this.talentName = _talentName;
 	}
 	
@@ -45,18 +48,43 @@ public class BauauftragScriptComparator implements Comparator<Bauen> {
 			wert2 =0;
 		} else {
 			GotoInfo gI2 = FFToolsRegions.makeOrderNACH(b2.scriptUnit, targetRegion.getCoordinate() ,b2.scriptUnit.getUnit().getRegion().getCoordinate(), false);
-			wert1 = gI2.getAnzRunden();
+			wert2 = gI2.getAnzRunden();
 		}
 
 		
 		// Bauzeit
-		double tp1 = Math.ceil(b1.scriptUnit.getSkillLevel(this.talentName)/this.level);
-		double tp2 = Math.ceil(b2.scriptUnit.getSkillLevel(this.talentName)/this.level);
+		// double tp1 = Math.ceil(b1.scriptUnit.getSkillLevel(this.talentName)/this.level);
+		// double tp2 = Math.ceil(b2.scriptUnit.getSkillLevel(this.talentName)/this.level);
+		
+		double tp1 = Math.ceil((this.builtSize * this.level)/b1.scriptUnit.getSkillLevel(this.talentName));
+		double tp2 = Math.ceil((this.builtSize * this.level)/b2.scriptUnit.getSkillLevel(this.talentName));
 		
 		tp1 += wert1;
 		tp2 += wert2;
 		
-		return (int) Math.round((tp1-tp2));
+		if (tp1==tp2 && ((wert1 + wert2)>0)){
+			// Bei Gleichheit den wählen, der in der Region ist
+			if (wert1==0){
+				// der erste ist in der gleichen region
+				tp1-=1;
+			}
+			if (wert2==0){
+				tp2-=1;			
+			}
+		}
+		int erg = (int) Math.round((tp1-tp2));
+		if (erg==0){
+			// bei immer noch gleichheit
+			// der mit der grösseren Talentanzahl
+			erg = (b2.scriptUnit.getSkillLevel(this.talentName) * b2.scriptUnit.getUnit().getModifiedPersons())-(b1.scriptUnit.getSkillLevel(this.talentName)*  b1.scriptUnit.getUnit().getModifiedPersons());
+		}
+		
+		if (erg==0){
+			// der mit dem höchsten Talent soll sich bewegen, der andere eventuell lernen
+			erg = (b2.scriptUnit.getSkillLevel(this.talentName) )-(b1.scriptUnit.getSkillLevel(this.talentName));
+		}
+		
+		return erg;
 	}
 }
 

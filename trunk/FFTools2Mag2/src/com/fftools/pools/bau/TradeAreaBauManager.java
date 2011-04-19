@@ -6,11 +6,16 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import magellan.library.Region;
+import magellan.library.Unit;
+
 import com.fftools.ScriptUnit;
 import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.scripts.Bauauftrag;
 import com.fftools.scripts.Bauen;
+import com.fftools.scripts.Burgenbau;
 import com.fftools.trade.TradeArea;
+import com.fftools.trade.TradeRegion;
 import com.fftools.utils.FFToolsGameData;
 import com.fftools.utils.FFToolsRegions;
 import com.fftools.utils.GotoInfo;
@@ -37,6 +42,9 @@ public class TradeAreaBauManager {
 	// Die Infozeilen
 	private ArrayList<String> infoLines = new ArrayList<String>();
 	
+	// Die scriptUnit, die den automatischen Burgenbau regestriert hat
+	private Burgenbau registerBurgenbau = null;
+	
 	
 	public TradeAreaBauManager (TradeArea _tradeArea){
 		this.tradeArea=_tradeArea;
@@ -49,6 +57,9 @@ public class TradeAreaBauManager {
 	 * Zentrale Zuordnung der Bauaufträge zu automatischen Bauarbeitern
 	 */
 	public void run0(){
+		
+		this.processBurgenbau();
+		
 		if (this.bauAufträge==null || this.bauAufträge.size()==0){
 			this.infoLines.add("keine Bauaufträge im TA bekannt");
 			return;
@@ -121,6 +132,12 @@ public class TradeAreaBauManager {
 				if (b.getActTyp()==Bauen.STRASSE){
 					actTalentName="Strassenbau";
 				}
+				// debug
+				if (b.scriptUnit.getUnitNumber().equalsIgnoreCase("bnfw")){
+					int i=0;
+					i++;
+				}
+				
 				
 				// mit welchem level
 				int level_needed = 1;
@@ -142,7 +159,7 @@ public class TradeAreaBauManager {
 				if (availableBauarbeiter.size()>0) {
 					// Sortieren mit Relevanz zu:
 					// ZielRegion und benötigtem TP und Level und Skill
-					BauauftragScriptComparator bc = new BauauftragScriptComparator(b.region(),level_needed,actTalentName);
+					BauauftragScriptComparator bc = new BauauftragScriptComparator(b.region(),level_needed,actTalentName,(b.getTargetSize()-b.getActSize()));
 					Collections.sort(availableBauarbeiter, bc);
 					// Zuordnen an den ersten besten
 					for (Bauen arbeiter:availableBauarbeiter){
@@ -211,7 +228,7 @@ public class TradeAreaBauManager {
 			// wir müssen erst hin.
 			// können wir reiten?
 			// debug
-			int minReitLevel=-1;
+			int minReitLevel=Bauen.minReitLevel;
 			if (Arbeiter.scriptUnit.getSkillLevel("Reiten")>minReitLevel){
 				// ja, hinreiten und pferde requesten
 				GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(Arbeiter.scriptUnit, Arbeiter.region().getCoordinate(), Auftrag.region().getCoordinate(), true);
@@ -219,6 +236,7 @@ public class TradeAreaBauManager {
 				Arbeiter.addComment("Auftrag: " + Auftrag.toString());
 				Arbeiter.addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
 				Arbeiter.setAutomode_hasPlan(true);
+				Arbeiter.setHasGotoOrder(true);
 				Auftrag.addComment("Bauen: " + Arbeiter.unitDesc() + " übernimmt: " + Auftrag.toString());
 				// Pferde requesten...
 				MatPoolRequest MPR = new MatPoolRequest(Arbeiter,Arbeiter.scriptUnit.getUnit().getModifiedPersons(), "Pferd", 21, "Bauarbeiter unterwegs" );
@@ -259,7 +277,7 @@ public class TradeAreaBauManager {
 			ScriptUnit actUnit = (ScriptUnit)iter.next();
 			
 			// debug
-			if (actUnit.getUnitNumber().equalsIgnoreCase("y9jl")){
+			if (actUnit.getUnitNumber().equalsIgnoreCase("12o0")){
 				int i=0;
 				i++;
 			}
@@ -267,6 +285,7 @@ public class TradeAreaBauManager {
 			boolean allFertig = true;
 			String lernTalent = "";
 			boolean hasCommand = false;
+			boolean isOnAutomode = false;
 			Bauen actBauen = null;
 			ArrayList<Bauen> actList = this.bauScripte.get(actUnit);
 			if (actList!=null && actList.size()>0){
@@ -274,6 +293,7 @@ public class TradeAreaBauManager {
 				Collections.sort(actList,bauC);
 				for (Iterator<Bauen> iter2 = actList.iterator();iter2.hasNext();){
 					actBauen = (Bauen)iter2.next();
+					if (actBauen.isAutomode()){isOnAutomode=true;}
 					if (!actBauen.isFertig()){
 						allFertig = false;
 						if (actBauen.getLernTalent().length()>0){
@@ -285,10 +305,19 @@ public class TradeAreaBauManager {
 							actBauen.addOrder(actBauen.getBauBefehl(), true);
 							break;
 						}
+						if (actBauen.isHasGotoOrder()){
+							hasCommand = true;
+							break;
+						}
+						if (actBauen.isAutomode() && !actBauen.hasPlan()){
+							// automode einheiten erhalten vom bei der Zuordnung den Lernbefehl
+							hasCommand = true;
+							break;
+						}
 					}
 				}
 			}
-			if (allFertig){
+			if (allFertig && !isOnAutomode){
 				// alle bauaufträge fertig
 				actUnit.addComment("Alle Bauaufträge erledigt");
 				actUnit.doNotConfirmOrders();
@@ -356,7 +385,12 @@ public class TradeAreaBauManager {
 			}
 		}
 		
+		// Burgenbau
+		if (this.registerBurgenbau!=null){
+			report2Unit(this.registerBurgenbau.scriptUnit);
+		}
 		// ToDo: autobauer benachrichtigen
+		
 		
 	}
 	
@@ -372,5 +406,79 @@ public class TradeAreaBauManager {
 		}
 	}
 	
+	/**
+	 * registriert die scriptUnit als Initiator für den Burgenbau
+	 * @param u
+	 */
+	public void addBurgenBau(Burgenbau u){
+		if (this.registerBurgenbau==null){
+			this.registerBurgenbau = u;
+			u.addComment("Automatischer Burgenbau für dieses TA registriert: " + this.getTradeArea().getName());
+		} else {
+			u.addComment("!! Automatischer Burgenbau konnte nicht registriert werden. Ist bereits geschehen durch: " +this.registerBurgenbau.unitDesc());
+		}
+	}
+	
+	/**
+	 * ergänzt Bauaufträge für den automatischen Burgenbau
+	 */
+	private void processBurgenbau(){
+		// haben wir ne entsprechende registrierung?
+		if (this.registerBurgenbau==null){
+			return;
+		}
+		if (this.registerBurgenbau.getAnzahl()<=0){
+			this.registerBurgenbau.addComment("Burgenbau: keine automatischen Bauaufträge erstellt (Anzahl = " + this.registerBurgenbau.getAnzahl() + ")");
+			return;
+		}
+		
+		ArrayList<Region> burgenRegionen = this.tradeArea.getBurgenbauRegionen();
+		if (burgenRegionen.size()==0){
+			this.registerBurgenbau.addComment("Burgenbau: keine automatischen Bauaufträge erstellt: keine Regionen bekannt");
+			return;
+		}
+		int i=1;
+		int actPrio=0;
+		ArrayList<String> infos = new ArrayList<String>();
+		for (Region r:burgenRegionen){
+			actPrio	= this.registerBurgenbau.getPrio()-(i-1);
+			TradeRegion TR = this.registerBurgenbau.getOverlord().getTradeAreaHandler().getTradeRegion(r);
+			Unit u = TR.getDepot();
+			if (u == null){
+				// kein Depot
+				infos.add("Burgenbau ("+actPrio+"): kein Depot in " + r.toString());
+			} else {
+				ScriptUnit su = this.registerBurgenbau.scriptUnit.getScriptMain().getScriptUnit(u);
+				if (su==null){
+					infos.add("Burgenbau ("+actPrio+"): kein Depot-Scriptunit in " + r.toString());
+				} else {
+					// ergänzen
+					Bauauftrag bA = new Bauauftrag();
+					ArrayList<String> newArgs = new ArrayList<String>();
+					newArgs.add("typ=Burg");
+					newArgs.add("Prio=" + actPrio);
+					newArgs.add("Ziel=" + FFToolsRegions.getNextCastleSize(r));
+					bA.setScriptUnit(su);
+					bA.setArguments(newArgs);
+					bA.setGameData(this.registerBurgenbau.gd_Script);
+					su.addAScriptNow(bA);
+					bA.run1();
+					su.addComment("Burgenbau: Auftrag hier hinzugefügt");
+					infos.add("Burgenbau ("+actPrio+"): auf " + FFToolsRegions.getNextCastleSize(r) + " in " + r.toString() + " bei " + su.unitDesc());
+				}
+			}
+			
+			i++;
+			if (i>this.registerBurgenbau.getAnzahl()){
+				break;
+			}
+		}
+		if (infos.size()>0){
+			Collections.reverse(infos);
+			for (String s:infos){
+				this.registerBurgenbau.addComment(s);
+			}
+		}
+	}
 	
 }
