@@ -7,6 +7,7 @@ import com.fftools.overlord.OverlordInfo;
 import com.fftools.overlord.OverlordRun;
 import com.fftools.scripts.Bauauftrag;
 import com.fftools.scripts.Bauen;
+import com.fftools.scripts.Burgenbau;
 import com.fftools.trade.TradeArea;
 import com.fftools.trade.TradeAreaHandler;
 
@@ -86,6 +87,15 @@ public class BauManager implements OverlordRun,OverlordInfo{
 		bauAuftrag.addComment("zugeordnet zum TA: " + tA.getName());
 	}
 	
+	
+	public void addBurgenbau(Burgenbau b){
+		TradeArea tA = this.tradeAreaHandler.getTAinRange(b.region());
+		if (tA==null){
+			outText.addOutLine("!!!addBurgenbau nicht erfolgreich: kein TA :" + b.unitDesc());
+			return;
+		}
+		tA.getTradeAreaBauManager().addBurgenBau(b);
+	}
 	
 	public int[] runAt(){
 		return runners;

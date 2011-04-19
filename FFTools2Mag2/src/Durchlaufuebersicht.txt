@@ -5,9 +5,12 @@ ACK					1
 Akademieverwalter	2
 Alchemist			10	(meldet nur an)
 AuraMaxWarnung      159
-Bauen				10 (vor MP)
+Bauen				8 Baumanager
+					10 (vor MP)
 					100 (nach MP)
+Bauauftrag			8
 Beschreibung		159
+Burgenbau			8
 Depot				2  (Anmeldung TM, alles requesten)
 					152 (nur Info, Silberdepotcheck)
 Gebaude				8 (Anfordern Unterhalt)
@@ -69,6 +72,8 @@ AlchemieManager		40
 Ausbildungsmanager	7 Vorlauf, Lernsilber anfordern 
 					135 vorlaufRequest, maximal verf Silber ermitteln
 					145 eigentlicher PoolLauf
+Baumanager			9 
+					105
 MatPoolManager		20
 					80
 					140

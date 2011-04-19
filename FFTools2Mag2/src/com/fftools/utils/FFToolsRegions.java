@@ -511,6 +511,49 @@ public class FFToolsRegions {
 		return ret;
 	}
 	
+	
+	/**
+	 * liefert nächsthöchste Ausbaustufe 
+	 * @param actSize
+	 * @return
+	 */
+	public static int getNextCastleSize(int actSize){
+		int nextS = 6250;
+		if (actSize<10){
+			nextS = 10;
+		} else if (actSize<50){
+			nextS = 50;
+		} else if (actSize<250){
+			nextS = 250;
+		} else if (actSize<1250){
+			nextS = 1250;
+		} else if (actSize<6250){
+			nextS = 6250;
+		}
+		
+		return nextS;
+	}
+	
+	/**
+	 * liefert nächste Ausbaustufe der Region
+	 * @param r
+	 * @return
+	 */
+	public static int getNextCastleSize(Region r){
+		int erg=0;
+		Building b = FFToolsRegions.getBiggestCastle(r);
+		if (b!=null){
+			// Es gibt eines....Steine bis zum nächsten Level?
+			int actSize = b.getSize();
+			erg = getNextCastleSize(actSize);
+		} else {
+			// Neubau -> bis 10
+			erg = 10;
+		}
+		return erg;
+	}
+	
+	
 	/**
 	 * liefert Wert eines zusätzlich verbauten Steines in die Burg der Region bis zur 
 	 * Erreichung des nächsten Levels in Silberstücken
@@ -527,18 +570,7 @@ public class FFToolsRegions {
 		if (b!=null){
 			// Es gibt eines....Steine bis zum nächsten Level?
 			int actSize = b.getSize();
-			
-			if (actSize<10){
-				stones = 10-actSize;
-			} else if (actSize<50){
-				stones = 50-actSize;
-			} else if (actSize<250){
-				stones = 250-actSize;
-			} else if (actSize<1250){
-				stones = 1250-actSize;
-			} else if (actSize<6250){
-				stones = 6250-actSize;
-			}
+			stones = getNextCastleSize(actSize)-actSize;
 			if (stones<=0){
 				return 0;
 			}

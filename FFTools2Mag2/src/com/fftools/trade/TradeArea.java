@@ -288,6 +288,37 @@ public class TradeArea {
 	}
 	
 	
+	public ArrayList<Region> getBurgenbauRegionen(){
+		ArrayList<Region> burgenRegionen = new ArrayList<Region>();
+		if (this.tradeRegions!=null && this.tradeRegions.size()>0){
+			for (TradeRegion TR:this.tradeRegions){
+				Region r = TR.getRegion();
+				if (FFToolsRegions.getValueOfBuiltStones(r)>0){
+					burgenRegionen.add(r);
+				}
+			}
+			if (burgenRegionen.size()>0){
+				// Sortieren
+				Collections.sort(burgenRegionen, new Comparator<Region>(){
+					public int compare(Region o1,Region o2){
+						double d1 = FFToolsRegions.getValueOfBuiltStones(o1);
+						double d2 = FFToolsRegions.getValueOfBuiltStones(o2);
+						if (d2>d1){
+							return 1;
+						}
+						if (d1>d2){
+							return -1;
+						}
+						return 0;
+					}
+				});
+			}
+		}
+		
+		return burgenRegionen;
+	}
+	
+	
 	public void informAreaWideInfos(){
 		
 		String oldFile = outText.getActFileName();
@@ -321,7 +352,7 @@ public class TradeArea {
 		outText.addOutLine("Burgenstatus in " + this.name);
 		outText.addOutLine("************************************");
 		outText.addNewLine();
-		ArrayList<Region> burgenRegionen = new ArrayList<Region>();
+		ArrayList<Region> burgenRegionen = getBurgenbauRegionen();
 		
 		NumberFormat NF = NumberFormat.getInstance();
 		NF.setMaximumFractionDigits(1);
@@ -330,47 +361,24 @@ public class TradeArea {
 		NF.setMaximumIntegerDigits(5);
 		
 		
-		if (this.tradeRegions!=null && this.tradeRegions.size()>0){
-			for (TradeRegion TR:this.tradeRegions){
-				Region r = TR.getRegion();
-				if (FFToolsRegions.getValueOfBuiltStones(r)>0){
-					burgenRegionen.add(r);
-				}
+		if (burgenRegionen.size()>0){
+			// Ausgaben
+			for (Region r:burgenRegionen){
+				outText.addOutChars(r.toString(), 30);
+				outText.addOutChars(" v: ");
+				outText.addOutChars("" + NF.format(FFToolsRegions.getValueOfBuiltStones(r)), 6);
+				outText.addOutChars(" act: ");
+				outText.addOutChars("" + (FFToolsRegions.getBiggestCastle(r)==null ? 0 : FFToolsRegions.getBiggestCastle(r).getSize()), 7);
+				outText.addOutChars(" stones: ");
+				// aktuelle Steine hier
+				NF.setMinimumFractionDigits(0);
+				outText.addOutChars("" + FFToolsRegions.getNumberOfItemsInRegion(r, this.overlord.getScriptMain().gd_ScriptMain.rules.getItemType("Stein"), this.overlord.getScriptMain()), 5);
+				outText.addOutChars(" talents:");
+				outText.addOutChars("" + FFToolsRegions.getNumberOfTalentInRegion(r, this.overlord.getScriptMain().gd_ScriptMain.rules.getSkillType("Burgenbau"), this.overlord.getScriptMain()), 6);
+				
+				outText.addNewLine();
 			}
-			if (burgenRegionen.size()>0){
-				// Sortieren
-				Collections.sort(burgenRegionen, new Comparator<Region>(){
-					public int compare(Region o1,Region o2){
-						double d1 = FFToolsRegions.getValueOfBuiltStones(o1);
-						double d2 = FFToolsRegions.getValueOfBuiltStones(o2);
-						if (d2>d1){
-							return 1;
-						}
-						if (d1>d2){
-							return -1;
-						}
-						return 0;
-					}
-				});
-				// Ausgaben
-				for (Region r:burgenRegionen){
-					outText.addOutChars(r.toString(), 30);
-					outText.addOutChars(" v: ");
-					outText.addOutChars("" + NF.format(FFToolsRegions.getValueOfBuiltStones(r)), 6);
-					outText.addOutChars(" act: ");
-					outText.addOutChars("" + (FFToolsRegions.getBiggestCastle(r)==null ? 0 : FFToolsRegions.getBiggestCastle(r).getSize()), 7);
-					outText.addOutChars(" stones: ");
-					// aktuelle Steine hier
-					NF.setMinimumFractionDigits(0);
-					outText.addOutChars("" + FFToolsRegions.getNumberOfItemsInRegion(r, this.overlord.getScriptMain().gd_ScriptMain.rules.getItemType("Stein"), this.overlord.getScriptMain()), 5);
-					outText.addOutChars(" talents:");
-					outText.addOutChars("" + FFToolsRegions.getNumberOfTalentInRegion(r, this.overlord.getScriptMain().gd_ScriptMain.rules.getSkillType("Burgenbau"), this.overlord.getScriptMain()), 6);
-					
-					outText.addNewLine();
-				}
-			} else {
-				outText.addOutLine("Keine Infos verfügbar");
-			}
+			
 		} else {
 			outText.addOutLine("!!!Keine TradeRegions ???");
 		}

@@ -37,7 +37,7 @@ public void runScript(int scriptDurchlauf){
 	}
 	
 	
-	private void run1(){
+	public void run1(){
 		
 		super.addVersionInfo();
 		
