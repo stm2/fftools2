@@ -1,10 +1,12 @@
 package com.fftools.scripts;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 
 import magellan.library.Border;
 import magellan.library.Building;
+import magellan.library.CoordinateID;
 import magellan.library.Item;
 import magellan.library.Skill;
 import magellan.library.rules.BuildingType;
@@ -15,6 +17,7 @@ import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.utils.FFToolsGameData;
 import com.fftools.utils.FFToolsOptionParser;
 import com.fftools.utils.FFToolsRegions;
+import com.fftools.utils.GotoInfo;
 
 /**
  * 
@@ -41,6 +44,8 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	public static final int BUILDING=3;
 	
 	public static final int minReitLevel=-1;
+	public static final int minDefaultBurgenbauTalent=3;  // Burgenbau
+	public static final int minDefaultStrassenbauTalent=2; 
 	
 	/**
 	 * Typ dieses Scriptes
@@ -91,9 +96,27 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	
 	private String lernTalent = "Burgenbau";
 	
+	private int minBurgenbauTalent=Bauen.minDefaultBurgenbauTalent;
+	private int minStassenbauTalent=Bauen.minDefaultStrassenbauTalent;
+	private int spec = Bauen.BURG;
+	private boolean isLearning=false;
+	
 	private String statusInfo = "";
+	private String finalStatusInfo = "";
 	
+	// falls in PLanungsmodus...dann eventuell späterer zieleinheit überhelfen
+	private ArrayList<MatPoolRequest> vorPlanungsMPR = null;
 	
+	public void setFinalStatusInfo(String finalStatusInfo) {
+		this.finalStatusInfo += finalStatusInfo;
+	}
+
+
+	public String getFinalStatusInfo() {
+		return finalStatusInfo;
+	}
+
+
 	/**
 	 * wenn in planingMode, dann nur feststellen des Bedarfes
 	 * kein MPRs etc
@@ -117,7 +140,23 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	 */
 	private boolean hasGotoOrder = false;
 	
+	/**
+	 * kann gesetzt werden als Heimatbasis
+	 */
+	private CoordinateID homeDest = null;
 	
+	/**
+	 * 
+	 * @param homeDest
+	 */
+	private boolean originatedFromBauMAnger = false;
+	
+	public void setHomeDest(CoordinateID homeDest) {
+		this.addComment("Home Region zentral übernommen: " + homeDest.toString());
+		this.homeDest = homeDest;
+	}
+
+
 	public boolean isHasGotoOrder() {
 		return hasGotoOrder;
 	}
@@ -189,6 +228,56 @@ public void runScript(int scriptDurchlauf){
 			this.setAutomode(true);
 		}
 		
+		// wants info
+		if (OP.getOptionBoolean("info", false)){
+			this.getBauManager().addInformationListener(this.scriptUnit);
+		}
+		
+		// home
+		String homeString=OP.getOptionString("home");
+		if (homeString.length()>2){
+			CoordinateID actDest = null;
+			if (homeString.indexOf(',') > 0) {
+				actDest = CoordinateID.parse(homeString,",");
+			} else {
+			// Keine Koordinaten, also Region in Koordinaten konvertieren
+				actDest = FFToolsRegions.getRegionCoordFromName(this.gd_Script, homeString);
+			}
+			if (actDest!=null){
+				this.homeDest=actDest;
+			} else {
+				this.addComment("!!! HOME Angabe nicht erkannt!");
+				this.doNotConfirmOrders();
+			}
+		}
+		
+		// spec
+		if (OP.getOptionString("spec").equalsIgnoreCase("Strassenbau") || OP.getOptionString("spec").equalsIgnoreCase("Strasse")){
+			this.spec=Bauen.STRASSE;
+		}
+		
+		// minTalent
+		this.minBurgenbauTalent=OP.getOptionInt("minTalent",this.minBurgenbauTalent);
+		this.minBurgenbauTalent=OP.getOptionInt("minBurgenbau",this.minBurgenbauTalent);
+		this.minStassenbauTalent = OP.getOptionInt("minStrassenbau", this.minStassenbauTalent);
+		
+		if (this.spec==Bauen.STRASSE){
+			if (this.scriptUnit.getSkillLevel("Strassenbau")<this.minStassenbauTalent){
+				this.lernTalent="Strassenbau";
+				this.setFinalStatusInfo("Min Strassenbau. ");
+				this.setAutomode_hasPlan(true);
+				isLearning=true;
+			}
+		} else {
+			if (this.scriptUnit.getSkillLevel("Burgenbau")<this.minBurgenbauTalent){
+				this.lernTalent="Burgenbau";
+				this.setFinalStatusInfo("Min Burgenbau. ");
+				this.setAutomode_hasPlan(true);
+				isLearning=true;
+			}
+		}
+		
+		
 	}
 
 
@@ -197,6 +286,11 @@ public void runScript(int scriptDurchlauf){
 		if (this.isAutomode()){
 			return;
 		}
+		
+		if (this.isLearning){
+			return;
+		}
+		
 		this.parseOK = false;
 		
 		FFToolsOptionParser OP = new FFToolsOptionParser(this.scriptUnit);
@@ -512,6 +606,7 @@ public void runScript(int scriptDurchlauf){
 				this.addMatPoolRequest(MPR);
 			} else {
 				this.addComment("Bauauftrag-Reuqest: " + MPR.toString());
+				this.addPlanungsMPR(MPR);
 			}
 			
 			if (this.numberOfBuildings>1){
@@ -529,7 +624,8 @@ public void runScript(int scriptDurchlauf){
 						if (!this.isInPlaningMode()){
 							this.addMatPoolRequest(MPR2);
 						} else {
-							this.addComment("Bauauftrag-Reuqest: " + MPR.toString());
+							this.addComment("Bauauftrag-Reuqest: " + MPR2.toString());
+							this.addPlanungsMPR(MPR2);
 						}
 					}
 				}
@@ -567,6 +663,7 @@ public void runScript(int scriptDurchlauf){
 				this.addMatPoolRequest(this.steinRequest);
 			} else {
 				this.addComment("Bauauftrag-Reuqest: " + this.steinRequest.toString());
+				this.addPlanungsMPR(this.steinRequest);
 			}
 		} else {
 			// Strasse fertig
@@ -624,6 +721,7 @@ public void runScript(int scriptDurchlauf){
 			this.addMatPoolRequest(this.steinRequest);
 		} else {
 			this.addComment("Bauauftrag-Reuqest: " + this.steinRequest.toString());
+			this.addPlanungsMPR(this.steinRequest);
 		}
 		
 	}
@@ -641,7 +739,9 @@ public void runScript(int scriptDurchlauf){
 		if (this.isAutomode()){
 			return;
 		}
-		
+		if (this.isLearning){
+			return;
+		}
 		// Behandlung gleich nach Typ
 		switch (this.actTyp){
 			case Bauen.BUILDING: this.nachMP_Building();break;
@@ -716,14 +816,18 @@ public void runScript(int scriptDurchlauf){
 			// bauen, wenn nicht schon anderes Bauscript vorhanden
 			if (this.actSize>0){
 				this.bauBefehl = "MACHEN " + actAnz + " BURG " + this.buildungNummer;
+				
 			} else {
 				this.bauBefehl = "MACHEN " + actAnz + " " + this.buildingType.getName();
+				
 			}
+			this.setFinalStatusInfo("baut " + actAnz + " " + this.buildingType.getName());
 			
 		} else {
 			// nicht bauen
 			this.addComment("Bauen: " + this.buildingType.getName() + " wird diese Runde nicht weitergebaut.");
 			this.bauBefehl = "";
+			this.setFinalStatusInfo("wartet auf Gebäude.");
 		}	
 	}
 	
@@ -785,10 +889,11 @@ public void runScript(int scriptDurchlauf){
 			} else {
 				this.bauBefehl = "MACHEN " + actAnz + " BURG";
 			}
-			
+			this.setFinalStatusInfo("baut " + actAnz + " Burg");
 		} else {
 			// nicht bauen
 			this.addComment("Bauen: Burg wird diese Runde nicht weitergebaut.");
+			this.setFinalStatusInfo("wartet auf Burgenbau. ");
 			this.bauBefehl = "";
 		}	
 	}
@@ -835,10 +940,12 @@ public void runScript(int scriptDurchlauf){
 		// Entscheidung
 		if (okAusl || complete){
 			this.bauBefehl = "MACHEN STRASSE " + this.dir.toString();
+			this.setFinalStatusInfo("baut Strasse");
 		} else {
 			// nicht bauen
 			this.addComment("Bauen: Strasse (" + this.dir.toString() + ") wird diese Runde nicht weitergebaut.");
 			this.bauBefehl = "";
+			this.setFinalStatusInfo("wartet auf Strassenbau");
 		}	
 	}
 	
@@ -885,6 +992,15 @@ public void runScript(int scriptDurchlauf){
 		mprTable.put(actItem,MPR);
 	}
 
+	
+	private void addPlanungsMPR(MatPoolRequest MPR){
+		if (this.vorPlanungsMPR==null){
+			this.vorPlanungsMPR = new ArrayList<MatPoolRequest>();
+		}
+		if (!this.vorPlanungsMPR.contains(MPR)){
+			this.vorPlanungsMPR.add(MPR);
+		}
+	}
 
 	/**
 	 * @return the bauBefehl
@@ -1052,10 +1168,57 @@ public void runScript(int scriptDurchlauf){
 		this.addComment("Keine Aufträge vom Baumanager erhalten.");
 		if (this.scriptUnit.getSkillLevel("Reiten")<Bauen.minReitLevel){
 			this.addComment("Mindestreitlevel unterschritten. Lerne Reiten");
-			this.addOrder("LERNEN Reiten ;mindestReitlevel", true);
+			// this.addOrder("LERNEN Reiten ;mindestReitlevel", true);
+			this.lerneTalent("Reiten", false);
+			this.finalStatusInfo="Mindestreitlevel";
 			return;
 		}
-		this.addOrder("LERNEN " + this.lernTalent + " ;unbeschäftigt", true);
+		
+		// wenn home gesetzt, dann dorthin laufen
+		if (this.homeDest!=null){
+			// sind wir da?
+			CoordinateID actPos = super.scriptUnit.getUnit().getRegion().getCoordinate();
+			if (!actPos.equals(this.homeDest)){
+				// wir sind noch nicht da
+				// ja, hinreiten und pferde requesten
+				GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(), this.homeDest, true);
+				this.addComment("unterwegs in die HOME-Region");
+				this.addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
+				// Pferde requesten...
+				if (this.scriptUnit.getSkillLevel("Reiten")>0){
+					MatPoolRequest MPR = new MatPoolRequest(this,this.scriptUnit.getUnit().getModifiedPersons(), "Pferd", 21, "Bauarbeiter unterwegs" );
+					this.addMatPoolRequest(MPR);
+				}
+				this.finalStatusInfo="going HOME";
+				return;
+			} else {
+				this.addComment("bereits in dier HOME-Region");
+			}
+		}
+		
+		
+		// this.addOrder("LERNEN " + this.lernTalent + " ;unbeschäftigt", true);
+		this.lerneTalent(this.lernTalent, true);
+		this.finalStatusInfo="ABM: LERNEN";
+	}
+
+
+	public boolean isOriginatedFromBauMAnger() {
+		return originatedFromBauMAnger;
+	}
+
+
+	public void setOriginatedFromBauMAnger(boolean originatedFromBauMAnger) {
+		this.originatedFromBauMAnger = originatedFromBauMAnger;
+	}
+	
+	
+	public void transferPlanungsMPR(){
+		if (this.vorPlanungsMPR!=null && this.vorPlanungsMPR.size()>0){
+			for (MatPoolRequest MPR:this.vorPlanungsMPR){
+				this.addMatPoolRequest(MPR);
+			}
+		}
 	}
 	
 }

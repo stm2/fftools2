@@ -1,6 +1,9 @@
 package com.fftools.scripts;
 
+import magellan.library.CoordinateID;
+
 import com.fftools.utils.FFToolsOptionParser;
+import com.fftools.utils.FFToolsRegions;
 
 
 /**
@@ -66,6 +69,24 @@ public void runScript(int scriptDurchlauf){
 		
 		this.Anzahl = OP.getOptionInt("Anzahl", 3);
 		this.Prio = OP.getOptionInt("Prio", 200);
+		
+		// home
+		String homeString=OP.getOptionString("home");
+		if (homeString.length()>2){
+			CoordinateID actDest = null;
+			if (homeString.indexOf(',') > 0) {
+				actDest = CoordinateID.parse(homeString,",");
+			} else {
+			// Keine Koordinaten, also Region in Koordinaten konvertieren
+				actDest = FFToolsRegions.getRegionCoordFromName(this.gd_Script, homeString);
+			}
+			if (actDest!=null){
+				this.getBauManager().setCentralHomeDest(actDest, this.scriptUnit);
+			} else {
+				this.addComment("!!! HOME Angabe nicht erkannt!");
+				this.doNotConfirmOrders();
+			}
+		}
 		
 		
 		this.getBauManager().addBurgenbau(this);

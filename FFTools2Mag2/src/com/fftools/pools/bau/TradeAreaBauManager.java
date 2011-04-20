@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import magellan.library.CoordinateID;
 import magellan.library.Region;
 import magellan.library.Unit;
 
@@ -45,7 +46,28 @@ public class TradeAreaBauManager {
 	// Die scriptUnit, die den automatischen Burgenbau regestriert hat
 	private Burgenbau registerBurgenbau = null;
 	
+	// Liste mit Bauscripten, die extra vom TA-BM informiert werde wollen (info=ja)
+	private ArrayList<ScriptUnit> informationListeners = null;
 	
+	// wird für alle Bauen=auto übernommen
+	private CoordinateID centralHomeDest = null;
+	
+	private ArrayList<Bauen> autoBauer = null;
+	
+	public CoordinateID getCentralHomeDest() {
+		return centralHomeDest;
+	}
+
+
+
+
+	public void setCentralHomeDest(CoordinateID centralHomeDest) {
+		this.centralHomeDest = centralHomeDest;
+	}
+
+
+
+
 	public TradeAreaBauManager (TradeArea _tradeArea){
 		this.tradeArea=_tradeArea;
 	}
@@ -70,7 +92,7 @@ public class TradeAreaBauManager {
 			return;
 		}
 		// Liste der automatischen Bauarbeiter bauen
-		ArrayList<Bauen> autoBauer = new ArrayList<Bauen>();
+		autoBauer = new ArrayList<Bauen>();
 		for (ScriptUnit su:this.bauScripte.keySet()){
 			ArrayList<Bauen> actList = this.bauScripte.get(su);
 			if (actList!=null && actList.size()>0){
@@ -87,7 +109,7 @@ public class TradeAreaBauManager {
 			return;
 		}
 		
-		
+		processCentralHomeDest(autoBauer);
 
 		
 		// erste Infozeilen
@@ -133,7 +155,7 @@ public class TradeAreaBauManager {
 					actTalentName="Strassenbau";
 				}
 				// debug
-				if (b.scriptUnit.getUnitNumber().equalsIgnoreCase("bnfw")){
+				if (b.scriptUnit.getUnitNumber().equalsIgnoreCase("51rm")){
 					int i=0;
 					i++;
 				}
@@ -215,6 +237,7 @@ public class TradeAreaBauManager {
 			Bauen newBauscript = Auftrag.clone();
 			newBauscript.setScriptUnit(Arbeiter.scriptUnit);
 			newBauscript.setPlaningMode(false);
+			newBauscript.setOriginatedFromBauMAnger(true);
 			
 			Arbeiter.addComment("übernommener Auftrag: " + newBauscript.toString());
 			Arbeiter.addComment("übernommener Auftrag von: " + Auftrag.unitDesc());
@@ -237,10 +260,16 @@ public class TradeAreaBauManager {
 				Arbeiter.addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
 				Arbeiter.setAutomode_hasPlan(true);
 				Arbeiter.setHasGotoOrder(true);
+				Arbeiter.setFinalStatusInfo("moving to work");
 				Auftrag.addComment("Bauen: " + Arbeiter.unitDesc() + " übernimmt: " + Auftrag.toString());
 				// Pferde requesten...
-				MatPoolRequest MPR = new MatPoolRequest(Arbeiter,Arbeiter.scriptUnit.getUnit().getModifiedPersons(), "Pferd", 21, "Bauarbeiter unterwegs" );
-				Arbeiter.addMatPoolRequest(MPR);
+				if (Arbeiter.scriptUnit.getSkillLevel("Reiten")>0){
+					MatPoolRequest MPR = new MatPoolRequest(Arbeiter,Arbeiter.scriptUnit.getUnit().getModifiedPersons(), "Pferd", 21, "Bauarbeiter unterwegs" );
+					Arbeiter.addMatPoolRequest(MPR);
+				}
+				
+				Auftrag.transferPlanungsMPR();
+				
 				
 				return true;
 				
@@ -250,7 +279,7 @@ public class TradeAreaBauManager {
 				Arbeiter.addComment("Als Bauarbeiter fast zugeordnet: " + Auftrag.toString() + " bei " + Auftrag.unitDesc());
 				Arbeiter.addComment("aber da noch nicht reiten könnend, erstmal lernen");
 				Arbeiter.scriptUnit.addOrder("Lernen Reiten", true, true);
-				
+				Arbeiter.setFinalStatusInfo("Mindestreitlevel");
 				Arbeiter.setAutomode_hasPlan(true);
 				return false;
 			}
@@ -267,7 +296,7 @@ public class TradeAreaBauManager {
 	
 	public void run1(){
 		
-		this.informUnits();
+		this.informUnits(1);
 		
 		if (this.bauScripte==null){return;}
 		
@@ -329,6 +358,7 @@ public class TradeAreaBauManager {
 					// alles fein
 					actBauen.addComment("Keine Bautätigkeit. Einheit soll Lernen.");
 					actBauen.lerneTalent(lernTalent,true);
+					actBauen.setFinalStatusInfo("Lerne " + lernTalent);
 				} else {
 					// kann nicht lernen
 					actUnit.addComment("!!!Bauen: Unit soll Lernen, kann aber nicht!");
@@ -336,6 +366,9 @@ public class TradeAreaBauManager {
 				}
 			}
 		}
+		
+		this.informUnits(2);
+		
 	}
 	
 	
@@ -350,6 +383,16 @@ public class TradeAreaBauManager {
 		if (!actList.contains(bauen)){
 			actList.add(bauen);
 			this.bauScripte.put(bauen.scriptUnit,actList);
+		}
+	}
+	
+	
+	public void addInformationListener(ScriptUnit su){
+		if (this.informationListeners==null){
+			this.informationListeners = new ArrayList<ScriptUnit>();
+		}
+		if (!this.informationListeners.contains(su)){
+			this.informationListeners.add(su);
 		}
 	}
 	
@@ -377,21 +420,40 @@ public class TradeAreaBauManager {
 	}
 	
 	
-	private void informUnits(){
+	private void informUnits(int step){
 		// alle Bauauftragshalter informieren
 		if (this.bauAufträge!=null && this.bauAufträge.size()>0){
 			for (ScriptUnit su:this.bauAufträge.keySet()){
-				report2Unit(su);
+				if (step==1){
+					report2Unit(su);
+				}
+				if (step==2){
+					report2Unit2(su);
+				}
 			}
 		}
 		
 		// Burgenbau
 		if (this.registerBurgenbau!=null){
-			report2Unit(this.registerBurgenbau.scriptUnit);
+			if (step==1){
+				report2Unit(this.registerBurgenbau.scriptUnit);
+			}
+			if (step==2){
+				report2Unit2(this.registerBurgenbau.scriptUnit);
+			}
 		}
-		// ToDo: autobauer benachrichtigen
 		
-		
+		// ToDo: autobauer benachrichtigen - nur die wollen (info=ja)
+		if (this.informationListeners!=null && this.informationListeners.size()>0){
+			for (ScriptUnit su:this.informationListeners){
+				if (step==1){
+					report2Unit(su);
+				}
+				if (step==2){
+					report2Unit2(su);
+				}
+			}
+		}
 	}
 	
 	// infolines an Unit
@@ -405,6 +467,34 @@ public class TradeAreaBauManager {
 			su.addComment("TA-Baumanager hat nix zu berichten");
 		}
 	}
+	
+	// Berichtet übetr final Status der autobauer
+	private void report2Unit2(ScriptUnit su){
+		if (this.autoBauer==null || this.autoBauer.size()==0){
+			return;
+		}
+		ArrayList<String> comments = new ArrayList<String>();
+		comments.add("---Final autobauer info---");
+		for (Bauen b:autoBauer){
+			if (b.getFinalStatusInfo().length()>1){
+				comments.add(b.unitDesc() + ":" + b.getFinalStatusInfo());
+			}
+		}
+		for (ScriptUnit u:this.bauScripte.keySet()){
+			ArrayList<Bauen>list = this.bauScripte.get(u);
+			for (Bauen b:list){
+				if (b.isOriginatedFromBauMAnger()){
+					comments.add(b.unitDesc() + ":" + b.getFinalStatusInfo());
+				}
+			}
+		}
+		comments.add("---  ---");
+		Collections.reverse(comments);
+		for (String s:comments){
+			su.addComment(s);
+		}
+	}
+	
 	
 	/**
 	 * registriert die scriptUnit als Initiator für den Burgenbau
@@ -477,6 +567,18 @@ public class TradeAreaBauManager {
 			Collections.reverse(infos);
 			for (String s:infos){
 				this.registerBurgenbau.addComment(s);
+			}
+		}
+	}
+	
+	
+	private void processCentralHomeDest(ArrayList<Bauen> autoBauer){
+		if (this.centralHomeDest==null){
+			return;
+		}
+		if (autoBauer!=null && autoBauer.size()>0){
+			for (Bauen b:autoBauer){
+				b.setHomeDest(this.centralHomeDest);
 			}
 		}
 	}

@@ -1,8 +1,11 @@
 package com.fftools.pools.bau;
 
 
+import magellan.library.CoordinateID;
+
 import com.fftools.OutTextClass;
 import com.fftools.ScriptMain;
+import com.fftools.ScriptUnit;
 import com.fftools.overlord.OverlordInfo;
 import com.fftools.overlord.OverlordRun;
 import com.fftools.scripts.Bauauftrag;
@@ -76,6 +79,16 @@ public class BauManager implements OverlordRun,OverlordInfo{
 		bauen.addComment("zugeordnet zum TA: " + tA.getName());
 	}
 	
+	public void addInformationListener(ScriptUnit su){
+		TradeArea tA = this.tradeAreaHandler.getTAinRange(su.getUnit().getRegion());
+		if (tA==null){
+			outText.addOutLine("!!!addInformationListener nicht erfolgreich: kein TA :" + su.unitDesc());
+			return;
+		}
+		tA.getTradeAreaBauManager().addInformationListener(su);
+		
+	}
+	
 	
 	public void addBauAuftrag(Bauauftrag bauAuftrag){
 		TradeArea tA = this.tradeAreaHandler.getTAinRange(bauAuftrag.region());
@@ -96,6 +109,19 @@ public class BauManager implements OverlordRun,OverlordInfo{
 		}
 		tA.getTradeAreaBauManager().addBurgenBau(b);
 	}
+	
+	
+	public void setCentralHomeDest(CoordinateID centralHomeDest,ScriptUnit fromSU){
+		TradeArea tA = this.tradeAreaHandler.getTAinRange(fromSU.getUnit().getRegion());
+		if (tA==null){
+			outText.addOutLine("!!!addBurgenbau nicht erfolgreich: kein TA :" + fromSU.unitDesc());
+			return;
+		}
+		tA.getTradeAreaBauManager().setCentralHomeDest(centralHomeDest);
+	}
+	
+	
+	// public void setCentralHomeDest(CoordinateID centralHomeDest) {
 	
 	public int[] runAt(){
 		return runners;
