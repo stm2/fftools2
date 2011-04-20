@@ -56,8 +56,15 @@ public class BauauftragScriptComparator implements Comparator<Bauen> {
 		// double tp1 = Math.ceil(b1.scriptUnit.getSkillLevel(this.talentName)/this.level);
 		// double tp2 = Math.ceil(b2.scriptUnit.getSkillLevel(this.talentName)/this.level);
 		
-		double tp1 = Math.ceil((this.builtSize * this.level)/b1.scriptUnit.getSkillLevel(this.talentName));
-		double tp2 = Math.ceil((this.builtSize * this.level)/b2.scriptUnit.getSkillLevel(this.talentName));
+		double neededTP = this.builtSize * this.level;
+		double availTP1 = b1.scriptUnit.getSkillLevel(this.talentName);
+		double availTP2 = b2.scriptUnit.getSkillLevel(this.talentName);
+		double persons1 = b1.scriptUnit.getUnit().getModifiedPersons();
+		double persons2 = b2.scriptUnit.getUnit().getModifiedPersons();
+		availTP1 = availTP1 * persons1;
+		availTP2 = availTP2 * persons2;
+		double tp1 = Math.ceil(neededTP/availTP1);
+		double tp2 = Math.ceil(neededTP/availTP2);
 		
 		tp1 += wert1;
 		tp2 += wert2;

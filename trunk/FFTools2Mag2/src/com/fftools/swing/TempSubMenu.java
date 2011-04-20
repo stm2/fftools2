@@ -9,6 +9,7 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 import com.fftools.demo.actions.MenuAction;
+import com.fftools.demo.actions.temp.BauarbeiterAction;
 import com.fftools.demo.actions.temp.DepotWahrnehmerAction;
 import com.fftools.demo.actions.temp.HandelAction;
 import com.fftools.demo.actions.temp.SoldatenFrontAction;
@@ -41,6 +42,7 @@ public class TempSubMenu extends JMenu {
 		addMenuItem(this,new TarnerAction(selectionObserver));
 		addMenuItem(this,new SoldatenFrontAction(selectionObserver));
 		addMenuItem(this,new SoldatenRearAction(selectionObserver));
+		addMenuItem(this,new BauarbeiterAction(selectionObserver));
 
 	}
 	

@@ -52,8 +52,6 @@ public void runScript(int scriptDurchlauf){
 		this.bauScript.setScriptUnit(this.scriptUnit);
 		this.bauScript.setArguments(this.getArguments());
 		this.bauScript.setGameData(this.gd_Script);
-		
-		
 		this.bauScript.setPlaningMode(true);
 		
 		// Parsen und Ausgaben...

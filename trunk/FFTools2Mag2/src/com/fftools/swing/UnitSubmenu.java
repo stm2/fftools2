@@ -15,6 +15,7 @@ import magellan.library.Unit;
 
 import com.fftools.demo.actions.MenuAction;
 import com.fftools.demo.actions.lernfix.LernfixTalentAction;
+import com.fftools.demo.actions.unit.BauarbeiterAction;
 import com.fftools.demo.actions.unit.ClearOrdersAction;
 import com.fftools.demo.actions.unit.DepotAction;
 import com.fftools.demo.actions.unit.DepotWahrnehmerAction;
@@ -67,6 +68,7 @@ public class UnitSubmenu extends JMenu implements SelectionListener {
 		addMenuItem(this,new KräuterAction(this.selectionObserver));
 		addMenuItem(this,new PferdeAction(this.selectionObserver));
 		addMenuItem(this,new RohstoffAction(this.selectionObserver));
+		addMenuItem(this,new BauarbeiterAction(this.selectionObserver));
 		addSeparator();
 		addMenuItem(this,new ClearOrdersAction(this.selectionObserver));
 
