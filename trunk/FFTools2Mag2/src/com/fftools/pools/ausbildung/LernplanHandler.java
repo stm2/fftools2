@@ -96,9 +96,16 @@ public class LernplanHandler implements OverlordInfo {
 		
 		// neuen Optionparser
 		FFToolsOptionParser OP = new FFToolsOptionParser(u);
+		ArrayList<String> orders = new ArrayList<String>();
 		for (Iterator<String> iter = u.getUnit().getOrders().iterator();iter.hasNext();){
 			String order = (String)iter.next();
 			if (order.toLowerCase().indexOf(scriptIdentifier.toLowerCase())>0){
+				orders.add(order);
+			}
+		}
+		
+		if (orders.size()>0){
+			for (String order:orders){
 				// diese orderzeile passt in unser beuteschema
 				OP.reset();
 				OP.addOptionString(order);
