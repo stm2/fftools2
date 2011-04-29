@@ -369,6 +369,8 @@ public class TradeAreaBauManager {
 		
 		this.informUnits(2);
 		
+		this.checkBauftragshalter();
+		
 	}
 	
 	
@@ -582,5 +584,40 @@ public class TradeAreaBauManager {
 			}
 		}
 	}
+	
+	
+	private void checkBauftragshalter() {
+		if (this.bauAufträge==null || this.bauAufträge.size()==0){
+			return;
+		}
+		for (ScriptUnit su:this.bauAufträge.keySet()){
+			ArrayList<Bauauftrag> list = this.bauAufträge.get(su);
+			if (list==null || list.size()==0){
+				// komisch...bauauftragshalter ohne Aufträge
+				su.doNotConfirmOrders();
+				su.addComment("!!! Als Halter von Bauaufträgen gelistet aber keine Gefunden!");
+			} else {
+				int count_all=0;
+				int count_rdy=0;
+				int count_toDo=0;
+				for (Bauauftrag bA:list){
+					count_all++;
+					Bauen b = bA.getBauScript();
+					if (b.isFertig()){
+						count_rdy++;
+					} else {
+						count_toDo++;
+					}
+				}
+				// info
+				su.addComment("TA-Bau: " + count_rdy + " / " + count_all + " OK, ToDo: " + count_toDo);
+				if (count_toDo==0){
+					su.doNotConfirmOrders();
+					su.addComment("TA-Bau: keine offenen Bauaufträge mehr!");
+				}
+			}
+		}
+	}
+	
 	
 }
