@@ -120,6 +120,7 @@ public class Material extends MatPoolScript {
 		}
 		
 		// Magier
+		int magieLevel=0;
 		actSkillType = this.gd_Script.rules.getSkillType("Magie");
 		if (actSkillType!=null){
 			Skill actSkill = this.scriptUnit.getUnit().getModifiedSkill(actSkillType);
@@ -128,6 +129,7 @@ public class Material extends MatPoolScript {
 				if (actLevel>0){
 					// prio = this.magierPrio;
 					this.isMage=true;
+					magieLevel=actLevel;
 				}
 			}
 		}
@@ -261,7 +263,7 @@ public class Material extends MatPoolScript {
 		}
 		
 		if (this.isMage){
-			prio = this.magierPrio;
+			prio = this.magierPrio  + magieLevel + user_prioAdd;
 		}
 		
 		
@@ -485,7 +487,7 @@ public class Material extends MatPoolScript {
 		*/
 		needRdU = OP.getOptionBoolean("RdU", false);
 		if (isMage){
-			prioTarn = this.magierPrio;
+			// prioTarn = this.magierPrio;
 			needRdU=true;
 		}
 
@@ -517,7 +519,7 @@ public class Material extends MatPoolScript {
 		// RdM
 		if (isMage){
 			this.gd_Script.rules.getItemType("Ring der Macht",true);
-			mpr = new MatPoolRequest(this,persons,"Ring der Macht",this.magierPrio,comment,kapa_policy,kapa_benutzer);
+			mpr = new MatPoolRequest(this,persons,"Ring der Macht",prioTarn,comment,kapa_policy,kapa_benutzer);
 			if (this.inRegion){
 				mpr.setOnlyRegion(true);
 			}
@@ -527,7 +529,7 @@ public class Material extends MatPoolScript {
 		// GdTS
 		if (isMage || OP.getOptionBoolean("GdTS", false)){
 			this.gd_Script.rules.getItemType("Gürtel der Trollstärke",true);
-			mpr = new MatPoolRequest(this,persons,"Gürtel der Trollstärke",this.magierPrio,comment,kapa_policy,kapa_benutzer);
+			mpr = new MatPoolRequest(this,persons,"Gürtel der Trollstärke",prioTarn,comment,kapa_policy,kapa_benutzer);
 			if (this.inRegion){
 				mpr.setOnlyRegion(true);
 			}
