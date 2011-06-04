@@ -129,7 +129,6 @@ public class SailToAction extends MenuAction {
 	   
   	     
     	if (isSeaConnPossible(u)){
-  	       // String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain.regions(), act, dest, excludeMap);
   	    	aquarianBonus = 0;
   	         try {
   	           aquarianBonus = u.getFaction().getRace().getAdditiveShipBonus();

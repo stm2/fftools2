@@ -219,6 +219,8 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	 */
 	public TradeArea getTAinRange(Region r){
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(this.data.rules);
+		RegionType Feuerwand = Regions.getFeuerwandRegionType(this.data.rules,this.data);
+		excludeMap.put(Feuerwand.getID(), Feuerwand);
 		Region actOriginRegion = null;
 		
 		if (this.tradeAreas==null){

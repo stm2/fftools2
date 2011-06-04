@@ -110,6 +110,8 @@ public class GoToAction extends MenuAction {
 	   List<Region>regionList=null;
 	   boolean PathNotFound = false;
 	   Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
+	   RegionType Feuerwand = Regions.getFeuerwandRegionType(data.rules,data);
+	   excludeMap.put(Feuerwand.getID(), Feuerwand);
 	   String order = "nix";
 	   if (onSameIsland(u.getRegion(), this.targetRegion)){
   	     if (actRegion==null || !u.getRegion().equals(actRegion)){
