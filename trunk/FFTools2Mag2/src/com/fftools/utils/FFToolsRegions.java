@@ -98,6 +98,8 @@ public class FFToolsRegions {
 		
 		// Path organisieren
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
+		RegionType Feuerwand = Regions.getFeuerwandRegionType(data.rules,data);
+		excludeMap.put(Feuerwand.getID(), Feuerwand);
 		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
 		if (path==null || path.length()==0) {
 			return -1;
@@ -192,6 +194,8 @@ public class FFToolsRegions {
 		
 		// Path organisieren
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
+		RegionType Feuerwand = Regions.getFeuerwandRegionType(data.rules,data);
+		excludeMap.put(Feuerwand.getID(), Feuerwand);
 		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
 		if (path==null || path.length()==0) {
 			return null;
@@ -316,6 +320,8 @@ public class FFToolsRegions {
 		erg.setDestRegion(u.getScriptMain().gd_ScriptMain.getRegion(dest));
 		
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(u.getScriptMain().gd_ScriptMain.rules);
+		RegionType Feuerwand = Regions.getFeuerwandRegionType(u.getScriptMain().gd_ScriptMain.rules, u.getScriptMain().gd_ScriptMain);
+		excludeMap.put(Feuerwand.getID(), Feuerwand);
 		String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain.regions(), act, dest, excludeMap);
 		if (path!=null && path.length()>0) {
 			// path gefunden
