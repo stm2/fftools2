@@ -242,8 +242,16 @@ public void runScript(int scriptDurchlauf){
 						// keine Zielregion...also lernen...oder trotzdem unterhalten?
 						// unter X% auslastung unbestätigt. 
 						if ( auslastung < ((double)this.mindestAuslastung/100)){
-							super.lerneTalent("Unterhaltung", true);
+							
 							addComment("Automode->Einheit lernt");
+							int reittalent=this.scriptUnit.getSkillLevel("Reiten");
+							if (reittalent>0){
+								super.lerneTalent("Unterhaltung", true);
+							} else {
+								// neu, wir lernen auf T1 Reiten
+								this.addComment("-> wir lernen prophylaktisch Reiten T1");
+								this.lerneTalent("Reiten",false);
+							}
 						} else {
 							super.addComment("Warnung: Einheit ist NICHT ausgelastet!");
 							super.addComment("" + Math.round((circusPoolRelation.getVerdienst()-circusPoolRelation.getDoUnterhaltung())/circusPoolRelation.getProKopfVerdienst()) + " Unterhalter überflüssig");		
@@ -265,7 +273,7 @@ public void runScript(int scriptDurchlauf){
 						} else {
 							// neu, wir lernen auf T1 Reiten
 							gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(),targetRegion.getCoordinate(), false);
-							this.addComment("-> wir lernen aber erstmal reiten T1");
+							this.addComment("-> wir lernen aber erstmal Reiten T1");
 							addComment("dieser Region NEU als Unterhalter zugeordnet: " + targetRegion.toString());
 							addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
 							this.lerneTalent("Reiten",false);
