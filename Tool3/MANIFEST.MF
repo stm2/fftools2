@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Class-Path: magellan-library.jar magellan-client.jar FFToolsTool1.jar FFTools2.jar
+Main-Class: com.fftools.tool3.Tool3_Main
+
