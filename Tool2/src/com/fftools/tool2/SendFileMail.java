@@ -233,7 +233,7 @@ public class SendFileMail implements Runnable{
 
 	        msg.setContent(bodyText, "text/plain; charset=" + Encoding.ISO.toString() );
 	        Transport.send( msg );
-	        outText.addOutLine(FileCopy.getDateS() +  " sending OK ");
+	        outText.addOutLine(FileCopy.getDateS() +  " sending OK, " + cnter + " lines");
 		} catch (Throwable exc) { // any fatal error
             // outText.addOutLine(exc.toString()); // print it so it can be written to errors.txt 
 			System.out.println(exc.toString());
