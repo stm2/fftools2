@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Class-Path: FFToolsTool1.jar FFTools2.jar mail.jar activation.jar
+Main-Class: com.fftools.pop3push.Pop3Push
