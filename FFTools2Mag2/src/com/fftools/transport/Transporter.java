@@ -179,12 +179,6 @@ public class Transporter {
 	public Transporter(ScriptUnit u){
 		this.scriptUnit = u;
 		
-		// debug
-		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("ebje")){
-			int iii=1;
-			iii++;
-		}
-		
 		// Kapazität erstmal gleich magellan kapa...Reitend
 		this.kapa = (int)(this.scriptUnit.getPayloadOnHorse()/100);
 		this.kapa_frei = this.kapa;
@@ -920,11 +914,6 @@ public class Transporter {
 	 */
 	public boolean isOK4TransportRequest(TransportRequest TR){
 		
-		// Debug
-		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("bj11")){
-			int iii=0;
-			iii++;
-		}
 		
 		if (isLearning){
 			return false;

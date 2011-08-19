@@ -630,10 +630,7 @@ public class TradeArea {
 			return 0;
 		}
 		
-		if (r.getRegion().getName()!=null && r.getRegion().getName().equalsIgnoreCase("Sócudol")){
-			int i222=0;
-			i222++;
-		}
+	
 		
 		ItemType itemType = r.getBuyItemType();
 		int gesamtVerkauf = this.getAreaSellAmount(itemType);

@@ -204,12 +204,6 @@ public class Handeln extends TradeAreaScript{
 		// jetzt fragen wir uns, ob er noch genügend Talente hat
 		if (this.getTrader().isKaufen()){
 			// Talentpunkte der unit ermitteln...
-			String unitNumber = this.scriptUnit.getUnit().toString(false);
-			if (unitNumber.equalsIgnoreCase("ur75")){
-				int ici = 1;
-				ici++;
-			}
-			
 			SkillType handelsSkillType =  super.gd_Script.rules.getSkillType("Handeln");
 			Skill handelsSkill =  this.scriptUnit.getUnit().getModifiedSkill(handelsSkillType);
 			int persons = this.scriptUnit.getUnit().getModifiedPersons();

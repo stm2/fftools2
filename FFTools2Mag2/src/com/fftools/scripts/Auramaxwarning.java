@@ -77,11 +77,7 @@ public class Auramaxwarning extends Script{
 		}
 		for(Iterator<String> iter = this.scriptUnit.getUnit().getOrders().iterator(); iter.hasNext();) {
 			String s = (String) iter.next();
-			if (s.startsWith("ZAUBERE")){
-				this.addComment("auramax: Einheit zaubert.");
-				return true;
-			}
-			if (s.startsWith("zaubere")){
+			if (s.toUpperCase().startsWith("ZAUBERE") || s.toUpperCase().startsWith("@ZAUBERE")){
 				this.addComment("auramax: Einheit zaubert.");
 				return true;
 			}

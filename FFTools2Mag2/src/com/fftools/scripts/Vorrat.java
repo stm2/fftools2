@@ -6,6 +6,7 @@ import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.trade.TradeArea;
 import com.fftools.trade.TradeUtils;
 import com.fftools.transport.TransportRequest;
+import com.fftools.utils.FFToolsGameData;
 import com.fftools.utils.FFToolsOptionParser;
 
 
@@ -74,12 +75,6 @@ public class Vorrat extends TransportScript{
 	
 	public void vorMatpool(){
 		
-		// debug me
-		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("9rxs")){
-			int iii3 = 1;
-			iii3++;
-		}
-		
 		// optionen parsen
 		FFToolsOptionParser OP = new FFToolsOptionParser(this.scriptUnit);
 		OP.addOptionList(this.getArguments());
@@ -90,7 +85,14 @@ public class Vorrat extends TransportScript{
 			return;
 		}
 		// ersetzungen
-		nameGut = nameGut.replace("_", " ");
+		// nameGut = nameGut.replace("_", " ");
+		
+		// replacen
+		if (nameGut!=null && nameGut.length()>0){
+			nameGut = FFToolsGameData.translateItemShortform(nameGut);
+		}
+		
+		
 		this.itemType = this.gd_Script.rules.getItemType(nameGut);
 		if (this.itemType==null){
 			// vielleicht noch ein ItemGroup

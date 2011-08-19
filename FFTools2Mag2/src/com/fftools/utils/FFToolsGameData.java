@@ -170,7 +170,7 @@ public class FFToolsGameData {
 			longEresseaOrders.add("BEKLAUE");
 			longEresseaOrders.add("BELAGERE");
 			longEresseaOrders.add("FAHRE");
-			// longEresseaOrders.add("FOLGE");
+			longEresseaOrders.add("FOLGE SCHIFF");
 			longEresseaOrders.add("FORSCHE");
 			longEresseaOrders.add("KAUFE");
 			longEresseaOrders.add("LEHRE");
@@ -251,6 +251,42 @@ public class FFToolsGameData {
 		
 		
 		return erg;
+	}
+	
+	/**
+	 * Nimmt standardmässige Ersetzungen vor...für request, vorrat etc
+	 * @param s
+	 * @return
+	 */
+	public static String translateItemShortform(String itemName){
+		
+		// replacen
+		if (itemName!=null && itemName.length()>0){
+			itemName = itemName.replace("_"," ");
+		}
+		
+		// Abkürzungen
+		if (itemName.equalsIgnoreCase("Adws")){
+			itemName = "Amulett des wahren Sehens";
+		}
+		if (itemName.equalsIgnoreCase("RdU")){
+			itemName = "Ring der Unsichtbarkeit";
+		}
+		if (itemName.equalsIgnoreCase("GdtS")){
+			itemName = "Gürtel der Trollstärke";
+		}
+		if (itemName.equalsIgnoreCase("RdfF")){
+			itemName = "Ring der flinken Finger";
+		}
+		if (itemName.equalsIgnoreCase("SdU")){
+			itemName = "Sphäre der Unsichtbarkeit";
+		}
+		
+		if (itemName.equalsIgnoreCase("RdM")){
+			itemName = "Ring der Macht";
+		}
+		
+		return itemName;
 	}
 	
 }

@@ -42,12 +42,6 @@ public class Lernen extends MatPoolScript{
 		
 		if (scriptDurchlauf==Vorlauf){
 			
-//			 DEbug
-			if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("8ejl")){
-				int ii22 = 0;
-				ii22++;
-			}
-			
 //			akademie feststellen falls einheit darin ist oder betritt.
 	    	Building gebaeude = this.scriptUnit.getUnit().getModifiedBuilding();
 	    	if (gebaeude != null){

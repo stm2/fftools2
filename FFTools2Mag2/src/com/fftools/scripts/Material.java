@@ -63,14 +63,7 @@ public class Material extends MatPoolScript {
 	private void run1(){
 		
 		super.addVersionInfo();
-		
-		// debug
-		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("bf1x")){
-			int iii1=0;
-			iii1++;
-		}
-		
-		
+
 		// check personenanzahl
 		int persons = this.scriptUnit.getUnit().getModifiedPersons();
 		if (persons<=0){

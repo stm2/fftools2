@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import magellan.library.rules.ItemType;
 
 import com.fftools.pools.matpool.relations.MatPoolRequest;
+import com.fftools.utils.FFToolsGameData;
 import com.fftools.utils.FFToolsOptionParser;
 
 
@@ -101,27 +102,9 @@ public class Request extends MatPoolScript{
 		
 		// replacen
 		if (itemName!=null && itemName.length()>0){
-			itemName = itemName.replace("_"," ");
+			itemName = FFToolsGameData.translateItemShortform(itemName);
 		}
-		
-		// Abkürzungen
-		if (itemName.equalsIgnoreCase("Adws")){
-			itemName = "Amulett des wahren Sehens";
-		}
-		if (itemName.equalsIgnoreCase("RdU")){
-			itemName = "Ring der Unsichtbarkeit";
-		}
-		if (itemName.equalsIgnoreCase("GdtS")){
-			itemName = "Gürtel der Trollstärke";
-		}
-		if (itemName.equalsIgnoreCase("RdfF")){
-			itemName = "Ring der flinken Finger";
-		}
-		if (itemName.equalsIgnoreCase("SdU")){
-			itemName = "Sphäre der Unsichtbarkeit";
-		}
-		
-		
+				
 		ItemType itemType = super.gd_Script.rules.getItemType(itemName);
 		boolean isCat = false;
 		if (itemType==null){
@@ -188,13 +171,6 @@ public class Request extends MatPoolScript{
 		}
 		
 		MatPoolRequest m = new MatPoolRequest(this,anzahl,itemName,Prio,"Request",kapaPolicy,kapaUser);
-		
-		// Dedug
-		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("16ve")){
-			int u2 = 1;
-			u2++;
-		}
-		
 		
 		// Specs
 		String specsString = OP.getOptionString("Spec");

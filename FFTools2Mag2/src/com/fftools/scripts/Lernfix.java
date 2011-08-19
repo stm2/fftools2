@@ -67,12 +67,6 @@ public class Lernfix extends MatPoolScript{
 	
 	private void scriptStart(){
 		
-		// debug
-		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("fkzt")){
-			int iizu = 0;
-			iizu++;
-		}
-		
 		
 		// Pool holen, man das ist umständlich....
 		ausbildungsPool = super.scriptUnit.getScriptMain().getOverlord().getAusbildungsManager().getAusbildungsPool(super.scriptUnit);

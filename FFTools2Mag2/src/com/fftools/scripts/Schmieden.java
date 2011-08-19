@@ -195,24 +195,13 @@ public void runScript(int scriptDurchlauf){
 			return;
 		}
 	
-		// debug
-		boolean isDebug=false;
-		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("kkow")){
-			int iii=1;
-			iii++;
-			this.addComment("hallo RdF!");
-			isDebug=true;
-		}
-		
-		
+
 		// RdF
 		ItemType rdfType=this.gd_Script.rules.getItemType("Ring der flinken Finger",false);
 		if (rdfType!=null){
 			Item rdfItem = this.scriptUnit.getModifiedItem(rdfType);
 			if (rdfItem!=null && rdfItem.getAmount()>0){
-				if (isDebug){
-					this.addComment("RdF: " + rdfItem.getAmount() + " vorhanden.");
-				}
+				
 				// RDF vorhanden...
 				// produktion pro mann ausrechnen
 				int prodProMann = (int)Math.floor((double)maxMachenWare/(double)this.scriptUnit.getUnit().getModifiedPersons());
@@ -227,11 +216,7 @@ public void runScript(int scriptDurchlauf){
 					}
 				}
 				this.addComment("Schmieden: " + rdfItem.getAmount() + " RdF. Prod von " + oldMaxMachenWare + " auf " + maxMachenWare + " erhöht.");
-			} else {
-				if (isDebug){
-					this.addComment("RdF: Item nicht vorhanden.");
-				}
-			}
+			} 
 		} else {
 			this.addComment("Schmieden: RdF ist noch völlig unbekannt.");
 		}

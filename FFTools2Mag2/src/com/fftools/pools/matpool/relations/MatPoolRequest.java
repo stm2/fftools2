@@ -245,19 +245,6 @@ public class MatPoolRequest extends MatPoolRelation  implements Comparable<MatPo
 	 * @return auf jeden Fall int, niemals null
 	 */
 	public int getForderung(ItemType itemType){
-		// debug
-		if (this.getPrio()==21){
-			int iiii=1;
-			iiii++;
-		}
-		if (this.getScriptUnit().getUnitNumber().equalsIgnoreCase("qv44")){
-			int iiii=1;
-			iiii++;
-		}
-		
-		// debug
-		// this.getScriptUnit().addComment("Debug: noch gefordert für: " + itemType.getName()+ ", bearbeitet aktuell: " + this.getBearbeitet());
-		
 		
 		// die einfachen sachen vorneweg
 		if (this.itemTypes==null){
