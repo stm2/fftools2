@@ -270,18 +270,6 @@ public class MatPool2 implements MatPool{
 		// als bereits vollständig erledigt erkannt werden
 		ArrayList<MatPoolOffer>fullfilledOffers=null;
 		
-		// debug
-		if (actRequest.getPrio()==21){
-			int iii=1;
-			iii++;
-		}
-		
-		if (actRequest.getScriptUnit().getUnitNumber().equalsIgnoreCase("91a6")){
-			int iii=1;
-			iii++;	
-		}
-		
-		
 		// existiert denn schon die HashMap mit den Collections?
 		if (this.gegenstandOffers==null){
 			this.gegenstandOffers = new HashMap<String, ArrayList<MatPoolOffer>>();
@@ -303,10 +291,8 @@ public class MatPool2 implements MatPool{
 			
 			// neue Liste anfügen
 			this.gegenstandOffers.put(actRequest.getOriginalGegenstand(), actOfferList);
-		} else {
-			int i = 1;
-			i++;
-		}
+		} 
+		
 		long startT1 = System.currentTimeMillis();
 		// Liste sortieren
 		// offers sortieren, falls abstrakter Begriff
@@ -590,14 +576,7 @@ public class MatPool2 implements MatPool{
 	 * @param m the MPR to add
 	 */
 	public void addMatPoolRequest(MatPoolRequest m){
-		
-//		 debug
-		if (m.getScriptUnit().getUnitNumber().equalsIgnoreCase("23yi")){
-			int i=1;
-			i++;
-		}
-		
-		
+
 		if (m.getItemTypes()==null){
 			// hier Fehler abfangen!
 			if (!this.matPoolManager.isReportOFF()) {
@@ -877,13 +856,6 @@ public class MatPool2 implements MatPool{
 		for (Iterator<MatPoolRequest> iter = this.requests.iterator();iter.hasNext();){
 			MatPoolRequest MPR = (MatPoolRequest)iter.next();
 			
-			// debug
-			if (MPR.getScriptUnit().getUnitNumber().equalsIgnoreCase("23yi")){
-				int i=1;
-				i++;
-			}
-			
-			
 			if (MPR.getBearbeitet()<MPR.getOriginalGefordert() && !MPR.isOnlyRegion()){
 				
 				
@@ -983,13 +955,7 @@ public class MatPool2 implements MatPool{
 	}
 	
 	private void firstInitialModifiedItems(ScriptUnit su){
-		// debug
-		if (su.getUnitNumber().equalsIgnoreCase("kkow")){
-			int ii=1;
-			ii++;
-		}
-		
-		
+
 		HashMap<ItemType, Item> newMap = new HashMap<ItemType, Item>();
 		HashMap<ItemType, Item> originalMap = new HashMap<ItemType, Item>();
 		for (Iterator<Item> iter = su.getUnit().getModifiedItems().iterator();iter.hasNext();){
@@ -1014,11 +980,7 @@ public class MatPool2 implements MatPool{
 	}
 	
 	private void resetModifiedItemsMatPool2(ScriptUnit su){
-		// debug
-		if (su.getUnitNumber().equalsIgnoreCase("kkow")){
-			int ii=1;
-			ii++;
-		}
+		
 		HashMap<ItemType, Item> originalMap = this.originalModifiedScriptUnitItems.get(su);
 		HashMap<ItemType, Item> oldMap = su.getModifiedItemsMatPool2();		
 		// resetten -> 0

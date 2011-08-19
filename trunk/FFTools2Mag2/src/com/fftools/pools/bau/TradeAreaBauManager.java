@@ -154,12 +154,6 @@ public class TradeAreaBauManager {
 				if (b.getActTyp()==Bauen.STRASSE){
 					actTalentName="Strassenbau";
 				}
-				// debug
-				if (b.scriptUnit.getUnitNumber().equalsIgnoreCase("51rm")){
-					int i=0;
-					i++;
-				}
-				
 				
 				// mit welchem level
 				int level_needed = 1;
@@ -305,12 +299,7 @@ public class TradeAreaBauManager {
 		for (Iterator<ScriptUnit> iter = this.bauScripte.keySet().iterator();iter.hasNext();){
 			ScriptUnit actUnit = (ScriptUnit)iter.next();
 			
-			// debug
-			if (actUnit.getUnitNumber().equalsIgnoreCase("12o0")){
-				int i=0;
-				i++;
-			}
-			
+		
 			boolean allFertig = true;
 			String lernTalent = "";
 			boolean hasCommand = false;

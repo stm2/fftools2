@@ -73,14 +73,7 @@ public class Depot extends TransportScript{
 	 */
 	
 	public void runDepot(int scriptDurchlauf){
-		
-		
-		// debug me
-		if(this.scriptUnit.getUnit().toString(false).equalsIgnoreCase("k5Lr")){
-			int i = 1;
-			i++;
-		}
-		
+				
 		// "registrierung" beim TransportManager, damit der später nicht
 		// seine Depots = Lieferanten zusammensuchen muss
 		this.getOverlord().getTransportManager().addDepot(this.scriptUnit);
@@ -197,14 +190,6 @@ public class Depot extends TransportScript{
 	
 	private int getKostenProRunde(){
 		int erg=0;
-		
-		
-		// debug
-		if (this.scriptUnit.getUnitNumber().equalsIgnoreCase("e4ft")){
-			int i= 0;
-			i++;
-		}
-		
 		// ScriptPersonen * 10
 		erg += FFToolsRegions.countScriptPersons(this.getOverlord().getScriptMain().getScriptUnits(), this.region()) * 10;
 		

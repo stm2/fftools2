@@ -517,12 +517,6 @@ public class ScriptUnit {
 			}
 		}
 		
-		// debug
-		if (this.getUnitNumber().equalsIgnoreCase("w8gz")){
-			int iiio9 = 0;
-			iiio9++;
-		}
-		
 		
 		// Ozeancheck
 		if (!may_confirm){
@@ -976,12 +970,6 @@ public class ScriptUnit {
 	 * @return the freeKapa
 	 */
 	public int getFreeKapa(int kapaPolicy, int userKapa) {
-		// debug
-		if (this.unit.toString(false).equalsIgnoreCase("fefn")){
-			int i = 1;
-			i++;
-		}
-		
 		
 		if (this.originalFreeKapaFood==-1){
 			// kapa war noch nicht gesetzt
@@ -1033,11 +1021,6 @@ public class ScriptUnit {
 	 * @param betrag
 	 */
 	public void decFreeKapa(int betrag){
-		// debug
-		if (this.unit.toString(false).equalsIgnoreCase("fefn")){
-			int i = 1;
-			i++;
-		}
 		
 		
 		// erhöht die genutzte Kapa
@@ -1047,11 +1030,6 @@ public class ScriptUnit {
 
 	public void resetFreeKapa(){
 		
-		//		 debug
-		if (this.unit.toString(false).equalsIgnoreCase("fefn")){
-			int i = 1;
-			i++;
-		}
 		
 		this.originalFreeKapaFood = -1;
 		this.usedKapa = 0;
@@ -1539,13 +1517,6 @@ public class ScriptUnit {
 		
 		if (this.getSetKapaPolicy()!=MatPoolRequest.KAPA_unbenutzt){
 			kapaPolicy=this.getSetKapaPolicy();
-		}
-		
-		
-		// debug
-		if (this.getUnitNumber().equalsIgnoreCase("qv44")){
-			int iii=0;
-			iii++;
 		}
 		
 		

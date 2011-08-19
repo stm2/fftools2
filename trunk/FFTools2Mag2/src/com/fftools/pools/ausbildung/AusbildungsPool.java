@@ -168,11 +168,7 @@ private MatPool matPool = null;
      */
 	
 	public void runPool(int Durchlauf){
-		if (this.region!=null && this.region.getName()!=null && this.region.getName().equalsIgnoreCase("Hochufer")){
-			int i22=0;
-			i22++;
-		}
-		
+
 		switch (Durchlauf){
 			case AusbildungsManager.Durchlauf1:
 				this.runPoolVorlauf();
@@ -1388,13 +1384,7 @@ private MatPool matPool = null;
 	    
 	   for (Iterator<AusbildungsRelation> iter = autoDidakten.iterator();iter.hasNext();){
 	    	AusbildungsRelation kandidat = (AusbildungsRelation) iter.next();
-	    	
-	    	// debug
-	    	if (kandidat.getDefaultTalent()==null){
-	    		int i = 1;
-	    		i++;
-	    	}
-	    	
+
 	      	// Genug Silber da 
 	    	if (kandidat.getDefaultTalent()!=null && kandidat.getLernKosten(kandidat.getDefaultTalent())<=this.LernSilber){
 	      		// Subject zuweisen...

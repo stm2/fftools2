@@ -268,6 +268,7 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 	 * evaluiert anstehende transporte in den angegeben regionen
 	 * @param regions
 	 */
+	@SuppressWarnings("unused")
 	private void runRegions(ArrayList<TradeRegion> tradeRegions, String infoName){
 		// eigene Region Liste bauen
 		// neu: unter berücksichtigung der selektierten Regionen
@@ -1110,12 +1111,6 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		// wir haben vor uns einen Transporter mit gesetztem Ziel
 		// der soll Ladung aufnehmen oder sich zum Ladeort bewegen
 		// Goto Befehl muss nicht noch umgesetzt werden....
-		
-		// debug
-		if (transporter.getScriptUnit().getUnitNumber().equalsIgnoreCase("LhL0")){
-			int iii=0;
-			iii++;
-		}
 		
 		
 		// sicherheitscheck: wir müssen schon näher ran ans Ziel, sonst hats keinen Zweck.
