@@ -1,6 +1,5 @@
 package com.fftools.scripts;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import magellan.library.Item;
@@ -20,7 +19,7 @@ import com.fftools.utils.FFToolsOptionParser;
  * @author Fiete
  *
  */
-public class Liefere extends Script{
+public class Liefere_Alt extends Script{
 	
 	/**
 	 * sollte ganz zum schluss laufen
@@ -37,18 +36,13 @@ public class Liefere extends Script{
 	
 	private boolean weniger = false;
 	
-	/**
-	 * die angeforderten (substitutionsfähigen) Items
-	 */
-	private ArrayList<ItemType> itemTypes = null;
-	
 	
 	/**
 	 * Parameterloser Constructor
 	 * Drinne Lassen fuer die Instanzierung des Objectes
 	 */
 	
-	public Liefere() {
+	public Liefere_Alt() {
 		super.setRunAt(Durchlauf);
 	}
 	
@@ -82,27 +76,11 @@ public class Liefere extends Script{
 		}
 		nameGut = nameGut.replace("_", " ");
 		this.itemType = this.gd_Script.rules.getItemType(nameGut);
-		boolean isCat = false;
-		if (itemType==null){
-			// Versuch der Kategorie
-			isCat = reportSettings.isInCategories(nameGut);
-			if (isCat){
-				itemTypes = new ArrayList<ItemType>();
-				itemTypes.addAll(reportSettings.getItemTypes(nameGut));
-			}
-		} else {
-			// gefundenes Gut
-			itemTypes = new ArrayList<ItemType>();
-			itemTypes.add(this.itemType);
-		}
-		if (this.itemType==null && !isCat){
+		if (this.itemType==null){
 			this.addComment("Liefere: Ware nicht erkannt.");
 			outText.addOutLine("!!!Liefere: Ware nicht erkannt. " + this.unitDesc());
 			return;
 		}
-		
-		
-		
 		this.menge = OP.getOptionInt("Menge", -1);
 		if (this.menge<1){
 			this.addComment("Liefere: Summe nicht erkannt.");
@@ -117,75 +95,63 @@ public class Liefere extends Script{
 		}
 		
 		this.notSuccessACK = OP.getOptionBoolean("notSuccessACK",false);
-		this.addComment("DEBUG: after parsing option \"notSuccessACK\", notSuccessACK is:" + this.notSuccessACK);
 		
 		this.weniger = OP.getOptionBoolean("weniger", false);
-		// Debug
-		this.addComment("DEBUG: after parsing option \"weniger\", wenig is:" + this.weniger);
 		
-		// Beginn schleife...
-		for (ItemType iT : this.itemTypes){
-			this.itemType = iT;
-			if (isCat){
-				this.addComment("Liefere mit Kategorie - jetzt bearbeitet: " + this.itemType.getName());
+		// OK..dann mal los
+		// Menge checken
+		Item item = this.scriptUnit.getModifiedItem(this.itemType);
+		if (item==null || item.getAmount()==0){
+			this.addComment("Liefere: kein " + this.itemType.getName() + " vorhanden.");
+			return;
+		}
+		if (item.getAmount()<this.menge && !this.weniger){
+			this.addComment("Liefere: nicht ausreichend " + this.itemType.getName() + " vorhanden.");
+			if (!this.notSuccessACK){
+				this.scriptUnit.doNotConfirmOrders();
 			}
-			// OK..dann mal los
-			// Menge checken
-			Item item = this.scriptUnit.getModifiedItem(this.itemType);
-			if (item==null || item.getAmount()==0){
-				this.addComment("Liefere: kein " + this.itemType.getName() + " vorhanden.");
-				continue;
-			}
-			if (item.getAmount()<this.menge && !this.weniger){
-				this.addComment("Liefere: nicht ausreichend " + this.itemType.getName() + " vorhanden.");
-				if (!this.notSuccessACK){
-					this.scriptUnit.doNotConfirmOrders();
-				}
-				continue;
-			}
-			// wir haben genug
-			// ziele durchgehen und checken
-			String[] targets = this.ziel.split(",");
-			int gesamtAmount = item.getAmount();
-			for (int i=0;i<targets.length;i++){
-				String s2 = targets[i];
-				s2 = s2.replace("_", " ");
-				Unit u = FFToolsGameData.getUnitInRegion(this.region(),s2);
-				if (u!=null){
-					// Ziel gefunden
-					if ((gesamtAmount >= this.menge && !this.weniger) || gesamtAmount>0){
-						// ausreichend zeug sollte da sein
-						int zumTarget = this.menge;
-						int vonGib = this.holDasZeug(u);
-						gesamtAmount -= vonGib;
-						zumTarget -= vonGib;
-						
-						if (zumTarget>0 && gesamtAmount>0){
-							// dann eigene Vorräte angreifen..
-							String newOrder = "GIB ";
-							newOrder += u.toString(false) + " ";
-							newOrder += zumTarget + " ";
-							newOrder += "\"" + this.itemType.getName() + "\" ;";
-							newOrder += "Liefere";
-							this.addOrder(newOrder,false);
-							gesamtAmount -= zumTarget;
-						} else {
-							if (zumTarget>0) {
-								this.addComment("Liefere: (->" + u.toString(false) + ") nicht ausreichend " + this.itemType.getName() + " vorhanden. (" + zumTarget + " fehlen)");
-							}
-						}
+			return;
+		}
+		// wir haben genug
+		// ziele durchgehen und checken
+		String[] targets = this.ziel.split(",");
+		int gesamtAmount = item.getAmount();
+		for (int i=0;i<targets.length;i++){
+			String s2 = targets[i];
+			s2 = s2.replace("_", " ");
+			Unit u = FFToolsGameData.getUnitInRegion(this.region(),s2);
+			if (u!=null){
+				// Ziel gefunden
+				if ((gesamtAmount >= this.menge && !this.weniger) || gesamtAmount>0){
+					// ausreichend zeug sollte da sein
+					int zumTarget = this.menge;
+					int vonGib = this.holDasZeug(u);
+					gesamtAmount -= vonGib;
+					zumTarget -= vonGib;
+					
+					if (zumTarget>0 && gesamtAmount>0){
+						// dann eigene Vorräte angreifen..
+						String newOrder = "GIB ";
+						newOrder += u.toString(false) + " ";
+						newOrder += zumTarget + " ";
+						newOrder += "\"" + this.itemType.getName() + "\" ;";
+						newOrder += "Liefere";
+						this.addOrder(newOrder,false);
+						gesamtAmount -= zumTarget;
 					} else {
-						// nicht mehr genügend da
-						if (!this.weniger){
-							this.addComment("Liefere: (->" + u.toString(false) + ") nicht ausreichend " + this.itemType.getName() + " vorhanden.");
-							if (!this.notSuccessACK){
-								this.scriptUnit.doNotConfirmOrders();
-							}
+						if (zumTarget>0) {
+							this.addComment("Liefere: (->" + u.toString(false) + ") nicht ausreichend " + this.itemType.getName() + " vorhanden. (" + zumTarget + " fehlen)");
 						}
 					}
 				} else {
-					this.addComment("Liefere: target not found: " + s2);
+					// nicht mehr genügend da
+					this.addComment("Liefere: (->" + u.toString(false) + ") nicht ausreichend " + this.itemType.getName() + " vorhanden.");
+					if (!this.notSuccessACK){
+						this.scriptUnit.doNotConfirmOrders();
+					}
 				}
+			} else {
+				this.addComment("Liefere: target not found: " + s2);
 			}
 		}
 	}
