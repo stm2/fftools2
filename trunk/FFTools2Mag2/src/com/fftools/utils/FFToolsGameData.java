@@ -171,6 +171,7 @@ public class FFToolsGameData {
 			longEresseaOrders.add("BELAGERE");
 			longEresseaOrders.add("FAHRE");
 			longEresseaOrders.add("FOLGE SCHIFF");
+			longEresseaOrders.add("FOLGEN SCHIFF");
 			longEresseaOrders.add("FORSCHE");
 			longEresseaOrders.add("KAUFE");
 			longEresseaOrders.add("LEHRE");
