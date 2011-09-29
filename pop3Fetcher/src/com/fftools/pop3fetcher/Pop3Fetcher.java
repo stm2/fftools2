@@ -19,6 +19,7 @@ import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.Address;
 import javax.mail.BodyPart;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -99,7 +100,7 @@ public class Pop3Fetcher {
 		Folder folder = store.getFolder("INBOX");
 		folder.open(Folder.READ_ONLY);
 		Message message[] = folder.getMessages();
-
+		boolean deleteAllMessages = false;
 	    for ( int i = 0; i < message.length; i++ )
 	    {
 	      Message m = message[i];
@@ -208,6 +209,37 @@ public class Pop3Fetcher {
 	          }
 	          
 		      
+	          boolean isServerCleaner = true;
+		      // Check Betreff
+		      if (!(m.getSubject().toLowerCase().startsWith("servercleaner"))){
+		    	  isServerCleaner = false;
+	          }
+	          
+	          u = null;
+	          if (isServerCleaner){
+	        	  // Untersuchung Passwort
+	        	  // Passwort extrahieren
+	        	  isServerCleaner=false;
+	        	  if (m.getSubject().length()>14){
+	        		  String checkPass=m.getSubject().substring(14);
+	        		  checkPass = checkPass.trim().replace("\"", "");
+	        		  u = s.getUser(checkPass);
+	        		  if (u!=null){
+	        			  isServerCleaner=true;	  
+	        		  } else {
+	        			  // unbekanntes passwort!
+	        			  reportWrongPasswort(m);
+	        		  }
+	        	  }
+	          }
+	          
+	          
+	          if (isServerCleaner){
+	              // Zug gefunden
+	        	  processServerCleaner(m,u);
+	        	  deleteAllMessages=true;
+	          }
+	          
 		      // als processed setzen
 		      setIsProcessed(m, monopolServer);
 	      } else {
@@ -215,6 +247,25 @@ public class Pop3Fetcher {
 	      }
 	    }
 	    folder.close( false );
+	    
+	    
+	    if (deleteAllMessages){
+	    	outText.addOutLine("delete all messages detected");
+	    	folder.open(Folder.READ_WRITE);
+			Message message2[] = folder.getMessages();
+			
+		    for ( int i = 0; i < message2.length; i++ )
+		    {
+		      Message m2 = message2[i];
+		      outText.addOutLine("marking for delete: " + getIDtag(m2) + "");
+		      m2.setFlag(Flags.Flag.DELETED, true);
+		    }
+		    outText.addOutLine("closing folder with expunge order");
+		    folder.close(true);
+		    outText.addOutLine("exiting message deletion");
+	    }
+	    
+	    
 	    store.close();
 	    
 	    outText.addOutLine("pop3FetcherMain finished.");
@@ -570,6 +621,130 @@ public class Pop3Fetcher {
             System.exit(1);
         }
 	}
+	
+	
+	/**
+	 * wickelt den Server Cleaner ab
+	 * @param m Die Message
+	 * @param u Der durch PW identifizierte User
+	 */
+	private static void processServerCleaner(Message m,User u){
+		try {
+			
+			outText.addOutLine("start server cleaner");
+			
+			// alles in mailout löschen
+			outText.addOutLine("cleaning mailout");
+			File path = new File("../mailout");
+			for (File file : path.listFiles()) {
+		        file.delete();
+		    }
+			
+			// alles in mailserver/monopol
+			outText.addOutLine("cleaning mailserver/monopol");
+			path = new File("../mailserver/monopol");
+			for (File file : path.listFiles()) {
+		        file.delete();
+		    }
+			
+			// alles in report/act_save
+			outText.addOutLine("cleaning report/act_save");
+			path = new File("../report/act_save");
+			for (File file : path.listFiles()) {
+		        file.delete();
+		    }
+			
+			// alles in report/aktuelle
+			outText.addOutLine("cleaning report/aktuelle");
+			path = new File("../report/aktuelle");
+			for (File file : path.listFiles()) {
+		        file.delete();
+		    }
+			
+			// sicherehitskopien in scratch
+			outText.addOutLine("cleaning scratch");
+			path = new File("../scratch");
+			for (File file : path.listFiles()) {
+		        if (file.toString().toLowerCase().startsWith("monopol.cr_20")){
+		        	file.delete();
+		        }
+		    }
+			
+			// Logfiles in scripts
+			outText.addOutLine("cleaning scripts");
+			path = new File("../scripts");
+			for (File file : path.listFiles()) {
+		        if (file.toString().toLowerCase().startsWith("fftools_log_")){
+		        	file.delete();
+		        }
+		        if (file.toString().equals("mergelog.txt")){
+		        	file.delete();
+		        }
+		    }
+			
+			// alles in scratch/last_report
+			outText.addOutLine("cleaning last report");
+			path = new File("../scratch/last_report");
+			for (File file : path.listFiles()) {
+		        file.delete();
+		    }
+			
+			
+			String serverName="monopol_gdr";
+	    	Server server = s.getServer(serverName);
+	    	if (server==null){
+	    		outText.addOutLine("server " +  serverName + " nicht definiert.");
+	    		System.exit(1);
+	    	}
+	    	
+	    	
+	    	MailAuthenticator auth = new MailAuthenticator(server.getUser(), server.getPass());
+	    	
+	    	Properties props = new Properties();
+	    	props.put("mail.smtp.host", server.getHost());
+	    	props.put("mail.smtp.auth", "true");
+	    	// Session session = Session.getDefaultInstance(props,auth);
+	    	Session session = Session.getInstance(props,auth);
+	    	
+	    	Message msg = new MimeMessage( session );
+
+	        InternetAddress addressFrom = new InternetAddress("monopol@gdr-group.com");
+	        msg.setFrom( addressFrom );
+
+	        
+	       
+			msg.addRecipients(Message.RecipientType.TO, m.getFrom());
+	        	
+	        msg.setSubject("Statusinfo: Monopol Server Reset");
+	        
+        	// mit einem Anhang !
+        	MimeMultipart content = new MimeMultipart();
+        	// normale Textnachricht
+        	MimeBodyPart text = new MimeBodyPart();
+        	
+        	String bodytext = "Der Monopol-Server wurde durch den Benutzer " + u.getName() + " zurueckgesetzt\n";
+        	bodytext += "Das ist ein ganz normaler Vorgang, der zwischen 2 Auswertungen aus Wartungsgruenden zu erfolgen hat.\n";
+        	bodytext += "Dabei wird allerdings auch der Posteingang des Servers geleert. Wenn Du Befehle eingesendet hast, fuer die Du noch keine Eingangsbestaetigung erhalten hast, solltest Du die Befehle erneut einschicken.\n\n";
+        	bodytext += "Mit besten Gruessen vom Monopol";
+        	
+        	
+  	        text.setContent(bodytext, "text/plain");
+  	        content.addBodyPart(text);
+  	       
+
+			// final
+			msg.setContent(content);
+
+	        
+	        Transport.send( msg );
+	        outText.addOutLine("Information über Server Reset versand.");
+		} catch (Throwable exc) { // any fatal error
+            // outText.addOutLine(exc.toString()); // print it so it can be written to errors.txt 
+			System.out.println(exc.toString());
+            System.exit(1);
+        }
+	}
+	
 	
 	/**
 	 * wickelt nachgeforderte Selektionen ab
