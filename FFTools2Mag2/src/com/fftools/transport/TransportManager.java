@@ -268,7 +268,6 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 	 * evaluiert anstehende transporte in den angegeben regionen
 	 * @param regions
 	 */
-	@SuppressWarnings("unused")
 	private void runRegions(ArrayList<TradeRegion> tradeRegions, String infoName){
 		// eigene Region Liste bauen
 		// neu: unter berücksichtigung der selektierten Regionen
