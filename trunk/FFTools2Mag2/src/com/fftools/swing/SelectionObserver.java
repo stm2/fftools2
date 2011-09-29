@@ -16,6 +16,7 @@ import magellan.client.event.SelectionListener;
  */
 public class SelectionObserver implements SelectionListener{
 
+	@SuppressWarnings("unchecked")
 	private Collection selectedObjects = null;
 	private Client client = null;
 	
@@ -44,6 +45,7 @@ public class SelectionObserver implements SelectionListener{
 	/**
 	 * @return the selectedObjects
 	 */
+	@SuppressWarnings("unchecked")
 	public Collection<Object> getSelectedObjects() {
 		return selectedObjects;
 	}
@@ -53,6 +55,7 @@ public class SelectionObserver implements SelectionListener{
 	 * @param c "Filter"-Klasse
 	 * @return ArrayList oder null
 	 */
+	@SuppressWarnings("unchecked")
 	public ArrayList<Object> getObjectsOfClass(Class<?> c){
 		ArrayList<Object> erg = null;
 		for (Iterator<Object> iter = this.selectedObjects.iterator();iter.hasNext();){

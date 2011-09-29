@@ -132,7 +132,7 @@ public class ConnectorPlugin implements MagellanPlugIn, MainMenuProvider, UnitCo
     /* (non-Javadoc)
 	 * @see magellan.client.swing.context.UnitContextMenuProvider#createContextMenu(magellan.client.event.EventDispatcher, magellan.library.GameData, magellan.library.Unit, java.util.Collection)
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	public JMenuItem createContextMenu(EventDispatcher dispatcher,GameData data, Unit unit, Collection selectedObjects) {
 		if (unitContextMenu==null){
 			unitContextMenu = new UnitSubmenu(this.client);
