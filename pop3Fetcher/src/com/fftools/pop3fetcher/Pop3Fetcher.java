@@ -665,7 +665,10 @@ public class Pop3Fetcher {
 			outText.addOutLine("cleaning scratch");
 			path = new File("../scratch");
 			for (File file : path.listFiles()) {
-		        if (file.toString().toLowerCase().startsWith("monopol.cr_20")){
+				String s_name = file.toString().toLowerCase();
+				outText.addOutLine("checking: " + s_name);
+		        if (file.toString().toLowerCase().startsWith("../scratch/monopol.cr_20")){
+		        	outText.addOutLine("deleting: " + s_name);
 		        	file.delete();
 		        }
 		    }
@@ -674,10 +677,14 @@ public class Pop3Fetcher {
 			outText.addOutLine("cleaning scripts");
 			path = new File("../scripts");
 			for (File file : path.listFiles()) {
-		        if (file.toString().toLowerCase().startsWith("fftools_log_")){
+				String s_name = file.toString().toLowerCase();
+				outText.addOutLine("checking: " + s_name);
+		        if (file.toString().toLowerCase().startsWith("../scripts/fftools_log_")){
+		        	outText.addOutLine("deleting: " + s_name);
 		        	file.delete();
 		        }
-		        if (file.toString().equals("mergelog.txt")){
+		        if (file.toString().equals("../scripts/mergelog.txt")){
+		        	outText.addOutLine("deleting: " + s_name);
 		        	file.delete();
 		        }
 		    }
@@ -711,7 +718,8 @@ public class Pop3Fetcher {
 	        InternetAddress addressFrom = new InternetAddress("monopol@gdr-group.com");
 	        msg.setFrom( addressFrom );
 
-	        
+	        InternetAddress addressTo = new InternetAddress(s.getDirectory("NachfordernMailInfo"));
+	        msg.addRecipient( Message.RecipientType.TO, addressTo );
 	       
 			msg.addRecipients(Message.RecipientType.TO, m.getFrom());
 	        	
