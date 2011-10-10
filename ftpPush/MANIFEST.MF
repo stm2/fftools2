@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Class-Path: FFToolsTool1.jar FFTools2.jar commons-net-3.0.1.jar
+Main-Class: com.fftools.ftpPush.FtpPush
