@@ -323,7 +323,8 @@ public class Handeln extends TradeAreaScript{
 	private void privat_return(){
 		if (!doSomething){
 			super.addComment("Händler hat keinen Auftrag und lernt.");
-			super.lerneTalent("Handeln", true);
+			// super.lerneTalent("Handeln", true);
+			this.addOrder("Lernen Handeln", true);
 		}
 	}
 	

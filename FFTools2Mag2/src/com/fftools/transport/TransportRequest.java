@@ -169,7 +169,11 @@ public class TransportRequest extends PriorityUser implements Comparable<Transpo
 	}
 	
 	public int compareTo(TransportRequest o){
-		return Math.max(0,(o.getPrio() - this.getPrio()));
+		int i =0;
+		// i = Math.max(0,(o.getPrio() - this.getPrio()));
+		// THAT WAS BUGGY!!!!  FF 2011-11-11 ...very late to find out..
+		i = o.getPrio() - this.getPrio();
+		return i;
 	}
 
 	/**
@@ -249,4 +253,11 @@ public class TransportRequest extends PriorityUser implements Comparable<Transpo
 	public void setTM_sortMode(int mode) {
 		TM_sortMode = mode;
 	}
+	
+	public String toString(){
+		String info = "";
+		info = this.gefordert + " " + this.originalGegenstand + " Prio " + this.getPrio() + " nach " + this.region.toString() +  " (" + this.getKommentar() + ")";
+		return info;
+	}
+	
 }
