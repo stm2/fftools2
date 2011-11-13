@@ -91,8 +91,7 @@ public class TransportOffer implements Comparable<TransportOffer> {
 	}
 	
 	public int compareTo(TransportOffer o){
-		return Math.max(0,(o.getAnzahl_nochOfferiert() - this.getAnzahl_nochOfferiert()));
-		
+		return o.getAnzahl_nochOfferiert() - this.getAnzahl_nochOfferiert();
 	}
 
 	/**
