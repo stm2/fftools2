@@ -214,12 +214,12 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 			// this.sortTransportersOutByTradeArea(TAH,TA);
 			
 			outText.setScreenOut(true);
-			outText.addOutLine("****** TransportManager bearbeitet TradeArea " + TA.getName() + " *******");
+			outText.addOutLine("***TM " + TA.getName() + " ");
 			tradeRegions.addAll(TA.getTradeRegions());
 			this.sortTransportersOutByTradeArea(TAH,TA);
 			
 			if (this.allTransporters!=null){
-				outText.addOutLine("Transporter zu diesem Area: " + this.transporters.size() + " (von " + this.allTransporters.size() + " insg.)");
+				outText.addOutChars("T: " + this.transporters.size() + "/" + this.allTransporters.size() + "");
 			} else {
 				outText.addOutLine("keine Transporter im CR ?!?");
 			}
@@ -233,11 +233,12 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 				}
 				long endT = System.currentTimeMillis();
 				outText.setScreenOut(true);
-				outText.addOutLine("Für " + TA.getName() + " benötigt:" + (endT-startT) + " ms.");
+				outText.addOutChars(", t=" + (endT-startT) + " ms.");
 				outText.setScreenOut(false);
 			} else {
+				
 				outText.setScreenOut(true);
-				outText.addOutLine("Für " + TA.getName() + " keine Transporter berücksichtigt.");
+				outText.addOutChars(" - keine Transporter.");
 				outText.setScreenOut(false);
 			}
 		}

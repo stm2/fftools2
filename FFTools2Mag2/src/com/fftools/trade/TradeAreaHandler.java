@@ -820,6 +820,9 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 			if (this.hasTAC(actTA)){
 				withInfo=true;
 			}
+			if (this.reportOFF_TAH_TAC){
+				withInfo=false;
+			}
 			if (!this.reportOFF_TAH_TAC && withInfo){
 				outText.addOutLine("*** TAH - Balance for " + actTA.getName() + " ***");
 				outText.addNewLine();
@@ -967,14 +970,16 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 			}
 		});
 		
-		outText.addOutLine("**********");
-		outText.addOutLine("process_TAC_Request_relative: " + actTAC_Request.toString());
-		
-		for (TAC_offer actTO:allOffers){
-			outText.addOutLine(actTO.toString());
+		if (!this.reportOFF_TAH_TAC){
+			outText.addOutLine("**********");
+			outText.addOutLine("process_TAC_Request_relative: " + actTAC_Request.toString());
+			
+			for (TAC_offer actTO:allOffers){
+				outText.addOutLine(actTO.toString());
+			}
+			outText.addOutLine("------------");
+			outText.addOutLine("");
 		}
-		outText.addOutLine("------------");
-		outText.addOutLine("");
 		// Abarbeiten
 		for (TAC_offer actTO:allOffers){
 			process_TAC_offer(actTAC_Request,actTO);
