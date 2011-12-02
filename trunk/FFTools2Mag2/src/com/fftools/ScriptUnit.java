@@ -182,7 +182,7 @@ public class ScriptUnit {
 					if (suDel!=null){
 						this.getOverlord().deleteScriptUnit(suDel);
 					} else {
-						outText.addOutLine("!!! Zu löschende Unit nicht in ScriptUnis!!!(" + t.getID().toString() + ")(" + this.unitDesc()+")",true);
+						this.addComment("!!! Zu löschende Unit nicht in ScriptUnis!!!(" + t.getID().toString() + ")(" + this.unitDesc()+")");
 					}
 					
 				} 

@@ -34,7 +34,7 @@ public class OutTextClass {
 	private long setPointEveryMilliseks = 300;
 	
 	private int cntPoints = 0;
-	private int maxRowPoints = 30;
+	private int maxRowPoints = 75;
 	
 	private HashMap<String,FileWriter> fileWriters = null; 
 	
@@ -72,17 +72,22 @@ public class OutTextClass {
 				System.out.flush();
 			}
 			cntPoints++;
-			if (cntPoints>maxRowPoints){
-				cntPoints=0;
-				if (txtOutput!=null){
-					txtOutput.append("*\r\n");
-					txtOutput.setCaretPosition((txtOutput.getText().length()));
-				} else {
-					System.out.print("*\r\n");
-					System.out.flush();
-				}
-				
+			checkMaxRowPoints();
+		}
+	}
+	
+	
+	private void checkMaxRowPoints(){
+		if (cntPoints>maxRowPoints){
+			cntPoints=0;
+			if (txtOutput!=null){
+				txtOutput.append("*\r\n");
+				txtOutput.setCaretPosition((txtOutput.getText().length()));
+			} else {
+				System.out.print("*\r\n");
+				System.out.flush();
 			}
+			
 		}
 	}
 	
@@ -93,6 +98,8 @@ public class OutTextClass {
 	public void addOutLine(String s) {
 		String sS = "\r\n" + s;
 		this.addOutChars(sS);
+		this.cntPoints = sS.length();
+		// checkMaxRowPoints();
 	}
 	
 	public void addNewLine(){
@@ -116,7 +123,8 @@ public class OutTextClass {
 				System.out.print(sS);
 				System.out.flush();
 			}
-			cntPoints=maxRowPoints;
+			cntPoints+=sS.length();
+			checkMaxRowPoints();
 		}
 		this.writeToLog(originalString);
 	}
@@ -137,7 +145,8 @@ public class OutTextClass {
 				System.out.print(sS);
 				System.out.flush();
 			}
-			cntPoints=maxRowPoints;
+			cntPoints+=sS.length();
+			checkMaxRowPoints();
 		}
 		this.writeToLog(originalString);
 	}
