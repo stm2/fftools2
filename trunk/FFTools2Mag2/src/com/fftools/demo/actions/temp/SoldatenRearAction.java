@@ -85,7 +85,7 @@ public class SoldatenRearAction extends MenuAction {
 		tempUnit.addOrderAt(0, "BENENNEN EINHEIT Soldaten ;dnt");
 		// script Setzen
 		
-		tempUnit.addOrderAt(0, "// script Lernfix Lernplan=ArmeeBogenschieﬂen");
+		tempUnit.addOrderAt(0, "// script Lernfix Lernplan=ArmeeBogen");
 		tempUnit.addOrderAt(0, "// script Material hinten=an");
 		
 		// rekrutieren

@@ -190,6 +190,12 @@ public class TradeAreaBauManager {
 		}
 		
 		
+		// 20120121: noch nicht versorgte Bauarbeiter könnten dort helfen
+		// wo: - genug Material da ist
+		// - und sie die Bauzeit verringern können.
+		// Bauprojekte durchgehen, die bereits genug Material haben...wissen wir das schon?
+		
+		
 		// was ist mit nicht versorgten Bauarbeitern?
 		
 		for (Bauen arbeiter:autoBauer){
