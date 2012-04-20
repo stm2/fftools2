@@ -28,9 +28,7 @@ import com.fftools.utils.GotoInfo;
  */
 public class TradeAreaBauManager {
 	// private static final OutTextClass outText = OutTextClass.getInstance();
-	
-	
-	
+
 	private TradeArea tradeArea = null;
 	
 	// merken wir uns zu jeder ScriptUnit doch einfach die bauScripte
@@ -38,12 +36,11 @@ public class TradeAreaBauManager {
 	
 	// merken wir uns zu jeder ScriptUnit doch einfach die bauAufträge
 	private Hashtable<ScriptUnit, ArrayList<Bauauftrag>> bauAufträge = null;
-	
 
 	// Die Infozeilen
 	private ArrayList<String> infoLines = new ArrayList<String>();
 	
-	// Die scriptUnit, die den automatischen Burgenbau regestriert hat
+	// Die scriptUnit, die den automatischen Burgenbau registriert hat
 	private Burgenbau registerBurgenbau = null;
 	
 	// Liste mit Bauscripten, die extra vom TA-BM informiert werde wollen (info=ja)
@@ -52,7 +49,13 @@ public class TradeAreaBauManager {
 	// wird für alle Bauen=auto übernommen
 	private CoordinateID centralHomeDest = null;
 	
+	// Eine Liste der Bauarbeiter mit mode=auto
+	// wird am Anfang von run0 einmalig gebaut 
 	private ArrayList<Bauen> autoBauer = null;
+	
+	// Eine Liste von Bauarbeitern, die eventuell unterstützt werden könnten
+	private ArrayList<Bauen> supportableBuilder = null;
+	
 	
 	public CoordinateID getCentralHomeDest() {
 		return centralHomeDest;
@@ -92,7 +95,7 @@ public class TradeAreaBauManager {
 			return;
 		}
 		// Liste der automatischen Bauarbeiter bauen
-		autoBauer = new ArrayList<Bauen>();
+		this.autoBauer = new ArrayList<Bauen>();
 		for (ScriptUnit su:this.bauScripte.keySet()){
 			ArrayList<Bauen> actList = this.bauScripte.get(su);
 			if (actList!=null && actList.size()>0){
@@ -108,6 +111,9 @@ public class TradeAreaBauManager {
 			this.infoLines.add("keine automatischen Bauarbeiter im TA bekannt");
 			return;
 		}
+		
+		// Anlegen der supportableBuilders
+		this.supportableBuilder = new ArrayList<Bauen>();
 		
 		processCentralHomeDest(autoBauer);
 
@@ -190,25 +196,85 @@ public class TradeAreaBauManager {
 		}
 		
 		
-		// 20120121: noch nicht versorgte Bauarbeiter könnten dort helfen
-		// wo: - genug Material da ist
-		// - und sie die Bauzeit verringern können.
-		// Bauprojekte durchgehen, die bereits genug Material haben...wissen wir das schon?
 		
-		
-		// was ist mit nicht versorgten Bauarbeitern?
-		
-		for (Bauen arbeiter:autoBauer){
-			if (!arbeiter.hasPlan() ){
-				processWaitingArbeiter(arbeiter);
-			}
-		}
 		
 		
 		
 		Collections.reverse(this.infoLines);
 		
 	}
+	
+	
+	/**
+	 * Durchforstet die Region von b nach Bauarbeitern noch ohne Auftrag
+	 * wenn der geeignet ist und helfen kann, wird 
+	 * - Liefere organisiert
+	 * - b.turnsToGo entsprechend reduziert
+	 * - dem Bauarbeiter ein Plan aufgedrückt
+	 * @param b
+	 */
+	private void checkForIddleSupporterInRegion(Bauen b){
+		// mit welchem level
+		int	level_needed = FFToolsGameData.getCastleSizeBuildSkillLevel(b.getActSize());
+		// Abarbeiten
+		ArrayList<Bauen> availableBauarbeiter = new ArrayList<Bauen>();
+		String actTalentName = "Burgenbau";
+		
+		
+		// noch verfügbare Bauarbeiter zusammensuchen
+		availableBauarbeiter.clear();
+		for (Bauen arbeiter:autoBauer){
+			if (!arbeiter.hasPlan() && arbeiter.scriptUnit.getSkillLevel(actTalentName)>=level_needed && arbeiter.region().equals(b.region())){
+				availableBauarbeiter.add(arbeiter);
+			}
+		}
+		
+		if (availableBauarbeiter.size()>0) {
+			// Sortieren mit Relevanz zu:
+			// ZielRegion und benötigtem TP und Level und Skill
+			BauauftragScriptComparator bc = new BauauftragScriptComparator(b.region(),level_needed,actTalentName,(b.getTargetSize()-b.getActSize()));
+			Collections.sort(availableBauarbeiter, bc);
+			// Zuordnen an den ersten besten
+			for (Bauen arbeiter:availableBauarbeiter){
+				if (b.getTurnsToGo()<=1){
+					break;
+				}
+				// ok...umsetzen
+				b.setSupporter(arbeiter);
+			}
+			
+		}
+		
+	}
+	
+	
+	/**
+	 * Durchforstet die Region von b nach Bauarbeitern, wegen Ressourcenmangel warten müssen
+	 * wenn der geeignet ist und helfen kann, wird 
+	 * - Liefere organisiert
+	 * - b.turnsToGo entsprechend reduziert
+	 * - dem Bauarbeiter ein Plan aufgedrückt / dessen Plan geändert
+	 * @param b
+	 */
+	private void checkForWaitingSupporterInRegion(Bauen b){
+		
+	}
+	
+	
+	/**
+	 * Durchforstet das TA nach Bauarbeitern ohne Plan, die innerhalb 
+	 * der aktuellen Fertigstellungszeit b erreichen können und durch ihr
+	 * mitwirken die Fertigstellungsdauer reduzieren können
+	 * Reisezeit + 1 > turns to go
+	 * wenn der geeignet ist und helfen kann, wird 
+	 * - b.turnsToGo entsprechend reduziert
+	 * - dem Bauarbeiter ein Plan aufgedrückt / dessen Plan geändert -> GoTo
+	 * @param b
+	 */
+	private void checkForIddleSupporterInTA(Bauen b){
+		
+	}
+	
 	
 	/**
 	 * Baumanager hat diesem Arbeiter keinen Auftrag erteilt
@@ -245,6 +311,11 @@ public class TradeAreaBauManager {
 			Arbeiter.scriptUnit.addAScriptNow(newBauscript);
 			Arbeiter.setAutomode_hasPlan(true);
 			Auftrag.addComment("Bauen: " + Arbeiter.unitDesc() + " übernimmt: " + Auftrag.toString());
+			
+			
+			this.supportableBuilder.add(newBauscript);
+			newBauscript.addComment("DEBUG: Bauscript auf Liste supportableBuilder");
+			
 			return true;
 			
 		} else {
@@ -295,6 +366,52 @@ public class TradeAreaBauManager {
 	 */
 	
 	public void run1(){
+		
+		
+		// 20120121: noch nicht versorgte Bauarbeiter könnten dort helfen
+		// wo: - genug Material da ist
+		// - und sie die Bauzeit verringern können.
+		// Bauprojekte durchgehen, die bereits genug Material haben...wissen wir das schon?
+		// 20120331 - fangen wir vorsichtig mit den Burgenbauern an
+		if (this.supportableBuilder!=null && this.supportableBuilder.size()>0){
+			for (Bauen b:this.supportableBuilder){
+				b.addComment("Prüfe Bauarbeiter auf Unterstützer...");
+				if (!b.isFertig() && b.getTurnsToGo()>1 && b.getActTyp()==Bauen.BURG){
+					// noch nicht fertig
+					// müsste noch diverse (>1) runden arbeiten (hat also genug ressourcen)
+					// ist BURGenbauer
+					
+					
+					b.addComment("Suche Unterstützer...");
+					// in einem ersten Schritt die Burgenbauer durchgehen, die in der 
+					// gleichen Region sind und *keinen* Plan haben
+					checkForIddleSupporterInRegion(b);
+					
+					if (b.getTurnsToGo()>1){
+						checkForWaitingSupporterInRegion(b);
+					}
+					if (b.getTurnsToGo()>1){
+						checkForIddleSupporterInTA(b);
+					}
+					b.addComment("Suche abgeschlossen. Aktuell verbleibende Runden: " + b.getTurnsToGo());
+				} else {
+					b.addComment("Bauarbeiter benötigt keine Unterstützung");
+					b.addComment("DEBUG: fertig: " + b.isFertig() + ", Turns: " + b.getTurnsToGo() + ", Typ:" + b.getActTyp());
+				}
+			}
+		}
+		
+		// was ist mit nicht versorgten Bauarbeitern?
+		if (this.autoBauer!=null && this.autoBauer.size()>0){
+			for (Bauen arbeiter:autoBauer){
+				if (!arbeiter.hasPlan() ){
+					processWaitingArbeiter(arbeiter);
+				}
+			}
+		}
+		
+		
+		
 		
 		this.informUnits(1);
 		

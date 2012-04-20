@@ -127,12 +127,15 @@ public class FFToolsGameData {
 			Unit actU = (Unit)iter.next();
 			// und prüfen
 			String test = actU.getName();
+			if (test==null){
+				test = actU.getModifiedName();
+			}
 			ID test2 = actU.getID();
 			if (test != null && test2 != null){
-				if (actU.getName().equalsIgnoreCase(unitDesc) || actU.toString(false).equalsIgnoreCase(unitDesc)){
+				if (test.equalsIgnoreCase(unitDesc) || actU.toString(false).equalsIgnoreCase(unitDesc)){
 					return actU;
-				}
-			}
+				} 
+			} 
 		}
 		return null;
 	}
