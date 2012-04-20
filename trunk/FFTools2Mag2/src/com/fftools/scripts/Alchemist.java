@@ -187,7 +187,7 @@ public class Alchemist extends MatPoolScript{
 	private void getZubehoer(){
 		this.getZubehoerDetail("Schaffenstrunk", 1);
 		this.getZubehoerDetail("Gehirnschmalz", 1);
-		this.getZubehoerDetail("Ring der flinken Finger", 1);
+		// this.getZubehoerDetail("Ring der flinken Finger", 1);
 	}
 	
 	/**
