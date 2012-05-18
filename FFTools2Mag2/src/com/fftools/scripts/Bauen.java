@@ -1260,7 +1260,7 @@ public void runScript(int scriptDurchlauf){
 			if (!actPos.equals(this.homeDest)){
 				// wir sind noch nicht da
 				// ja, hinreiten und pferde requesten
-				GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(), this.homeDest, true);
+				GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(), this.homeDest, true,"autoLearn");
 				this.addComment("unterwegs in die HOME-Region");
 				this.addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
 				// Pferde requesten...
@@ -1392,12 +1392,13 @@ public void runScript(int scriptDurchlauf){
 		int minReitLevel=Bauen.minReitLevel;
 		if (b.scriptUnit.getSkillLevel("Reiten")>minReitLevel){
 			// ja, hinreiten und pferde requesten
-			GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(b.scriptUnit, b.region().getCoordinate(), this.region().getCoordinate(), true);
+			GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(b.scriptUnit, b.region().getCoordinate(), this.region().getCoordinate(), false,"setSupporterOnRoute");
 			if (gotoInfo.getAnzRunden()>=(this.turnsToGo)){
 				b.addComment("Kann nicht helfen bei: " + this.toString() + " (zu weit weg), ETA:" + gotoInfo.getAnzRunden() + " Runden bei noch " + this.turnsToGo + " weiteren Runden Bauzeit.");
 				this.addComment(b.unitDesc() + " zu weit weg für Hilfe hier.  ETA:" + gotoInfo.getAnzRunden() + " Runden bei noch " + this.turnsToGo + " weiteren Runden Bauzeit.");
 			} else {
-				b.addComment("dieser Region NEU als Bauuntersztützer zugeordnet: " +  this.region().toString());
+				gotoInfo = FFToolsRegions.makeOrderNACH(b.scriptUnit, b.region().getCoordinate(), this.region().getCoordinate(), true,"setSupporterOnRoute");
+				b.addComment("dieser Region NEU als Bauunterstützer zugeordnet: " +  this.region().toString());
 				b.addComment("Auftrag: " + this.toString());
 				b.addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden bei noch " + this.turnsToGo + " weiteren Runden Bauzeit.");
 				b.setAutomode_hasPlan(true);

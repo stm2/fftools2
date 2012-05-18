@@ -304,7 +304,7 @@ public class FFToolsRegions {
 	}
 	
 	
-	public static GotoInfo makeOrderNACH(ScriptUnit u,CoordinateID act,CoordinateID dest,boolean writeOrders){
+	public static GotoInfo makeOrderNACH(ScriptUnit u,CoordinateID act,CoordinateID dest,boolean writeOrders,String originInfo){
 		
 		//	FF 20070103: eingebauter check, ob es actDest auch gibt?!
 		if (!isInRegions(u.getScriptMain().gd_ScriptMain.regions(), dest)){
@@ -327,7 +327,12 @@ public class FFToolsRegions {
 			// path gefunden
 			if (writeOrders){
 				u.addOrder("NACH " + path, true);
-				u.addComment("Einheit durch GOTO bestätigt.",true);
+				String info = "Einheit durch GOTO bestätigt.";
+				if ((originInfo.length())>1) {
+					info = info + "(" + originInfo + ")";
+				}
+				
+				u.addComment(info ,true);
 			}
 			erg.setPath(path);
 			

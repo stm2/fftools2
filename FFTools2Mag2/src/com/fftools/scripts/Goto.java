@@ -97,7 +97,7 @@ public class Goto extends Script implements WithGotoInfo{
 	
 	private void makeOrderNACH(CoordinateID act,CoordinateID dest){		
 		this.gotoInfo = new GotoInfo();
-		this.gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, act, dest,true);
+		this.gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, act, dest,true,"Goto - makeOrderNach");
 		
 	}
 

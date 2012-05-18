@@ -393,7 +393,7 @@ public class TradeAreaBauManager {
 			int minReitLevel=Bauen.minReitLevel;
 			if (Arbeiter.scriptUnit.getSkillLevel("Reiten")>minReitLevel){
 				// ja, hinreiten und pferde requesten
-				GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(Arbeiter.scriptUnit, Arbeiter.region().getCoordinate(), Auftrag.region().getCoordinate(), true);
+				GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(Arbeiter.scriptUnit, Arbeiter.region().getCoordinate(), Auftrag.region().getCoordinate(), true,"TA-BM:BauZuordnung");
 				Arbeiter.addComment("dieser Region NEU als Bauarbeiter zugeordnet: " +  Auftrag.region().toString());
 				Arbeiter.addComment("Auftrag: " + Auftrag.toString());
 				Arbeiter.addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");

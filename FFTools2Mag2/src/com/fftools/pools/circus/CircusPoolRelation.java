@@ -158,7 +158,7 @@ public class CircusPoolRelation implements Comparable<CircusPoolRelation> {
 	
 	// setzt den dest wert auf die entfernung zur Region "to"
 	public void setDistToRegion(Region to){
-		this.gotoInfo = FFToolsRegions.makeOrderNACH(this.unterhalten.scriptUnit, this.unterhalten.scriptUnit.getUnit().getRegion().getCoordinate(), to.getCoordinate(), false);
+		this.gotoInfo = FFToolsRegions.makeOrderNACH(this.unterhalten.scriptUnit, this.unterhalten.scriptUnit.getUnit().getRegion().getCoordinate(), to.getCoordinate(), false,"CircusPoolRelation");
 		this.dist = this.gotoInfo.getAnzRunden();
 	}
 

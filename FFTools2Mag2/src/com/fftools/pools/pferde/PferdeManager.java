@@ -347,7 +347,7 @@ public class PferdeManager implements OverlordRun,OverlordInfo {
 				GotoInfo gotoInfo = FFToolsRegions.getPathDistLandGotoInfo(overLord.getScriptMain().gd_ScriptMain, actMover.region().getCoordinate(), actR.getCoordinate(), false);
 				if (gotoInfo.getAnzRunden()>0){
 					// wir kommen hin
-					gotoInfo = FFToolsRegions.makeOrderNACH(actMover.scriptUnit, actMover.region().getCoordinate(),actR.getCoordinate(), true);
+					gotoInfo = FFToolsRegions.makeOrderNACH(actMover.scriptUnit, actMover.region().getCoordinate(),actR.getCoordinate(), true,"Pferdemanager");
 					// aus der Liste der Mover entfernen
 					this.movingPferdeMacher.remove(actMover);
 					if (!this.reportOFF) {
