@@ -243,6 +243,9 @@ public class TradeAreaBauManager {
 				b.setSupporter(arbeiter);
 			}
 			
+		} else {
+			b.addComment("TABM: leider keine unbeschäftigten passenden Bauarbeiter in der Region, keine Hilfe von dieser Seite");
+			
 		}
 		
 	}
@@ -257,7 +260,41 @@ public class TradeAreaBauManager {
 	 * @param b
 	 */
 	private void checkForWaitingSupporterInRegion(Bauen b){
+		// mit welchem level
+		int	level_needed = FFToolsGameData.getCastleSizeBuildSkillLevel(b.getActSize());
+		// Abarbeiten
+		ArrayList<Bauen> availableBauarbeiter = new ArrayList<Bauen>();
+		String actTalentName = "Burgenbau";
 		
+		
+		// noch verfügbare Bauarbeiter zusammensuchen
+		availableBauarbeiter.clear();
+		for (Bauen arbeiter:autoBauer){
+			if (arbeiter.hasPlan() && arbeiter.getBauBefehl()=="" && arbeiter.scriptUnit.getSkillLevel(actTalentName)>=level_needed && arbeiter.region().equals(b.region())){
+				if (!(arbeiter.scriptUnit.equals(b.scriptUnit)) && !(arbeiter.isHasGotoOrder())){
+					availableBauarbeiter.add(arbeiter);
+				}
+			}
+		}
+		
+		if (availableBauarbeiter.size()>0) {
+			// Sortieren mit Relevanz zu:
+			// ZielRegion und benötigtem TP und Level und Skill
+			BauauftragScriptComparator bc = new BauauftragScriptComparator(b.region(),level_needed,actTalentName,(b.getTargetSize()-b.getActSize()));
+			Collections.sort(availableBauarbeiter, bc);
+			// Zuordnen an den ersten besten
+			for (Bauen arbeiter:availableBauarbeiter){
+				if (b.getTurnsToGo()<=1){
+					b.addComment("Abbruch der Zuordnung in der Region: Anzahl Runden: " + b.getTurnsToGo() );
+					break;
+				}
+				// ok...umsetzen
+				b.setSupporter(arbeiter);
+			}
+			
+		} else {
+			b.addComment("TABM: leider keine wartenden passenden Bauarbeiter in der Region, keine Hilfe von dieser Seite");
+		}
 	}
 	
 	
@@ -272,7 +309,38 @@ public class TradeAreaBauManager {
 	 * @param b
 	 */
 	private void checkForIddleSupporterInTA(Bauen b){
+		// mit welchem level
+		int	level_needed = FFToolsGameData.getCastleSizeBuildSkillLevel(b.getActSize());
+		// Abarbeiten
+		ArrayList<Bauen> availableBauarbeiter = new ArrayList<Bauen>();
+		String actTalentName = "Burgenbau";
 		
+		
+		// noch verfügbare Bauarbeiter zusammensuchen
+		availableBauarbeiter.clear();
+		for (Bauen arbeiter:autoBauer){
+			if (!arbeiter.hasPlan() && arbeiter.scriptUnit.getSkillLevel(actTalentName)>=level_needed && !arbeiter.region().equals(b.region())){
+				availableBauarbeiter.add(arbeiter);
+			}
+		}
+		
+		if (availableBauarbeiter.size()>0) {
+			// Sortieren mit Relevanz zu:
+			// ZielRegion und benötigtem TP und Level und Skill
+			BauauftragScriptComparator bc = new BauauftragScriptComparator(b.region(),level_needed,actTalentName,(b.getTargetSize()-b.getActSize()));
+			Collections.sort(availableBauarbeiter, bc);
+			// Zuordnen an den ersten besten
+			for (Bauen arbeiter:availableBauarbeiter){
+				if (b.getTurnsToGo()<=1){
+					break;
+				}
+				// ok...umsetzen
+				b.setSupporterOnRoute(arbeiter);
+			}
+			
+		} else {
+			b.addComment("TABM: leider keine unbeschäftigten passenden Bauarbeiter im TA, keine Hilfe von dieser Seite");
+		}
 	}
 	
 	
@@ -352,6 +420,8 @@ public class TradeAreaBauManager {
 				Arbeiter.scriptUnit.addOrder("Lernen Reiten", true, true);
 				Arbeiter.setFinalStatusInfo("Mindestreitlevel");
 				Arbeiter.setAutomode_hasPlan(true);
+				Arbeiter.setHasGotoOrder(false);
+				
 				return false;
 			}
 		}
@@ -382,15 +452,17 @@ public class TradeAreaBauManager {
 					// ist BURGenbauer
 					
 					
-					b.addComment("Suche Unterstützer...");
+					b.addComment("Suche arbeitslose Unterstützer in dieser Region...");
 					// in einem ersten Schritt die Burgenbauer durchgehen, die in der 
 					// gleichen Region sind und *keinen* Plan haben
 					checkForIddleSupporterInRegion(b);
 					
 					if (b.getTurnsToGo()>1){
+						b.addComment("Suche wartende Unterstützer in dieser Region...");
 						checkForWaitingSupporterInRegion(b);
 					}
 					if (b.getTurnsToGo()>1){
+						b.addComment("Suche arbeitslose Unterstützer in diesem TA...");
 						checkForIddleSupporterInTA(b);
 					}
 					b.addComment("Suche abgeschlossen. Aktuell verbleibende Runden: " + b.getTurnsToGo());
@@ -406,6 +478,9 @@ public class TradeAreaBauManager {
 			for (Bauen arbeiter:autoBauer){
 				if (!arbeiter.hasPlan() ){
 					processWaitingArbeiter(arbeiter);
+				}
+				if (arbeiter.hasMovingSupporters()){
+					arbeiter.informTurnsToGo();
 				}
 			}
 		}
