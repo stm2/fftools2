@@ -14,6 +14,7 @@ import magellan.library.rules.ItemType;
 import magellan.library.rules.SkillType;
 import magellan.library.utils.Direction;
 
+import com.fftools.pools.bau.Supporter;
 import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.utils.FFToolsGameData;
 import com.fftools.utils.FFToolsOptionParser;
@@ -28,6 +29,8 @@ import com.fftools.utils.GotoInfo;
  */
 
 public class Bauen extends MatPoolScript implements Cloneable{
+	
+	
 	// private static final ReportSettings reportSettings = ReportSettings.getInstance();
 	private int Durchlauf_Baumanager = 8;
 	private int Durchlauf_vorMatPool = 10;
@@ -108,7 +111,8 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	private int supportedLevels = 0; // Wieviele Level steuern supporter bei
 	private int AnzahlLevelNachRessourcen = 0; // für wieviele level hätten wir den Material
 	
-	
+	private ArrayList<Supporter> supporters;  // Liste aller Bauarbeiter für dieses Projekt
+	private boolean hasMovingSupporters = false;
 	
 
 
@@ -176,7 +180,7 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	public void setHasGotoOrder(boolean hasGotoOrder) {
 		this.hasGotoOrder = hasGotoOrder;
 	}
-
+	
 
 	/**
 	 * nix mehr zu tun!
@@ -195,10 +199,13 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	private int minAuslastung = 75;
 	
 	
+	
+	
 	// Konstruktor
 	public Bauen() {
 		super.setRunAt(this.runners);
 	}
+
 	
 	
 public void runScript(int scriptDurchlauf){
@@ -887,9 +894,9 @@ public void runScript(int scriptDurchlauf){
 		}
 		
 		if (!complete && anzRes>anzTal){
-			int anzRunden = (int)Math.ceil((double)anzRes / (double) anzTal);
+			int anzRunden = (int)Math.ceil((double)anzRes / (double) anzTal) - 1;
 			this.remainingLevels = (this.targetSize - this.getActSize()) - anzTal;
-			this.addComment("Bei meiner aktuellen Arbeitsleistung kann ich noch " + anzRunden + " Runden bauen. (Verbleibend: " + this.remainingLevels + " Stufen.");
+			this.addComment("Bei meiner aktuellen Arbeitsleistung kann ich noch " + anzRunden + " weitere Runden bauen. (Verbleibend: " + this.remainingLevels + " Stufen.");
 			this.turnsToGo = anzRunden;
 		}
 		
@@ -911,6 +918,12 @@ public void runScript(int scriptDurchlauf){
 				this.bauBefehl = "MACHEN " + actAnz + " BURG";
 			}
 			this.setFinalStatusInfo("baut " + actAnz + " Burg");
+			
+			Supporter sup = new Supporter();
+			sup.setETA(0);
+			sup.setLevels(actAnz);
+			sup.setBauen(this);
+			this.addSupporter(sup);
 		} else {
 			// nicht bauen
 			this.addComment("Bauen: Burg wird diese Runde nicht weitergebaut.");
@@ -1351,11 +1364,86 @@ public void runScript(int scriptDurchlauf){
 		int newTurnsToGo = (int)Math.ceil((double)this.AnzahlLevelNachRessourcen / (double)newSum);
 		this.addComment("Mit Unterstützer diese Runde ein Weiterbau von " + newSum + " Stufe an der Burg. (Baudauer: " + newTurnsToGo + " Runden.");
 		this.turnsToGo = newTurnsToGo;
+		this.turnsToGo = this.anzRundenWithSupporters(this.AnzahlLevelNachRessourcen, false);
+		this.addComment("Genaue Neuberechnung ergibt: " + this.turnsToGo);
+		
+		Supporter sup = new Supporter();
+		sup.setETA(0);
+		sup.setLevels(actStufen);
+		sup.setBauen(b);
+		this.addSupporter(sup);
 		
 		// debug: zum Wiederfinden
-		// outText.addOutLine("Bauunterstützung bei " + this.unitDesc(), true);
+		
+		outText.addOutLine("++++ *** ++++ **** ++++Bauunterstützung bei " + this.unitDesc(), true);
 		
 	}
+	
+	/**
+	 * Ein anderer Bauarbeiter soll unseren Unterstützen
+	 * Bisher: nur beim Bauen von Burgen!
+	 * Der andere hat noch keinen Plan und ist in einer anderen region -> herholen
+	 * @param b
+	 */
+	public void setSupporterOnRoute(Bauen b){
+		// wir müssen erst hin.
+		// können wir reiten?
+		// debug
+		int minReitLevel=Bauen.minReitLevel;
+		if (b.scriptUnit.getSkillLevel("Reiten")>minReitLevel){
+			// ja, hinreiten und pferde requesten
+			GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(b.scriptUnit, b.region().getCoordinate(), this.region().getCoordinate(), true);
+			if (gotoInfo.getAnzRunden()>=(this.turnsToGo)){
+				b.addComment("Kann nicht helfen bei: " + this.toString() + " (zu weit weg), ETA:" + gotoInfo.getAnzRunden() + " Runden bei noch " + this.turnsToGo + " weiteren Runden Bauzeit.");
+				this.addComment(b.unitDesc() + " zu weit weg für Hilfe hier.  ETA:" + gotoInfo.getAnzRunden() + " Runden bei noch " + this.turnsToGo + " weiteren Runden Bauzeit.");
+			} else {
+				b.addComment("dieser Region NEU als Bauuntersztützer zugeordnet: " +  this.region().toString());
+				b.addComment("Auftrag: " + this.toString());
+				b.addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden bei noch " + this.turnsToGo + " weiteren Runden Bauzeit.");
+				b.setAutomode_hasPlan(true);
+				b.setHasGotoOrder(true);
+				b.setFinalStatusInfo("moving to work (supporter)");
+				this.addComment("Bauen: " + b.unitDesc() + " unterstützt beim Bauen. ETA: " + gotoInfo.getAnzRunden() + " Runden bei noch " + this.turnsToGo + " weiteren Runden Bauzeit.");
+				// Pferde requesten...
+				if (b.scriptUnit.getSkillLevel("Reiten")>0){
+					MatPoolRequest MPR = new MatPoolRequest(b,b.scriptUnit.getUnit().getModifiedPersons(), "Pferd", 21, "Bauunterstützer unterwegs" );
+					b.addMatPoolRequest(MPR);
+				}
+				
+				// turns to go irgendwie anpassen...
+				int otherAnzTal = b.calcAnzTalBurg(this.actSize);
+				this.addComment("Unterstützer kann nach Talenten für " + otherAnzTal + " bauen.");
+				
+				Supporter sup = new Supporter();
+				sup.setETA(0);
+				sup.setLevels(otherAnzTal);
+				sup.setBauen(b);
+				this.addSupporter(sup);
+				
+				this.turnsToGo = this.anzRundenWithSupporters(this.AnzahlLevelNachRessourcen, false);
+				this.addComment("neue Bauzeit: " + this.turnsToGo);
+				
+				this.hasMovingSupporters=true;
+				
+				// debug: zum Wiederfinden
+				
+				outText.addOutLine("++++ *** ++++ **** ++++Bauunterstützung bei " + this.unitDesc() + " (moving)", true);
+				
+				
+			}
+			
+		} else {
+			// nein, auf T1 Reiten lernen
+			// mit Ausreichend info versehen
+			b.addComment("Als Bauunterstützer fast zugeordnet: " + this.toString() + " bei " + this.unitDesc());
+			b.addComment("aber da noch nicht reiten könnend, erstmal lernen");
+			b.scriptUnit.addOrder("Lernen Reiten", true, true);
+			b.setFinalStatusInfo("Mindestreitlevel");
+			b.setAutomode_hasPlan(true);
+			b.setHasGotoOrder(false);
+		}
+	}
+	
 	
 	
 	public int calcAnzTalBurg(int castleSize){
@@ -1413,6 +1501,64 @@ public void runScript(int scriptDurchlauf){
 		
 		return anzTal;
 		
+	}
+	
+	private void addSupporter(Supporter sup){
+		if (this.supporters==null){
+			this.supporters=new ArrayList<Supporter>();
+		}
+		if (!this.supporters.contains(sup)) {
+			this.supporters.add(sup);
+		}
+	}
+	
+	
+	public int anzRundenWithSupporters(int levels, boolean addComment){
+		if (this.supporters==null || this.supporters.size()==0){
+			return -1;
+		}
+		
+		int runningSum=0;
+		int lastRunningSum=-1;
+		int anzRunden = 0;
+		if (addComment){
+			this.addComment("Berechnung der finalen Bauzeit für " + levels + " Level");
+		}
+		while (runningSum<=levels){
+			// alle Aufsummieren, die ETA >= anzRunden haben
+			int runningSumTurn=0;
+			for (Supporter sup:this.supporters){
+				if (sup.getETA()<=anzRunden){
+					runningSumTurn+=sup.getLevels();
+				}
+			}
+			runningSum+=runningSumTurn;
+			if (addComment){
+				this.addComment("Runde " + anzRunden + ": " + runningSumTurn + " level, Summe: " + runningSum);
+			}
+			if (runningSum<=levels){
+				anzRunden++;
+			}
+			
+			if (runningSum==lastRunningSum){
+				this.addComment("Abbruch der Berechnung wg Konstanz in Runde " + anzRunden);
+				return -1;
+			}
+			lastRunningSum=runningSum;
+		}
+		if (addComment){
+			this.addComment("Geplante Fertigstellung in " + anzRunden + " Runden.");
+		}
+		return anzRunden;
+	}
+
+
+	public boolean hasMovingSupporters() {
+		return hasMovingSupporters;
+	}
+	
+	public void informTurnsToGo(){
+		this.anzRundenWithSupporters(this.AnzahlLevelNachRessourcen, true);
 	}
 	
 }
