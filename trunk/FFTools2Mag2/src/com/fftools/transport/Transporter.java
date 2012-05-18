@@ -317,13 +317,13 @@ public class Transporter {
 	public void setDestRegion(Region destRegion) {
 		this.destRegion = destRegion;
 		this.gotoInfo = new GotoInfo();
-		this.gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.getActRegion().getCoordinate(), destRegion.getCoordinate(),false);
+		this.gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.getActRegion().getCoordinate(), destRegion.getCoordinate(),false,"Transporter - SetDestRegion");
 	}
 	
 	public void processDestRegion(){
 		if (this.destRegion!=null){
 			this.gotoInfo = new GotoInfo();
-			this.gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.getActRegion().getCoordinate(), destRegion.getCoordinate(),true);
+			this.gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.getActRegion().getCoordinate(), destRegion.getCoordinate(),true,"Transporter-  process Dest Region");
 			
 			// test more info
 			GotoInfo test = FFToolsRegions.getPathDistLandGotoInfo(this.scriptUnit.getScriptMain().gd_ScriptMain, this.getActRegion().getCoordinate(), destRegion.getCoordinate(), this.isRiding);

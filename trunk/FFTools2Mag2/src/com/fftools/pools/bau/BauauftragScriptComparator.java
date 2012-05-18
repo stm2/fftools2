@@ -41,13 +41,13 @@ public class BauauftragScriptComparator implements Comparator<Bauen> {
 		if (targetRegion.equals(b1.scriptUnit.getUnit().getRegion())){
 			wert1 =0;
 		} else {
-			GotoInfo gI1 = FFToolsRegions.makeOrderNACH(b1.scriptUnit, targetRegion.getCoordinate() ,b1.scriptUnit.getUnit().getRegion().getCoordinate(), false);
+			GotoInfo gI1 = FFToolsRegions.makeOrderNACH(b1.scriptUnit, targetRegion.getCoordinate() ,b1.scriptUnit.getUnit().getRegion().getCoordinate(), false,"BauauftragScriptComp");
 			wert1 = gI1.getAnzRunden();
 		}
 		if (targetRegion.equals(b2.scriptUnit.getUnit().getRegion())){
 			wert2 =0;
 		} else {
-			GotoInfo gI2 = FFToolsRegions.makeOrderNACH(b2.scriptUnit, targetRegion.getCoordinate() ,b2.scriptUnit.getUnit().getRegion().getCoordinate(), false);
+			GotoInfo gI2 = FFToolsRegions.makeOrderNACH(b2.scriptUnit, targetRegion.getCoordinate() ,b2.scriptUnit.getUnit().getRegion().getCoordinate(), false,"BauauftragScriptComp");
 			wert2 = gI2.getAnzRunden();
 		}
 

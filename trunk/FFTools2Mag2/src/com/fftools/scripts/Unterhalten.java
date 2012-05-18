@@ -264,7 +264,7 @@ public void runScript(int scriptDurchlauf){
 						
 						int reittalent=this.scriptUnit.getSkillLevel("Reiten");
 						if (reittalent>0){
-							gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(),targetRegion.getCoordinate(), true);
+							gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(),targetRegion.getCoordinate(), true,"Unterhalten");
 							addComment("dieser Region NEU als Unterhalter zugeordnet: " + targetRegion.toString());
 							addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
 							// Pferde requesten...
@@ -272,7 +272,7 @@ public void runScript(int scriptDurchlauf){
 							this.addMatPoolRequest(MPR);
 						} else {
 							// neu, wir lernen auf T1 Reiten
-							gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(),targetRegion.getCoordinate(), false);
+							gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, this.region().getCoordinate(),targetRegion.getCoordinate(), false,"Unterhalten");
 							this.addComment("-> wir lernen aber erstmal Reiten T1");
 							addComment("dieser Region NEU als Unterhalter zugeordnet: " + targetRegion.toString());
 							addComment("ETA: " + gotoInfo.getAnzRunden() + " Runden.");
