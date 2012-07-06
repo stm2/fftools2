@@ -1685,4 +1685,14 @@ public class ScriptUnit {
 		this.delScriptList.clear();
 	}
 	
+	
+	/**
+	 * 
+	 * @return mainDurchlauf beim Overlord
+	 */
+	public int getMainDurchlauf(){
+		return this.getOverlord().getMainDurchlauf();
+	}
+	
+	
 }
