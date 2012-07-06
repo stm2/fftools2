@@ -270,9 +270,10 @@ public class TradeAreaBauManager {
 		// noch verfügbare Bauarbeiter zusammensuchen
 		availableBauarbeiter.clear();
 		for (Bauen arbeiter:autoBauer){
-			if (arbeiter.hasPlan() && arbeiter.getBauBefehl()=="" && arbeiter.scriptUnit.getSkillLevel(actTalentName)>=level_needed && arbeiter.region().equals(b.region())){
+			if (arbeiter.hasPlan() && arbeiter.isOriginatedFromBauMAnger() && arbeiter.getBauBefehl()=="" && arbeiter.scriptUnit.getSkillLevel(actTalentName)>=level_needed && arbeiter.region().equals(b.region())){
 				if (!(arbeiter.scriptUnit.equals(b.scriptUnit)) && !(arbeiter.isHasGotoOrder())){
 					availableBauarbeiter.add(arbeiter);
+					// b.addComment("DEBUG:Bauunterstützersuche: verfügbar " + arbeiter.unitDesc() + " mit Baubefehl: " + arbeiter.getBauBefehl() + "!? (" + b.scriptUnit.getMainDurchlauf() + ")");
 				}
 			}
 		}

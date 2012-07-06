@@ -845,6 +845,7 @@ public void runScript(int scriptDurchlauf){
 		boolean complete = false;
 		if (actAnz + this.actSize>=this.targetSize){
 			complete=true;
+			this.addComment("Bauen: " + this.buildingType.getName() + " wird diese Runde fertig!");
 		}
 		
 		// wird Mindestauslastung eingehalten
@@ -859,18 +860,19 @@ public void runScript(int scriptDurchlauf){
 		if (okAusl || complete){
 			// bauen, wenn nicht schon anderes Bauscript vorhanden
 			if (this.actSize>0){
-				this.bauBefehl = "MACHEN " + actAnz + " BURG " + this.buildungNummer;
+				this.setBauBefehl("MACHEN " + actAnz + " BURG " + this.buildungNummer,"nach MP Building");
 				
 			} else {
-				this.bauBefehl = "MACHEN " + actAnz + " " + this.buildingType.getName();
+				this.setBauBefehl("MACHEN " + actAnz + " " + this.buildingType.getName(),"nach MP Building");
 				
 			}
 			this.setFinalStatusInfo("baut " + actAnz + " " + this.buildingType.getName());
-			
+			this.setAutomode_hasPlan(true);
+			this.addComment("Debug: Baubefehl: " + this.bauBefehl + " (" + this.scriptUnit.getMainDurchlauf() + ")");
 		} else {
 			// nicht bauen
 			this.addComment("Bauen: " + this.buildingType.getName() + " wird diese Runde nicht weitergebaut.");
-			this.bauBefehl = "";
+			this.setBauBefehl("","nachMP-Building");
 			this.setFinalStatusInfo("wartet auf Gebäude.");
 		}	
 	}
@@ -913,9 +915,9 @@ public void runScript(int scriptDurchlauf){
 		if (okAusl || complete){
 			// bauen, wenn nicht schon anderes Bauscript vorhanden
 			if (this.actSize>0){
-				this.bauBefehl = "MACHEN " + actAnz + " BURG " + this.buildungNummer;
+				this.setBauBefehl("MACHEN " + actAnz + " BURG " + this.buildungNummer,"nach MP Burg");
 			} else {
-				this.bauBefehl = "MACHEN " + actAnz + " BURG";
+				this.setBauBefehl( "MACHEN " + actAnz + " BURG","nach MP Burg");
 			}
 			this.setFinalStatusInfo("baut " + actAnz + " Burg");
 			
@@ -928,7 +930,7 @@ public void runScript(int scriptDurchlauf){
 			// nicht bauen
 			this.addComment("Bauen: Burg wird diese Runde nicht weitergebaut.");
 			this.setFinalStatusInfo("wartet auf Ressourcen. ");
-			this.bauBefehl = "";
+			this.setBauBefehl("","nach MP Burg");
 		}	
 		
 		
@@ -1018,12 +1020,12 @@ public void runScript(int scriptDurchlauf){
 		
 		// Entscheidung
 		if (okAusl || complete){
-			this.bauBefehl = "MACHEN STRASSE " + this.dir.toString();
+			this.setBauBefehl("MACHEN STRASSE " + this.dir.toString(),"nach MP strasse");
 			this.setFinalStatusInfo("baut Strasse");
 		} else {
 			// nicht bauen
 			this.addComment("Bauen: Strasse (" + this.dir.toString() + ") wird diese Runde nicht weitergebaut.");
-			this.bauBefehl = "";
+			this.setBauBefehl("","nach MP Strasse");
 			this.setFinalStatusInfo("wartet auf Strassenbau");
 		}	
 	}
@@ -1352,9 +1354,9 @@ public void runScript(int scriptDurchlauf){
 		// Plan setzen
 		b.setAutomode_hasPlan(true);
 		if (this.actSize>0){
-			b.bauBefehl = "MACHEN " + actStufen + " BURG " + this.buildungNummer;
+			b.setBauBefehl("MACHEN " + actStufen + " BURG " + this.buildungNummer,"set Supporter Bauen");
 		} else {
-			b.bauBefehl = "MACHEN " + actStufen + " BURG";
+			b.setBauBefehl("MACHEN " + actStufen + " BURG","set Supporter Bauen");
 		}
 		b.setFinalStatusInfo("baut " + actStufen + " Burg (Unterstützer)");
 		
@@ -1393,7 +1395,7 @@ public void runScript(int scriptDurchlauf){
 		if (b.scriptUnit.getSkillLevel("Reiten")>minReitLevel){
 			// ja, hinreiten und pferde requesten
 			GotoInfo gotoInfo = FFToolsRegions.makeOrderNACH(b.scriptUnit, b.region().getCoordinate(), this.region().getCoordinate(), false,"setSupporterOnRoute");
-			if (gotoInfo.getAnzRunden()>=(this.turnsToGo)){
+			if (gotoInfo.getAnzRunden()>=(this.turnsToGo - 1)){
 				b.addComment("Kann nicht helfen bei: " + this.toString() + " (zu weit weg), ETA:" + gotoInfo.getAnzRunden() + " Runden bei noch " + this.turnsToGo + " weiteren Runden Bauzeit.");
 				this.addComment(b.unitDesc() + " zu weit weg für Hilfe hier.  ETA:" + gotoInfo.getAnzRunden() + " Runden bei noch " + this.turnsToGo + " weiteren Runden Bauzeit.");
 			} else {
@@ -1560,6 +1562,12 @@ public void runScript(int scriptDurchlauf){
 	
 	public void informTurnsToGo(){
 		this.anzRundenWithSupporters(this.AnzahlLevelNachRessourcen, true);
+	}
+
+
+	public void setBauBefehl(String bauBefehl, String OriginInfo) {
+		this.bauBefehl = bauBefehl;
+		// this.addComment("DEBUG neuer Baubefehl: " + bauBefehl + " (" + this.scriptUnit.getMainDurchlauf() + ", " + OriginInfo + ", " + this.isInPlaningMode() + ")");
 	}
 	
 }

@@ -66,6 +66,10 @@ public class Overlord {
 	 */
 	private ArrayList<ScriptUnit> deletedUnits = null;
 	
+	/**
+	 * Der aktuelle Zähler
+	 */
+	private int mainDurchlauf=-1;
 	
 	/**
 	 * Konstruktor
@@ -112,7 +116,7 @@ public class Overlord {
 		}
 		
 		
-		for (int mainDurchlauf = 0;mainDurchlauf<Integer.MAX_VALUE;mainDurchlauf++){
+		for (mainDurchlauf = 0;mainDurchlauf<Integer.MAX_VALUE;mainDurchlauf++){
 			// scriptunits anstossen
 			for (Iterator<ScriptUnit> iter = this.scriptMain.getScriptUnits().values().iterator();iter.hasNext();){
 				ScriptUnit scrU = (ScriptUnit)iter.next();
@@ -465,6 +469,10 @@ public class Overlord {
 			return true;
 		}
 		return false;
+	}
+
+	public int getMainDurchlauf() {
+		return mainDurchlauf;
 	}
 	
 	
