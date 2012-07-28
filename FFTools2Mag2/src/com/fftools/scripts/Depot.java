@@ -182,6 +182,20 @@ public class Depot extends TransportScript{
 			
 		}
 		
+		// versuch, auch das Depot als TR-Name Setter zuzulassen
+		if (OP.getOptionString("TradeArea").length()>0){
+			String setAreaName = OP.getOptionString("TradeArea");
+			// TR bekommen
+			TradeRegion TR = this.getTradeRegion();
+			if (TR!=null){
+				TR.setTradeAreaName(setAreaName);
+				this.addComment("trying to name TradeArea as: " + setAreaName);
+			} else {
+				this.addComment("!!! could not set TradeArea Name: no TradeRegion found.");
+				this.doNotConfirmOrders();
+			}
+		}
+		
 		
 		// requestInfo
 		this.scriptUnit.findScriptClass("RequestInfo");
