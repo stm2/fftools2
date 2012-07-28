@@ -412,6 +412,17 @@ private MatPool matPool = null;
 		                 // gibt es überhaupt anwärter für eine lernkette?
 		                 if ((teacherKandidat!=null)&&(schuelerKandidat!=null)){
 			                 this.verboseOutText("AusbildungsPool: ++++ Ermittle Lehrer Kombinationen für " + this.getSchuelerAnzahl(schuelerKandidat) + " Schüler " + aktuellerSkill.getName()+ " T"+schuelerStufe + " in " +schuelerKandidat.size()+ " Einheiten +++");
+			                 // Debug
+			                 if (aktuellerSkill.getName().equalsIgnoreCase("cerddor")){
+			                	 this.verboseOutText("Liste aller Schüler:");
+			                	 for (AusbildungsRelation ARx:schuelerKandidat){
+			                		 this.verboseOutText("....." + ARx.getScriptUnit().unitDesc());
+			                	 }
+			                	 this.verboseOutText("Liste aller Lehrer:");
+			                	 for (AusbildungsRelation ARx:teacherKandidat){
+			                		 this.verboseOutText("....." + ARx.getScriptUnit().unitDesc());
+			                	 }
+			                 }
 		                	 schueler_global= new ArrayList<AusbildungsRelation>();
 			                 this.schueler_global.addAll(schuelerKandidat);
 		                	 this.teacher_gobal=null;
@@ -480,11 +491,20 @@ private MatPool matPool = null;
     */
     private void buildTeacherList(ArrayList<AusbildungsRelation> quellList, ArrayList<AusbildungsRelation> _vorgaengerList, int _position, int _aktuelleLaenge, int _minLaenge, int _maxLaenge, int _idealeLaenge){
 	    AusbildungsRelation[] quellArray = quellList.toArray(new AusbildungsRelation[0]);
-	    	   
+	    
+	    
+	    
+	    
 	    if (this.teachRekursion++<= this.maxRekursion){
 	    	for (int n = _position; n<quellArray.length;n++){
 	    		// liste erreicht die geforderte länge
 		    	// 
+	    		// Debug:
+	    		String s = "Rekursion: " + this.teachRekursion + ", ";
+	    		s += "Position geg:" + _position + ", act:" + n + ",";
+	    		s += "quelle:" + quellArray[n].getTeachPlaetze() + ", min:" + _minLaenge;
+	    		s += "aktuelle:" + _aktuelleLaenge + ", maxLaenge:" + _maxLaenge + ", idealLaenge:" + _idealeLaenge;
+	    		// this.verboseOutText(s);
 		    	if (((quellArray[n].getTeachPlaetze() +_aktuelleLaenge) >= _minLaenge)&&(quellArray[n].getTeachPlaetze() +_aktuelleLaenge) <= _maxLaenge){
 		    	   		
 		    		// ist die neue liste näher an der geforderten länge?
@@ -539,6 +559,7 @@ private MatPool matPool = null;
 	     }else{
 	    	 if (!this.overrun){
 	    		 // outText.addOutLine("AusbildungsPool: RekursionsÜberlauf bei Lehrersuche für " + this.aktuellerSkill.getName() + " in "+ this.region.getName(),true);
+	    		 this.verboseOutText("AusbildungsPool: RekursionsÜberlauf bei Lehrersuche für " + this.aktuellerSkill.getName() + " in "+ this.region.getName());
 	    		 this.overrun=true;
 	    	 }
 	    	 
@@ -821,39 +842,27 @@ private MatPool matPool = null;
 		 relation.getScriptUnit().addComment("AusbildungsPool: Auf See lernen " + relation.getScriptUnit().getUnit().getRace().getName() + " nicht!");
 	}else{
 		// OK einheit ist an Land oder MM
-	
 		// Wir haben ein LernLehrTalent vom Pool!
 		if ((relation.getSubject() != null)&&(!relation.getSubject().isEmpty())) {
 			if (relation.isTeacher()) {
 				String spacer = " "; // Stellt Leerzeichen bereit.
 				String schuelerId = ""; // Sammelt Ids
-
 				if (relation.getPooledRelation() != null) {
-
 					// Die zugepoolten Relations der Schüler des Lehrers abfragen
-
-					for (Iterator<AusbildungsRelation> iter1 = relation.getPooledRelation()
-							.iterator(); iter1.hasNext();) {
+					for (Iterator<AusbildungsRelation> iter1 = relation.getPooledRelation().iterator(); iter1.hasNext();) {
 						AusbildungsRelation schueler = (AusbildungsRelation) iter1.next();
 						// Schrittweise Liste der Schüler Id's in String sammeln und Leerzeichen dran!
-						schuelerId = schuelerId
-								+ schueler.getScriptUnit().getUnit().toString(false)
-								+ spacer;
-
+						schuelerId += schueler.getScriptUnit().getUnit().toString(false) + spacer;
 					}
-					relation.getScriptUnit().addComment(
-							"AusbildungsPool: Einheit ist Lehrer!");
+					relation.getScriptUnit().addComment("AusbildungsPool: Einheit ist Lehrer!");
 					Skill lehrfach = (Skill)relation.getSubject().values().toArray()[relation.getSubject().values().toArray().length-1];
 					// Tags setzen
 					relation.getScriptUnit().putTag(CRParser.TAGGABLE_STRING3, "Lehrer - Pool");				
 					relation.getScriptUnit().putTag(CRParser.TAGGABLE_STRING4, lehrfach.getName());
-					relation.getScriptUnit().addOrder("LEHREN " + schuelerId,
-							true);
+					relation.getScriptUnit().addOrder("LEHREN " + schuelerId,true);
 				} else { // PooldedRelations ist null!
-					outText
-							.addOutLine("AusbildungsPool: Lehrer (" + relation.getScriptUnit().getUnit().getID()+") ohne Schüler");
-					relation.getScriptUnit().addComment(
-							"AusbildungsPool: Lehrer ohne Schüler!");
+					outText.addOutLine("AusbildungsPool: Lehrer (" + relation.getScriptUnit().getUnit().getID()+") ohne Schüler");
+					relation.getScriptUnit().addComment("AusbildungsPool: Lehrer ohne Schüler!");
 					relation.getScriptUnit().doNotConfirmOrders();
 				}
 			}
@@ -873,30 +882,21 @@ private MatPool matPool = null;
 				else{
 					// Ok kein magier.. dann standard
 					relation.getScriptUnit().addOrder("LERNEN " + lernfach.getName(),true);
-				}
-				
-				
-                				
+				}			
                 // Kommentare und Bestätigungen setzen
-
 				if (relation.getPooledRelation() == null) {
 					// Schüler Selbstlerner ohne Lehrer
 					// Tag setzen
 					relation.getScriptUnit().putTag(CRParser.TAGGABLE_STRING3, "Autodidakten - Pool");				
-					relation.getScriptUnit().addComment(
-							"AusbildungsPool: Einheit findet keinen Lehrer!");
+					relation.getScriptUnit().addComment("AusbildungsPool: Einheit findet keinen Lehrer!");
 			    	} else {
 					// Schüler hat Liste mit Lehrer!
-					
 			    	// Tag setzen	
 			    	relation.getScriptUnit().putTag(CRParser.TAGGABLE_STRING3, "Schüler - Pool");				
-					relation.getScriptUnit().addComment(
-							"AusbildungsPool: Einheit wird gelehrt!");
-
+					relation.getScriptUnit().addComment("AusbildungsPool: Einheit wird gelehrt!");
 				}
 
 			}
-
 		}
 	 }
 	}
@@ -1139,13 +1139,13 @@ private MatPool matPool = null;
 				 if (!this.region.getRegionType().isOcean()||kandidat.getScriptUnit().getUnit().getRace().getName().equals("Meermenschen")){
 				 //Kandidat darf nicht bereits Schüler oder Lehrer sein!
 				  if ((!kandidat.isSchueler())&&(!kandidat.isTeacher())){	
-						 // kandidat hat Lerntalent?
-						 if (kandidat.getStudyRequest()!=null && kandidat.getStudyRequest().containsKey(_lernTalent.getSkillType())){
-							 // Kandidat ist auf gefordertem level oder ein nachzuegler?
-							 if ((kandidat.getStudyRequest().get(_lernTalent.getSkillType()).getLevel()<= _schuelerStufe)&&(kandidat.getStudyRequest().get(_lernTalent.getSkillType()).getLevel()>= _schuelerStufe-this.minNachzuegler)){ 
-                             schueler.add(kandidat);										 
-							  }
+					 // kandidat hat Lerntalent?
+					 if (kandidat.getStudyRequest()!=null && kandidat.getStudyRequest().containsKey(_lernTalent.getSkillType())){
+						 // Kandidat ist auf gefordertem level oder ein nachzuegler?
+						 if ((kandidat.getStudyRequest().get(_lernTalent.getSkillType()).getLevel()<= _schuelerStufe)&&(kandidat.getStudyRequest().get(_lernTalent.getSkillType()).getLevel()>= _schuelerStufe-this.minNachzuegler)){ 
+							 schueler.add(kandidat);										 
 						 }
+					 }
 				 }
 			   } 
 			  }
@@ -1197,12 +1197,10 @@ private MatPool matPool = null;
 		     // 
 		     if (schueler.isEmpty()){
             	 return null; 
-             }else{
+             } else {
             	 Collections.sort(schueler, new SchuelerComparator(_lernTalent));
             	 return schueler;
              }
-		     
-	
     }
      
    
@@ -1251,7 +1249,7 @@ private MatPool matPool = null;
     
     
    /**
-    * Sucht Lehrer für ein Talent auf Stufe aus ener Liste und gibt Liste der Lhrer zurück.
+    * Sucht Lehrer für ein Talent auf Stufe aus ener Liste und gibt Liste der Lehrer zurück.
     * @param _relation
     * @param _schuelerStufe
     * @param _teachTalent
@@ -1271,7 +1269,9 @@ private MatPool matPool = null;
 					 //Kandidat darf nicht bereits Schüler oder Lehrer sein!
 					 if ((!kandidat.isSchueler())&&(!kandidat.isTeacher())){	
 							 // kandidat hat Lehrtalent? Dann sollte es ein teachoffer geben und man sollte nicht noch teuren LernTrank im Blut haben.
-							 if ((kandidat.getTeachOffer()!=null) && (kandidat.getTeachOffer().containsKey(_teachTalent.getSkillType()))&& (kandidat.getGehirnschmalzEffekte()<= 0)){
+							 // if ((kandidat.getTeachOffer()!=null) && (kandidat.getTeachOffer().containsKey(_teachTalent.getSkillType()))&& (kandidat.getGehirnschmalzEffekte()<= 0)){
+							 // geändert 20120713: gehirnschmalz ist kein Problem...
+								 if ((kandidat.getTeachOffer()!=null) && (kandidat.getTeachOffer().containsKey(_teachTalent.getSkillType()))){	
 								 // Kandidat hat geforderten Level? also mindestens 2 besser aber nicht zu gut?
 								  if ((_schuelerStufe +2 <= kandidat.getTeachOffer().get(_teachTalent.getSkillType()).getLevel())&&(_schuelerStufe + this.maxTalentDiff >= kandidat.getTeachOffer().get(_teachTalent.getSkillType()).getLevel())){ 
                                     teacher.add(kandidat);										 

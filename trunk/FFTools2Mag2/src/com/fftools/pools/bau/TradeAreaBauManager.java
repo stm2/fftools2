@@ -120,6 +120,9 @@ public class TradeAreaBauManager {
 		
 		// erste Infozeilen
 		this.infoLines.add("TA-Bau: " + this.bauAufträge.size() + " Bauauftragshalter und " + autoBauer.size()+ " autom. Bauarbeiter");
+		if (this.registerBurgenbau!=null){
+			this.infoLines.add("TA-Bau: Bauaufträge definiert bei: " + this.registerBurgenbau.unitDesc());
+		}
 		// Liste der Aufträge
 		this.infoLines.add("bekannte Aufträge:");
 		ArrayList<Bauen> auftragsBauscripte = new ArrayList<Bauen>();
