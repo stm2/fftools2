@@ -16,7 +16,7 @@ import magellan.client.event.SelectionListener;
  */
 public class SelectionObserver implements SelectionListener{
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private Collection selectedObjects = null;
 	private Client client = null;
 	

@@ -499,12 +499,14 @@ private MatPool matPool = null;
 	    	for (int n = _position; n<quellArray.length;n++){
 	    		// liste erreicht die geforderte länge
 		    	// 
+	    		/*
 	    		// Debug:
 	    		String s = "Rekursion: " + this.teachRekursion + ", ";
 	    		s += "Position geg:" + _position + ", act:" + n + ",";
 	    		s += "quelle:" + quellArray[n].getTeachPlaetze() + ", min:" + _minLaenge;
 	    		s += "aktuelle:" + _aktuelleLaenge + ", maxLaenge:" + _maxLaenge + ", idealLaenge:" + _idealeLaenge;
 	    		// this.verboseOutText(s);
+	    		 * */
 		    	if (((quellArray[n].getTeachPlaetze() +_aktuelleLaenge) >= _minLaenge)&&(quellArray[n].getTeachPlaetze() +_aktuelleLaenge) <= _maxLaenge){
 		    	   		
 		    		// ist die neue liste näher an der geforderten länge?
