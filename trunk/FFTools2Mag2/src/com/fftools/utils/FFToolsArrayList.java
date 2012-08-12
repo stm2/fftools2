@@ -65,7 +65,7 @@ public class FFToolsArrayList {
 	 * @param t
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static boolean containsClass(Collection c, Class<?> t){
 		if (c==null || c.isEmpty()){
 			return false;
@@ -87,7 +87,7 @@ public class FFToolsArrayList {
 	 * @param t
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static int countClass(Collection c, Class<?> t){
 		if (c==null || c.isEmpty()){
 			return 0;

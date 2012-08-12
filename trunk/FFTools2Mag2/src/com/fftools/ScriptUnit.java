@@ -163,33 +163,35 @@ public class ScriptUnit {
 		
 		// hat diese Unit durch ein Script (rekrutieren) TEMPs angelegt?
 		if (this.unit.tempUnits()!=null && this.unit.tempUnits().size()>0){
+			ArrayList<TempUnit> Temps4Deletion = new ArrayList<TempUnit>();
 			for (TempUnit t:this.unit.tempUnits()){
-				boolean mustdelete = false;
 				if (t.getOrders()!=null && t.getOrders().size()>0){
 					for (String s:t.getOrders()){
 						if (s.equals(Rekrutieren.scriptCreatedTempMark)){
 							// bingo!!
-							mustdelete = true;
+							Temps4Deletion.add(t);
 							break;
 						}
 					}
 				}
-				if (mustdelete){
+			}
+			
+			// Jetzt löschen
+			if (Temps4Deletion.size()>0){
+				for (TempUnit t:Temps4Deletion){
 					this.addComment("Lösche vorher angelegte Temp Unit: " + t.getID().toString());
 					this.unit.deleteTemp(t.getID(), this.scriptMain.gd_ScriptMain);
-					
 					ScriptUnit suDel = this.scriptMain.getScriptUnit(t);
 					if (suDel!=null){
 						this.getOverlord().deleteScriptUnit(suDel);
 					} else {
 						this.addComment("!!! Zu löschende Unit nicht in ScriptUnis!!!(" + t.getID().toString() + ")(" + this.unitDesc()+")");
 					}
-					
-				} 
+				}
 			}
+			
+			
 		}
-		
-		
 		return cnt;
 	}
 	
