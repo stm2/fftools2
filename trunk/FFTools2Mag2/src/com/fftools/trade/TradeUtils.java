@@ -86,7 +86,7 @@ public class TradeUtils {
 	public static LinkedList<String> getIslandInfo(Region r,ScriptMain scriptMain){
 		LinkedList<String> erg = new LinkedList<String>();
 		GameData data = scriptMain.gd_ScriptMain;
-		Map<CoordinateID,Region> regions = Islands.getIsland(data.rules,data.regions(),r);
+		Map<CoordinateID,Region> regions = Islands.getIsland(r);
 		if (regions==null){
 			erg.add("Island Info not available");
 			return erg;
@@ -186,7 +186,7 @@ public class TradeUtils {
 	 * @return
 	 */
 	public static boolean onSameIsland(Region r1,Region r2,GameData data){
-		Map<CoordinateID,Region> regions = Islands.getIsland(data.rules,data.regions(),r1);
+		Map<CoordinateID,Region> regions = Islands.getIsland(r1);
 		if (regions==null){
 			OutTextClass.getInstance().addOutLine("!!!Islands->regions liefert NULL!!!");
 			return false;

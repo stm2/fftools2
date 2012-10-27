@@ -2,6 +2,8 @@ package com.fftools.scripts;
 
 import java.text.NumberFormat;
 
+import magellan.library.Item;
+import magellan.library.Unit;
 import magellan.library.rules.ItemType;
 
 import com.fftools.pools.matpool.relations.MatPoolRequest;
@@ -13,8 +15,8 @@ import com.fftools.utils.FFToolsOptionParser;
 public class Trankeffekt extends MatPoolScript{
 	
 	
-	private static final int Durchlauf_vorMP = 2;
-	private static final int Durchlauf_nachMP = 162;
+	private static final int Durchlauf_vorMP = 21;
+	private static final int Durchlauf_nachMP = 710;
 	
 	private int[] runsAt = {Durchlauf_vorMP,Durchlauf_nachMP};
 	
@@ -135,7 +137,12 @@ public class Trankeffekt extends MatPoolScript{
 		int effects = this.scriptUnit.getEffekte(this.trank);
 		if (effects<persZahl){
 //			 Trank benutzen
-			this.addOrder("BENUTZEN " +  NF.format(Math.ceil((double)persZahl/this.personenWirkung)) + " " + this.trank,false);
+			// nur wenn in Region vorhanden
+			if (countPotionInRegion4Faction()>0){
+				this.addOrder("BENUTZEN " +  NF.format(Math.ceil((double)persZahl/this.personenWirkung)) + " " + this.trank,false);
+			} else {
+				this.addComment("Trank " + this.trank + " nicht ausreichend, aber auch nicht für diese Partei in dieser Region verfügbar.");
+			}
 			
 		} else {
 			this.addComment("Trank " + this.trank + " ausreichend.");
@@ -163,5 +170,26 @@ public class Trankeffekt extends MatPoolScript{
 	public boolean allowMultipleScripts(){
 		return true;
 	}
+	
+	/**
+	 * liefert die Anzahl der Tränke bei den Einheiten der Partei in der Region
+	 * @return
+	 */
+	private int countPotionInRegion4Faction(){
+		int erg=0;
+		if (this.itemType==null){
+			return 0;
+		}
+		for (Unit u:this.region().getUnits().values()){
+			if (u.getFaction()!=null && u.getFaction().equals(this.getUnit().getFaction())){
+				Item i = u.getItem(this.itemType);
+				if (i!=null){
+					erg += i.getAmount();
+				}
+			}
+		}
+		return erg;
+	}
+	
 	
 }

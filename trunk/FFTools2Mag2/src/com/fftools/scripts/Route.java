@@ -9,7 +9,7 @@ import com.fftools.utils.FFToolsRegions;
 
 public class Route extends Script{
 	
-	private static final int Durchlauf = 3;
+	private static final int Durchlauf = 40;
 	
 	// Parameterloser constructor
 	public Route() {

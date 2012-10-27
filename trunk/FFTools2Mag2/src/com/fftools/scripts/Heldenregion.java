@@ -110,8 +110,7 @@ public class Heldenregion extends MatPoolScript{
 		
 		// existiert eine Partei dazu?
 		boolean factionExists = false;
-		for (Iterator<Faction> iter=this.gd_Script.factions().values().iterator();iter.hasNext();){
-			Faction actFaction = (Faction)iter.next();
+		for (Faction actFaction : this.gd_Script.getFactions()){
 			if (actFaction.getID().toString().equalsIgnoreCase(this.factionNumber)){
 				factionExists=true;
 				this.faction = actFaction;

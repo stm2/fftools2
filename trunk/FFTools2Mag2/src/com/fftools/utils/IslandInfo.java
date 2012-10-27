@@ -142,7 +142,7 @@ public class IslandInfo {
 	 * @param r
 	 */
 	private static void searchBattleInRegion(GameData data,Region r){
-		for (Faction f : data.factions().values()){
+		for (Faction f : data.getFactions()){
 			if (f.getBattles()!=null && f.getBattles().size()>0){
 				for (Battle b : f.getBattles()){
 					CoordinateID c = b.getID();
@@ -163,7 +163,7 @@ public class IslandInfo {
 	 * @param r
 	 */
 	private static void searchHungerInRegion(GameData data,Region r){
-		for (Faction f : data.factions().values()){
+		for (Faction f : data.getFactions()){
 			if (f.getMessages()!=null && f.getMessages().size()>0){
 				for (Message m : f.getMessages()){
 					MagellanMessageImpl msg = (MagellanMessageImpl)m;
@@ -250,7 +250,7 @@ public class IslandInfo {
 	public static void writeInfos(GameData data){
 		Integer i ;
 		String s;
-		for (Island island : data.islands().values()){
+		for (Island island : data.getIslands()){
 			try {
 				i = Integer.valueOf(island.getName());
 			} catch (NumberFormatException e){

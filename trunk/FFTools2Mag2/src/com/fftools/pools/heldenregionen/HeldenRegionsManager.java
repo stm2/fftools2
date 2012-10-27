@@ -35,8 +35,8 @@ import com.fftools.scripts.Lernfix;
 public class HeldenRegionsManager implements OverlordRun,OverlordInfo{
 	private static final OutTextClass outText = OutTextClass.getInstance();
 	
-	private static final int Durchlauf1 = 15;
-	private static final int Durchlauf2 = 30;
+	private static final int Durchlauf1 = 180;
+	private static final int Durchlauf2 = 230;
 	
 	
 	private int[] runners = {Durchlauf1,Durchlauf2};
@@ -167,13 +167,13 @@ public class HeldenRegionsManager implements OverlordRun,OverlordInfo{
 		
 		int numberPersons = 0;
 		// Anzahl von Personen dieser Faction ermitteln
-		for (Iterator<Unit> iter=this.scriptMain.gd_ScriptMain.units().values().iterator();iter.hasNext();){
-			Unit actUnit = (Unit)iter.next();
+		for (Unit actUnit:this.scriptMain.gd_ScriptMain.getUnits()){
 			if (actUnit.getFaction().equals(heldenregion.getFaction())){
 				numberPersons += actUnit.getModifiedPersons();
 			}
 		}
-		for (Iterator<TempUnit> iter=this.scriptMain.gd_ScriptMain.tempUnits().values().iterator();iter.hasNext();){
+		for (@SuppressWarnings("deprecation")
+		Iterator<TempUnit> iter=this.scriptMain.gd_ScriptMain.tempUnits().values().iterator();iter.hasNext();){
 			Unit actUnit = (Unit)iter.next();
 			if (actUnit.getFaction().equals(heldenregion.getFaction())){
 				numberPersons += actUnit.getModifiedPersons();

@@ -13,7 +13,7 @@ import com.fftools.trade.TradeRegion;
 public class Requestinfo extends MatPoolScript{
 	
 	
-	private static final int Durchlauf = 155;
+	private static final int Durchlauf = 860;
 	
 	/**
 	 * Parameterloser Constructor

@@ -50,10 +50,10 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	private boolean reportOFF_TAH_TAC = false;
 	
 	
-	private static final int Durchlauf1 = 8;
-	private static final int Durchlauf2 = 12; // Vor OnTAC
-	private static final int Durchlauf3 = 17; // Nach OnTAC
-	private static final int Durchlauf4 = 100; // irgendwann
+	private static final int Durchlauf1 = 13;
+	private static final int Durchlauf2 = 105; // Vor OnTAC
+	private static final int Durchlauf3 = 125; // Nach OnTAC
+	private static final int Durchlauf4 = 864; // irgendwann
 	
 	
 	private int[] runners = {Durchlauf1,Durchlauf2,Durchlauf3,Durchlauf4};
@@ -219,7 +219,7 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 	 */
 	public TradeArea getTAinRange(Region r){
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(this.data.rules);
-		RegionType Feuerwand = Regions.getFeuerwandRegionType(this.data.rules,this.data);
+		RegionType Feuerwand = Regions.getFeuerwandRegionType(this.data);
 		excludeMap.put(Feuerwand.getID(), Feuerwand);
 		Region actOriginRegion = null;
 		
@@ -238,7 +238,7 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 			}
 			
 			if (TradeUtils.onSameIsland(r, actOriginRegion, this.data)) {
-				String path = Regions.getDirections(this.data.regions(), actOriginRegion.getID() , r.getID(), excludeMap);
+				String path = Regions.getDirections(this.data, actOriginRegion.getID() , r.getID(), excludeMap,1);
 				if (path!=null && path.length()>0) {
 					// weg gefunden
 					// länge bestimmen = Anzahl der richtungen
@@ -390,8 +390,10 @@ public class TradeAreaHandler implements OverlordRun,OverlordInfo{
 		if (this.tradeAreas==null){return null;}
 		for (Iterator<TradeArea> iter = this.tradeAreas.iterator();iter.hasNext();){
 			TradeArea tA = (TradeArea)iter.next();
-			if (tA.getName().equalsIgnoreCase(name)){
-				return tA;
+			if (tA.getName()!=null){
+				if (tA.getName().equalsIgnoreCase(name)){
+					return tA;
+				}
 			}
 		}
 		return null;

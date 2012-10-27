@@ -17,8 +17,8 @@ public class Settradeareaconnection extends TradeAreaScript{
 	
 	
 
-	private static final int Durchlauf_vorMP1 = 9;
-	private static final int Durchlauf_nachMP1 = 38;
+	private static final int Durchlauf_vorMP1 = 33;
+	private static final int Durchlauf_nachMP1 = 330;
 	
 	
 	private int[] runners = {Durchlauf_vorMP1,Durchlauf_nachMP1};

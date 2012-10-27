@@ -10,7 +10,7 @@ public class Enterbuilding extends MatPoolScript{
 	
 	
 	
-	int Durchlauf_1 = 2;
+	int Durchlauf_1 = 25;
 	
 
 	

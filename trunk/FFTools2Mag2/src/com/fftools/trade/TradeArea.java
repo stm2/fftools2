@@ -69,7 +69,7 @@ public class TradeArea {
 	/**
 	 * name of TradeArea....set by scripter Option or by originRegion
 	 */
-	private String name = null;
+	private String name = "N.N.";
 	
 	/**
 	 * Liste der trader in diesem TradeArea
@@ -199,7 +199,11 @@ public class TradeArea {
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
-		this.name = name;
+		if (name!=null){
+			this.name = name;
+		} else {
+			this.name="N.N. (nulled)";
+		}
 	}
 
 	/**

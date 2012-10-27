@@ -36,8 +36,8 @@ public class LernfixLernplanAction extends MenuAction{
 
 	private void makeIt(Unit u){
 		// Update/Add Orders
-		u.addOrderAt(0, "// Tipp: ziel=[maxLevel]");
-		u.addOrderAt(0, "// script Lernfix Lernplan=" + this.lernPlan.getName());
+		u.addOrder("// Tipp: ziel=[maxLevel]");
+		u.addOrder("// script Lernfix Lernplan=" + this.lernPlan.getName());
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

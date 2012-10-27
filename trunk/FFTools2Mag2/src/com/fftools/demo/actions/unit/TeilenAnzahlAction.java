@@ -77,7 +77,7 @@ public class TeilenAnzahlAction extends MenuAction {
 					remainingPersons=0;
 				}
 				// Order setzen
-				u.addOrderAt(0, "GIB " + newUnit.toString(false) + " " + transfer + " Personen ;dnt");
+				u.addOrder( "GIB " + newUnit.toString(false) + " " + transfer + " Personen ;dnt");
 				tempUnits.add(newUnit);
 			}
 		}
@@ -97,10 +97,10 @@ public class TeilenAnzahlAction extends MenuAction {
 		// neue Unit ID
 		UnitID id = UnitID.createTempID(this.selectionObserver.getClient().getData(), this.selectionObserver.getClient().getProperties(), parentUnit);
 		// Die tempUnit anlegen
-		TempUnit tempUnit = parentUnit.createTemp(id);
+		TempUnit tempUnit = parentUnit.createTemp(this.selectionObserver.getClient().getData(),id);
 		
 		// name setzen
-		tempUnit.addOrderAt(0, "BENENNEN EINHEIT \"" + u.getModifiedName() + "\" ;dnt");
+		tempUnit.addOrder( "BENENNEN EINHEIT \"" + u.getModifiedName() + "\" ;dnt");
 		
 
 		this.selectionObserver.getClient().getDispatcher().fire(new TempUnitEvent(this, tempUnit, TempUnitEvent.CREATED));

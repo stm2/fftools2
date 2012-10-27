@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import magellan.client.event.TempUnitEvent;
+import magellan.library.Order;
 import magellan.library.TempUnit;
 import magellan.library.Unit;
 import magellan.library.UnitID;
@@ -80,20 +81,21 @@ public class KlonenAction extends MenuAction {
 		// neue Unit ID
 		UnitID id = UnitID.createTempID(this.selectionObserver.getClient().getData(), this.selectionObserver.getClient().getProperties(), parentUnit);
 		// Die tempUnit anlegen
-		TempUnit tempUnit = parentUnit.createTemp(id);
+		TempUnit tempUnit = parentUnit.createTemp(this.selectionObserver.getClient().getData(),id);
 		
 		// name setzen
-		tempUnit.addOrderAt(0, "BENENNEN EINHEIT \"" + parentUnit.getModifiedName() + "\" ;dnt", true);
+		tempUnit.addOrder( "BENENNEN EINHEIT \"" + parentUnit.getModifiedName() + "\" ;dnt");
 		// script orders übernehmen
-		for (Iterator<String> iter=parentUnit.getOrders().iterator();iter.hasNext();){
-			String actOrder = (String)iter.next();
+		for (Iterator<Order> iter=parentUnit.getOrders2().iterator();iter.hasNext();){
+			Order o = (Order)iter.next();
+			String actOrder = o.getText();
 			if (actOrder.toLowerCase().startsWith("// script")){
-				tempUnit.addOrderAt(0, actOrder, false);
+				tempUnit.addOrder( actOrder);
 			}
 		}
 		
 		// rekrutieren
-		tempUnit.addOrderAt(0, "// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren " + parentUnit.getModifiedPersons(), false);
+		tempUnit.addOrder( "// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren " + parentUnit.getModifiedPersons());
 		
 		// tag1 und tag2 übernehmen
 		String tag1 = parentUnit.getTag(CRParser.TAGGABLE_STRING);

@@ -16,9 +16,9 @@ public class AusbildungsManager implements OverlordRun,OverlordInfo {
 	private static final OutTextClass outText = OutTextClass.getInstance();
 	
 	
-	public static final int Durchlauf1 = 7;
-	public static final int Durchlauf2 = 135;
-	public static final int Durchlauf3 = 145;
+	public static final int Durchlauf1 = 80;
+	public static final int Durchlauf2 = 550;
+	public static final int Durchlauf3 = 650;
 	
 	private int[] runners = {Durchlauf1, Durchlauf2, Durchlauf3};
 	
@@ -82,12 +82,11 @@ public class AusbildungsManager implements OverlordRun,OverlordInfo {
     	long ende = System.currentTimeMillis();
     	outText.addOutLine("Ausbildungsmanager (" + Durchlauf + ") benötigte:" + (ende-start) + "ms",true);
     	if (Durchlauf==Durchlauf3){
-    		
-    	if (this.getMaxUsedRecursion()>=50){
-    		// outText.addOutLine("Ausbildungsmanager: Überhöhten Rekursionswert: "+  this.getMaxUsedRecursion() + " an monopol-tools@googlegroups.com melden!", true); 
-    	} else{
-    		outText.addOutLine("Ausbildungsmanager: max Rekursionen: " + this.getMaxUsedRecursion(), true);
-    	}
+			if (this.getMaxUsedRecursion()>=50){
+				// outText.addOutLine("Ausbildungsmanager: Überhöhten Rekursionswert: "+  this.getMaxUsedRecursion() + " an monopol-tools@googlegroups.com melden!", true); 
+			} else{
+				outText.addOutLine("Ausbildungsmanager: max Rekursionen: " + this.getMaxUsedRecursion(), true);
+			}
     	
     	}
     }

@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import magellan.library.Item;
 import magellan.library.Region;
+import magellan.library.gamebinding.EresseaRelationFactory;
 import magellan.library.rules.ItemCategory;
 import magellan.library.rules.ItemType;
 
@@ -176,7 +177,11 @@ public class MatPool2 implements MatPool{
 		// gleichzeitig check, ob wir im ersten Lauf sind!
 		if (!this.generatedOffers){
 			// Hier relations reset der Region
-			this.region.refreshUnitRelations(true);
+			// this.region.refreshUnitRelations(true);
+			
+			// this.matPoolManager.scriptMain.gd_ScriptMain.getGameSpecificStuff().getRelationFactory().createRelations(this.region);
+			EresseaRelationFactory ERF = ((EresseaRelationFactory) this.matPoolManager.scriptMain.gd_ScriptMain.getGameSpecificStuff().getRelationFactory());
+			ERF.processRegionNow(this.region);
 			// modified setzen
 			this.firstInitialModifiedItems();
 			// für verbliebene Gegenstände offers generieren

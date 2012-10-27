@@ -8,7 +8,7 @@ import com.fftools.trade.TradeArea;
 public class Islandinfo extends TradeAreaScript{
 	
 	
-	private static final int Durchlauf = 30;
+	private static final int Durchlauf = 220;
 	
 	/**
 	 * Parameterloser Constructor

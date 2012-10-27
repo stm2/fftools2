@@ -12,7 +12,7 @@ import magellan.library.MissingData;
 import magellan.library.io.GameDataReader;
 import magellan.library.io.file.FileType;
 import magellan.library.io.file.FileTypeFactory;
-import magellan.library.utils.MagellanFinder;
+import magellan.client.utils.MagellanFinder;
 import magellan.library.utils.PropertiesHelper;
 import magellan.library.utils.Resources;
 import magellan.library.utils.SelfCleaningProperties;
@@ -108,7 +108,7 @@ public class RunIslandInfo {
 	            return;
 	        }
 	        // in data tatsächlich der geladenen Report?
-	        outText.addOutLine(reportName + " loaded with " + data.regions().size() + " regions and " + data.units().size() + " units.");
+	        outText.addOutLine(reportName + " loaded with " + data.getRegions().size() + " regions and " + data.getUnits().size() + " units.");
 	        data.setLocale(new Locale("de"));
 	        magellan.library.utils.Locales.setGUILocale(new Locale("de"));
 	        // na denn los...

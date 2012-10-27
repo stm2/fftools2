@@ -110,14 +110,14 @@ public class GoToAction extends MenuAction {
 	   List<Region>regionList=null;
 	   boolean PathNotFound = false;
 	   Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
-	   RegionType Feuerwand = Regions.getFeuerwandRegionType(data.rules,data);
+	   RegionType Feuerwand = Regions.getFeuerwandRegionType(data);
 	   excludeMap.put(Feuerwand.getID(), Feuerwand);
 	   String order = "nix";
 	   if (onSameIsland(u.getRegion(), this.targetRegion)){
   	     if (actRegion==null || !u.getRegion().equals(actRegion)){
   	       // String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain.regions(), act, dest, excludeMap);
   	       actRegion = u.getRegion();
-  	       regionList = Regions.getPath(data.regions(), actRegion.getCoordinate(), this.targetRegion.getCoordinate(), excludeMap);
+  	       regionList = Regions.getLandPath(data, actRegion.getCoordinate(), this.targetRegion.getCoordinate(), excludeMap,1,1);
   	       path=Regions.getDirections(regionList);
   	     }
   	   
@@ -131,8 +131,8 @@ public class GoToAction extends MenuAction {
 		   order = "; !! not on same island!";
 		   PathNotFound=true;
 	   }
-	   u.addOrderAt(0, order);   
-		u.addOrderAt(0, command);
+	   u.addOrder(order);   
+		u.addOrder(command);
 		if (!PathNotFound){
 			u.setOrdersConfirmed(true);
 		}
@@ -144,7 +144,7 @@ public class GoToAction extends MenuAction {
 	
 	private boolean onSameIsland(Region r1,Region r2){
 		  Collection<Region> island = new LinkedList<Region>();
-	    Map<CoordinateID,Region> m = Islands.getIsland(data.rules, data.regions(), r1);
+	    Map<CoordinateID,Region> m = Islands.getIsland(r1);
 	    if(m != null) {
 	      island.addAll(m.values());
 	      island.remove(r1);

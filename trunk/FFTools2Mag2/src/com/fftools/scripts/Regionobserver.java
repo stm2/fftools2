@@ -165,14 +165,14 @@ public class Regionobserver extends MatPoolScript{
 		if (alertStatus==0) {
 			// Falls die Einheit noch nicht bewacht, setze Befehle
 			if (this.scriptUnit.getUnit().getGuard()==0) {
-				this.scriptUnit.getUnit().addOrders("BEWACHEN", false);
-				this.scriptUnit.getUnit().addOrders("KÄMPFE NICHT", false);
+				this.scriptUnit.addOrder("BEWACHEN", false);
+				this.scriptUnit.addOrder("KÄMPFE NICHT", false);
 			}
 		// Nicht alle Einheiten vertrauenswürdig? Volle Deckung...
 		} else {
 			if (this.scriptUnit.getUnit().getGuard()==1) {
-				this.scriptUnit.getUnit().addOrders("BEWACHEN NICHT", false);
-				this.scriptUnit.getUnit().addOrders("KÄMPFE FLIEHE", false);
+				this.scriptUnit.addOrder("BEWACHEN NICHT", false);
+				this.scriptUnit.addOrder("KÄMPFE FLIEHE", false);
 			}
 		}
 

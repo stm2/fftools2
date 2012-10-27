@@ -1,5 +1,6 @@
 package com.fftools.utils;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -9,18 +10,13 @@ import java.util.Map;
 import magellan.library.Border;
 import magellan.library.Building;
 import magellan.library.CoordinateID;
-import magellan.library.EntityID;
 import magellan.library.GameData;
 import magellan.library.ID;
 import magellan.library.Item;
 import magellan.library.Region;
 import magellan.library.Rules;
-import magellan.library.Ship;
 import magellan.library.Skill;
-import magellan.library.StringID;
 import magellan.library.Unit;
-import magellan.library.impl.MagellanShipImpl;
-import magellan.library.rules.BuildingType;
 import magellan.library.rules.CastleType;
 import magellan.library.rules.ItemType;
 import magellan.library.rules.RegionType;
@@ -64,10 +60,9 @@ public class FFToolsRegions {
 	 * @param c zu prüfende Region Coord (zu gebrauchen wenn bspw. geparst
 	 * @return
 	 */
-	public static boolean isInRegions(Map<CoordinateID,Region> regions,CoordinateID c){
+	public static boolean isInRegions(Collection<Region> regions,CoordinateID c){
 		if (regions==null || c==null) {return false;}
-		for (Iterator<Region> iter = regions.values().iterator();iter.hasNext();){
-			Region r = (Region)iter.next();
+		for (Region r:regions){
 			if (r.getCoordinate().equals(c)){
 				return true;
 			}
@@ -82,14 +77,14 @@ public class FFToolsRegions {
 	 * @param von Startregion
 	 * @param nach Zielregion
 	 * @param reitend  reitet die Einheit oder zu Fuss?
-	 * @param nextHold wenn Übergeben, wird darin CoordinateID des nächsten Halts der Unit abgelegt
+	 * @param nextHold wenn Übergeben, wird darin FFToolsCoordinateID des nächsten Halts der Unit abgelegt
 	 * @return Anzahl benötigter Runden
 	 */
-	public static int getPathDistLand(GameData data, CoordinateID von, CoordinateID nach,boolean reitend,CoordinateID nextHold){
-		if (!data.regions().containsKey(von)){
+	public static int getPathDistLand(GameData data, CoordinateID von, CoordinateID nach,boolean reitend,FFToolsCoordinateID nextHold){
+		if (!data.getRegions().contains(data.getRegion(von))){
 			return -1;
 		}
-		if (!data.regions().containsKey(nach)){
+		if (!data.getRegions().contains(data.getRegion(nach))){
 			return -1;
 		}
 		if (von.equals(nach)){
@@ -98,9 +93,10 @@ public class FFToolsRegions {
 		
 		// Path organisieren
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
-		RegionType Feuerwand = Regions.getFeuerwandRegionType(data.rules,data);
+		RegionType Feuerwand = Regions.getFeuerwandRegionType(data);
 		excludeMap.put(Feuerwand.getID(), Feuerwand);
-		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
+		// String path = Regions.getDirections(data, von, nach, excludeMap,1);
+		String path =  Regions.getDirections(Regions.getLandPath(data, von, nach, excludeMap,2, 3));
 		if (path==null || path.length()==0) {
 			return -1;
 		}
@@ -116,25 +112,20 @@ public class FFToolsRegions {
 		int step = 0;
 		CoordinateID lastCoord = null;
 		CoordinateID actCoord = null;
-		try {
-			lastCoord = (CoordinateID)von.clone();
-			actCoord = (CoordinateID)von.clone();
-		} catch (CloneNotSupportedException e){
-			
-		}
+		lastCoord = (CoordinateID)von.clone();
+		actCoord = (CoordinateID)von.clone();
 		boolean reached = false;
 		boolean nextHoldSet = false;
 		while (!reached){
 			String actDir = dirs[step];
-			int actDirInt = Direction.toInt(actDir);
+			Direction actDirInt = Direction.toDirection(actDir);
 			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
-			actCoord.translate(moveCoord);
-			
-			
+			actCoord = actCoord.translate(moveCoord);
 			
 			int notwBewPunkte = 3;
-			Region r1 = (Region)data.regions().get(lastCoord);
-			Region r2 = (Region)data.regions().get(actCoord);
+			Region r1 = (Region)data.getRegion(lastCoord);
+			Region r2 = (Region)data.getRegion(actCoord);
+			
 			if(r1==null || r2==null){
 				return -1;
 			}
@@ -148,9 +139,7 @@ public class FFToolsRegions {
 				nextHoldSet = true;
 			} else {
 				if (!nextHoldSet && nextHold!=null){
-					nextHold.x = actCoord.x;
-					nextHold.y = actCoord.y;
-					nextHold.z = actCoord.z;
+					nextHold.setToCoordinateID(actCoord);
 				}
 			}
 			
@@ -158,9 +147,7 @@ public class FFToolsRegions {
 				reached = true;
 			} else {
 				// schieben
-				lastCoord.x = actCoord.x;
-				lastCoord.y = actCoord.y;
-				lastCoord.z = actCoord.z;
+				lastCoord = CoordinateID.create(actCoord);
 				step++;
 			}
 		}
@@ -179,10 +166,10 @@ public class FFToolsRegions {
 	 * @return GotoInfo
 	 */
 	public static GotoInfo getPathDistLandGotoInfo(GameData data, CoordinateID von, CoordinateID nach,boolean reitend){
-		if (!data.regions().containsKey(von)){
+		if (!data.getRegions().contains(data.getRegion(von))){
 			return null;
 		}
-		if (!data.regions().containsKey(nach)){
+		if (!data.getRegions().contains(data.getRegion(nach))){
 			return null;
 		}
 		GotoInfo erg = new GotoInfo();
@@ -194,9 +181,10 @@ public class FFToolsRegions {
 		
 		// Path organisieren
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(data.rules);
-		RegionType Feuerwand = Regions.getFeuerwandRegionType(data.rules,data);
+		RegionType Feuerwand = Regions.getFeuerwandRegionType(data);
 		excludeMap.put(Feuerwand.getID(), Feuerwand);
-		String path = Regions.getDirections(data.regions(), von, nach, excludeMap);
+		// String path = Regions.getDirections(data, von, nach, excludeMap,1);
+		String path =  Regions.getDirections(Regions.getLandPath(data, von, nach, excludeMap,2, 3));
 		if (path==null || path.length()==0) {
 			return null;
 		}
@@ -212,26 +200,22 @@ public class FFToolsRegions {
 		int step = 0;
 		CoordinateID lastCoord = null;
 		CoordinateID actCoord = null;
-		try {
-			lastCoord = (CoordinateID)von.clone();
-			actCoord = (CoordinateID)von.clone();
-		} catch (CloneNotSupportedException e){
-			
-		}
-		CoordinateID nextHold = new CoordinateID(0,0);
+		lastCoord = (CoordinateID)von.clone();
+		actCoord = (CoordinateID)von.clone();
+		CoordinateID nextHold = CoordinateID.create(0, 0);
 		Region lastHoldRegion = data.getRegion(von);
 		
 		boolean reached = false;
 		boolean nextHoldSet = false;
 		while (!reached){
 			String actDir = dirs[step];
-			int actDirInt = Direction.toInt(actDir);
+			Direction actDirInt = Direction.toDirection(actDir);
 			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
-			actCoord.translate(moveCoord);
+			actCoord = actCoord.translate(moveCoord);
 
 			int notwBewPunkte = 3;
-			Region r1 = (Region)data.regions().get(lastCoord);
-			Region r2 = (Region)data.regions().get(actCoord);
+			Region r1 = (Region)data.getRegion((lastCoord));
+			Region r2 = (Region)data.getRegion((actCoord));
 			if(r1==null || r2==null){
 				return null;
 			}
@@ -248,9 +232,7 @@ public class FFToolsRegions {
 				erg.setNextHold(data.getRegion(nextHold));
 			} else {
 				if (!nextHoldSet && nextHold!=null){
-					nextHold.x = actCoord.x;
-					nextHold.y = actCoord.y;
-					nextHold.z = actCoord.z;
+					nextHold = CoordinateID.create(actCoord);
 				}
 			}
 			
@@ -259,9 +241,7 @@ public class FFToolsRegions {
 				erg.setPathElement(anzRunden-1, lastHoldRegion, data.getRegion(actCoord));
 			} else {
 				// schieben
-				lastCoord.x = actCoord.x;
-				lastCoord.y = actCoord.y;
-				lastCoord.z = actCoord.z;
+				lastCoord = CoordinateID.create(actCoord);
 				step++;
 			}
 		}
@@ -307,7 +287,7 @@ public class FFToolsRegions {
 	public static GotoInfo makeOrderNACH(ScriptUnit u,CoordinateID act,CoordinateID dest,boolean writeOrders,String originInfo){
 		
 		//	FF 20070103: eingebauter check, ob es actDest auch gibt?!
-		if (!isInRegions(u.getScriptMain().gd_ScriptMain.regions(), dest)){
+		if (!isInRegions(u.getScriptMain().gd_ScriptMain.getRegions(), dest)){
 			// Problem  actDest nicht im CR -> abbruch
 			u.addComment("Goto Ziel nicht im CR",true);
 			u.doNotConfirmOrders();
@@ -320,9 +300,10 @@ public class FFToolsRegions {
 		erg.setDestRegion(u.getScriptMain().gd_ScriptMain.getRegion(dest));
 		
 		Map<ID,RegionType> excludeMap = Regions.getOceanRegionTypes(u.getScriptMain().gd_ScriptMain.rules);
-		RegionType Feuerwand = Regions.getFeuerwandRegionType(u.getScriptMain().gd_ScriptMain.rules, u.getScriptMain().gd_ScriptMain);
+		RegionType Feuerwand = Regions.getFeuerwandRegionType(u.getScriptMain().gd_ScriptMain);
 		excludeMap.put(Feuerwand.getID(), Feuerwand);
-		String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain.regions(), act, dest, excludeMap);
+		// String path = Regions.getDirections(u.getScriptMain().gd_ScriptMain, act, dest, excludeMap,2);
+		String path =  Regions.getDirections(Regions.getLandPath(u.getScriptMain().gd_ScriptMain, act, dest, excludeMap,2, 3));
 		if (path!=null && path.length()>0) {
 			// path gefunden
 			if (writeOrders){
@@ -341,10 +322,11 @@ public class FFToolsRegions {
 			if (u.getPayloadOnHorse()>=0){
 				reitend = true;
 			}
-			CoordinateID nextHold = new CoordinateID(act);
+			FFToolsCoordinateID nextHold = FFToolsCoordinateID.create(0,0,0);
 			int _anzRunden = FFToolsRegions.getPathDistLand(u.getScriptMain().gd_ScriptMain, act, dest, reitend,nextHold);
 			if (_anzRunden>0){
-				Region _nextHoldRegion = u.getScriptMain().gd_ScriptMain.getRegion(nextHold);
+				CoordinateID _nextRegionCoord = CoordinateID.create(nextHold.getX(),nextHold.getY(),nextHold.getZ());
+				Region _nextHoldRegion = u.getScriptMain().gd_ScriptMain.getRegion(_nextRegionCoord);
 				if (_nextHoldRegion!=null){
 					if (writeOrders){
 					  u.addComment("Nächster Halt in " + _nextHoldRegion.toString(),true);
@@ -675,8 +657,7 @@ public class FFToolsRegions {
 			outText.addOutLine("Erzeuge neue Map RegionNames");
 			System.out.println("Erzeuge neue Map RegionNames\n");
 			regionMap = new HashMap<String, CoordinateID>();
-			for (Iterator<Region> iter = data.regions().values().iterator();iter.hasNext();){
-				Region r = (Region)iter.next();
+			for (Region r:data.getRegions()){
 				currentName = r.getName();
 				currentCoord = r.getCoordinate();
 				regionMap.put(currentName, currentCoord);
@@ -708,20 +689,12 @@ public class FFToolsRegions {
 		Region fromR = data.getRegion(from);
 		if (fromR==null){return -1;}
 		
-		
-		
-		BuildingType harbour = data.rules.getBuildingType(StringID.create("Hafen"));
-		// Wildes Konstrukt: Ship ergänzen um planShipRoute zu nutzen
-		Ship s = new MagellanShipImpl(EntityID.createEntityID(1, 36) , data);
-		s.setRegion(fromR);
-		s.setShoreId(Direction.DIR_INVALID);
-		List<Region> pathL = Regions.planShipRoute(s, to,data.regions(), harbour, speed);
+		List<Region> pathL = Regions.planShipRoute(data,from,Direction.DIR_INVALID,to,speed);
 		if (pathL==null || pathL.size()<=0){
 			return -1;
 		}
 		int dist = pathL.size()-1;
-		// Und ship wieder wech
-		fromR.removeShip(s);
+		
 		return dist;
 	}
 	

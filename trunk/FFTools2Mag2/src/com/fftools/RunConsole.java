@@ -12,7 +12,7 @@ import magellan.library.io.cr.CRWriter;
 import magellan.library.io.file.FileType;
 import magellan.library.io.file.FileTypeFactory;
 import magellan.library.utils.Encoding;
-import magellan.library.utils.MagellanFinder;
+import magellan.client.utils.MagellanFinder;
 import magellan.library.utils.PropertiesHelper;
 import magellan.library.utils.Resources;
 import magellan.library.utils.SelfCleaningProperties;
@@ -55,8 +55,7 @@ public class RunConsole {
 	        }
 	        
 	        File settFileDir = null;
-	        settFileDir = MagellanFinder.findSettingsDirectory(fileDir,
-	                settFileDir);
+	        settFileDir = MagellanFinder.findSettingsDirectory(fileDir,settFileDir);
 	        
 	        // bin abfang (?)
 	        if (settFileDir.toString().endsWith("bin")){
@@ -108,7 +107,7 @@ public class RunConsole {
 	            return;
 	        }
 	        // in data tatsächlich der geladenen Report?
-	        outText.addOutLine(reportName + " loaded with " + data.regions().size() + " regions and " + data.units().size() + " units.");
+	        outText.addOutLine(reportName + " loaded with " + data.getRegions().size() + " regions and " + data.getUnits().size() + " units.");
 	        data.setLocale(new Locale("de"));
 	        magellan.library.utils.Locales.setGUILocale(new Locale("de"));
 	        // na denn los...
@@ -181,15 +180,14 @@ public class RunConsole {
     		// Filetype organisieren..brauchen wir zum init des CRWriters
     		filetype = FileTypeFactory.singleton().createFileType(crFile, false);
     		filetype.setCreateBackup(false);
-    		CRWriter crw = new CRWriter(null,filetype,Encoding.ISO.toString());
+    		CRWriter crw = new CRWriter(sm.gd_ScriptMain,null,filetype,Encoding.ISO.toString());
     		// alle anderen Values des CRw auf default
     		crw.setServerConformance(false);
     		// temp.cr schreiben
     		// sm.gd_ScriptMain.encoding = FileType.ISO_8859_1;
     		sm.gd_ScriptMain.setEncoding(Encoding.ISO.toString());
-    		Thread t = crw.writeAsynchronously(sm.gd_ScriptMain);
-    		while (t.isAlive()) {}
-    		// crw.write(sm.gd_ScriptMain);
+    		crw.writeSynchronously();
+    		
     		
     		crw.close();
     		outText.addOutLine("wrote " + crFile.getName());

@@ -22,8 +22,8 @@ public class Ontradeareaconnection extends TradeAreaScript{
 	
 	
 
-	private static final int Durchlauf_vorMP1 = 15;
-	private static final int Durchlauf_vorMP1_2 = 16;
+	private static final int Durchlauf_vorMP1 = 110;
+	private static final int Durchlauf_vorMP1_2 = 120;
 	
 	private static final int onRouteRequestPrio=10;
 	

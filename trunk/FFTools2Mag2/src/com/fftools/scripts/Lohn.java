@@ -12,8 +12,8 @@ public class Lohn extends MatPoolScript{
 	int Prioritaet_Lohn = 1000;
 	int Min_Prioritaet_Lohn = 900;
 	
-	int Durchlauf_Anforderung = 4;
-	int Durchlauf_afterMatPoolCheck = 100;
+	int Durchlauf_Anforderung = 34;
+	int Durchlauf_afterMatPoolCheck = 420;
 	// ueberpruefung mittels matPoolRunFinished
 	// int Durchlauf_ueberpruefung = 7;
 	

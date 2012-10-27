@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import magellan.client.Client;
 import magellan.client.event.UnitOrdersEvent;
 import magellan.library.Item;
+import magellan.library.Order;
 import magellan.library.Region;
 import magellan.library.Ship;
 import magellan.library.Skill;
@@ -16,6 +17,7 @@ import magellan.library.StringID;
 import magellan.library.TempUnit;
 import magellan.library.Unit;
 import magellan.library.gamebinding.EresseaConstants;
+import magellan.library.gamebinding.MovementEvaluator;
 import magellan.library.io.cr.CRParser;
 import magellan.library.rules.ItemType;
 import magellan.library.rules.Race;
@@ -30,7 +32,6 @@ import com.fftools.scripts.Rekrutieren;
 import com.fftools.scripts.Script;
 import com.fftools.scripts.Setlernplan;
 import com.fftools.scripts.Settrankorder;
-import com.fftools.utils.FFToolsGameData;
 
 
 /**
@@ -140,23 +141,24 @@ public class ScriptUnit {
 	public int deleteNotNeededOrders(){
 		int cnt =0;
 		if (this.unit == null) {NotNeededOrdersDeleted = false;return -1;}
-		ArrayList<String> newOrders = new ArrayList<String>(1);
-		for(Iterator<String> iter = this.unit.getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		ArrayList<Order> newOrders = new ArrayList<Order>(1);
+		for(Iterator<Order> iter = this.unit.getOrders2().iterator(); iter.hasNext();) {
+			Order o = (Order) iter.next();
+			String s = o.getText();
 			if (s.startsWith("//")){
 				// Kommentare beibehalten
-				newOrders.add(s);
+				newOrders.add(this.getUnit().createOrder(s));
 			} else if (s.toLowerCase().indexOf("do_not_touch")>0 || s.toLowerCase().indexOf(";dnt")>0) {
 				// nicht anfassen!
-				newOrders.add(s);
+				newOrders.add(this.getUnit().createOrder(s));
 			} else if (s.startsWith("@")){
 				// permanente orders...
-				newOrders.add(s);
+				newOrders.add(this.getUnit().createOrder(s));
 			} else {
 				cnt++;
 			}
 		}
-		this.unit.setOrders(newOrders, true);
+		this.unit.setOrders2(newOrders);
 		NotNeededOrdersDeleted = true;
 		
 		// this.unit.getRegion().refreshUnitRelations(true);
@@ -165,8 +167,9 @@ public class ScriptUnit {
 		if (this.unit.tempUnits()!=null && this.unit.tempUnits().size()>0){
 			ArrayList<TempUnit> Temps4Deletion = new ArrayList<TempUnit>();
 			for (TempUnit t:this.unit.tempUnits()){
-				if (t.getOrders()!=null && t.getOrders().size()>0){
-					for (String s:t.getOrders()){
+				if (t.getOrders2()!=null && t.getOrders2().size()>0){
+					for (Order o:t.getOrders2()){
+						String s = o.getText();
 						if (s.equals(Rekrutieren.scriptCreatedTempMark)){
 							// bingo!!
 							Temps4Deletion.add(t);
@@ -208,30 +211,31 @@ public class ScriptUnit {
 	public int deleteSomeOrders(String ordersStartWith){
 		int cnt =0;
 		if (this.unit == null) {NotNeededOrdersDeleted = false;return -1;}
-		ArrayList<String> newOrders = new ArrayList<String>(1);
-		for(Iterator<String> iter = this.unit.getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		ArrayList<Order> newOrders = new ArrayList<Order>(1);
+		for(Iterator<Order> iter = this.unit.getOrders2().iterator(); iter.hasNext();) {
+			Order o = (Order) iter.next();
+			String s = o.getText();
 			if (s.startsWith("//")){
 				// Kommentare beibehalten
-				newOrders.add(s);
+				newOrders.add(this.getUnit().createOrder(s));
 			} else if (s.toLowerCase().indexOf("do_not_touch")>0 || s.toLowerCase().indexOf(";dnt")>0) {
 				// nicht anfassen!
-				newOrders.add(s);
+				newOrders.add(this.getUnit().createOrder(s));
 			} else if (s.toLowerCase().indexOf(";script")>0) {
 				// nicht anfassen!
-				newOrders.add(s);
+				newOrders.add(this.getUnit().createOrder(s));
 			} else if (s.startsWith("@")){
 				// permanente orders...
-				newOrders.add(s);
+				newOrders.add(this.getUnit().createOrder(s));
 			} else if (!(s.toLowerCase().startsWith(ordersStartWith.toLowerCase()))){
 				// orders, die nicht mit ordersStartWith beginnen
-				newOrders.add(s);
+				newOrders.add(this.getUnit().createOrder(s));
 			} else {
 				cnt++;
 			}
 		}
 		if (cnt>0){
-			this.unit.setOrders(newOrders, false);
+			this.unit.setOrders2(newOrders);
 		}
 		// this.unit.getRegion().refreshUnitRelations(true);
 		return cnt;
@@ -249,11 +253,12 @@ public class ScriptUnit {
 	 */
 	
 	public boolean hasOrder(String orderStartWith){
-		if (this.unit.getOrders()==null || this.unit.getOrders().size()==0){
+		if (this.unit.getOrders2()==null || this.unit.getOrders2().size()==0){
 			return false;
 		}
-		for(Iterator<String> iter = this.unit.getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		for(Iterator<Order> iter = this.unit.getOrders2().iterator(); iter.hasNext();) {
+			Order o = (Order) iter.next();
+			String s = o.getText();
 			if ((s.length()>=orderStartWith.length()) &&  s.substring(0, orderStartWith.length()).equalsIgnoreCase(orderStartWith)){
 				return true;
 			} 
@@ -262,7 +267,7 @@ public class ScriptUnit {
 	}
 	
 	
-	private void saveOriginalScriptOrders(){
+	public void saveOriginalScriptOrders(){
 		if (!NotNeededOrdersDeleted) {deleteNotNeededOrders();}
 		originalScriptOrders = new ArrayList<String>(1);
 
@@ -271,8 +276,9 @@ public class ScriptUnit {
 		// (Ergänzung: in dieser runDurchlauf-runde)
 		// und wuerden ausserdem den Iterator ueber u.orders stoeren...
 		
-		for(Iterator<String>iter = this.unit.getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		for(Iterator<Order>iter = this.unit.getOrders2().iterator(); iter.hasNext();) {
+			Order o = (Order) iter.next();
+			String s = o.getText();
 			if (s.toLowerCase().startsWith("// script ")) {
 				String s2 = s.substring(10);
 				originalScriptOrders.add(s2);
@@ -509,9 +515,9 @@ public class ScriptUnit {
 	private void checkForLongOrder(){
 		boolean may_confirm = false;
 		// alle order durchlaufen
-		for(Iterator<String> iter = this.unit.getOrders().iterator(); iter.hasNext();) {
-			String actOrder = (String)iter.next();
-			if (FFToolsGameData.isLongEresseaOrder(actOrder)){
+		for(Iterator<Order> iter = this.unit.getOrders2().iterator(); iter.hasNext();) {
+			Order actOrder = (Order)iter.next();
+			if (actOrder.isLong()){
 				// jo..lange order
 				may_confirm = true;
 				// schleife kann verlassen werden, ein treffer reicht
@@ -553,16 +559,7 @@ public class ScriptUnit {
 		}
 	}
 	
-	/**
-	 * Wenn Client gesetzt ist und Orders geaendert/ergaenzt worden
-	 * Feuert fuer die unit das UnitOrdersEvent
-	 */
 	
-	public void refreshClient() {
-		if (this.c!=null && this.orders_changed){
-			this.c.getMagellanContext().getEventDispatcher().fire(new UnitOrdersEvent(this, this.unit));
-		}
-	}
 	
 	public Unit getUnit(){
 		if (this.unit==null) {return null;} else {return this.unit;}
@@ -585,8 +582,9 @@ public class ScriptUnit {
 	 */
 	
 	public void readReportSettings(){
-		for(Iterator<String> iter = this.unit.getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		for(Iterator<Order> iter = this.unit.getOrders2().iterator(); iter.hasNext();) {
+			Order o = (Order) iter.next();
+			String s = o.getText();
 			if (s.toLowerCase().startsWith("// script setitemgroup")) {
 				String s2 = s.substring(23);
 				// ToDo: in ReportSettings verschieben
@@ -629,23 +627,12 @@ public class ScriptUnit {
 	 */
 	public static boolean isScriptUnit(Unit u){
 		// orders nach // script einträgen durchsuchen
-		for(Iterator<String> iter = u.getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		for(Iterator<Order> iter = u.getOrders2().iterator(); iter.hasNext();) {
+			Order o = (Order) iter.next();
+			String s = o.getText();
 			if (s.toLowerCase().startsWith("// script ")) { return true;}
 		}
-		
-		// tags auch durchsuchen
-		// da erst später überprüft wird, ab die Tags tatsächlich auf scripte 
-		// verweisen, nehmen wir hier an, dass die besetzung der ijcTaggable...1
-		// und 2 hinreichend sind für eine scriptUnit
-		// Fiete 20090120: nö...keine Auswertung der Tags für scripte
-		/**
-		String tag1 = u.getTag(CRParser.TAGGABLE_STRING);
-		String tag2 = u.getTag(CRParser.TAGGABLE_STRING2);
-		if (tag1!=null && tag2!=null){
-			return true;
-		}
-		*/
+
 		return false;
 	}
 	
@@ -657,8 +644,9 @@ public class ScriptUnit {
 	 */
 	public static boolean isDepot(Unit u){
 		// orders nach // script Depot einträgen durchsuchen
-		for(Iterator<String> iter = u.getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		for(Iterator<Order> iter = u.getOrders2().iterator(); iter.hasNext();) {
+			Order o = (Order) iter.next();
+			String s = o.getText();
 			if (s.toLowerCase().startsWith("// script depot")) { return true;}
 		}
 		return false;
@@ -879,7 +867,7 @@ public class ScriptUnit {
 			// löschen war erfolgreich
 			// neuen Bauen...via order
 			this.getUnit().addOrder("// script " + newOrder,false, 1);
-			this.getUnit().setOrdersChanged(true);
+			// this.getUnit().reparseOrders();
 			this.ordersHaveChanged();
 			this.setUnitOrders_adjusted(true);
 			// fertig.
@@ -898,11 +886,12 @@ public class ScriptUnit {
 	 * @param matchingChars
 	 */
 	public boolean removeScriptOrder(String matchingChars){
-		ArrayList<String> newOrders = new ArrayList<String>(1);
-		ArrayList<String> newComments = new ArrayList<String>(1);
+		ArrayList<Order> newOrders = new ArrayList<Order>(1);
+		ArrayList<Order> newComments = new ArrayList<Order>(1);
 		boolean didSomething = false;
-		for(Iterator<String> iter = this.unit.getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		for(Iterator<Order> iter = this.unit.getOrders2().iterator(); iter.hasNext();) {
+			Order o = (Order) iter.next();
+			String s = o.getText();
 			boolean toDelete = false;
 			if (s.startsWith("// script ")){
 				String checkS = s.substring("// script ".length()).toLowerCase();
@@ -913,16 +902,16 @@ public class ScriptUnit {
 				}
 			}
 			if (!toDelete){
-				newOrders.add(s);
+				newOrders.add(this.getUnit().createOrder(s));
 			} else {
 				// kleiner Kommentar, dass gelöscht?
-				newComments.add("; script order entfernt: " + s + "  do_not_touch");
+				newComments.add(this.getUnit().createOrder("; script order entfernt: " + s + "  do_not_touch"));
 			}
 		}
 		if (didSomething){
 			newOrders.addAll(newComments);
-			this.unit.setOrders(newOrders, true);
-			this.unit.setOrdersChanged(true);
+			this.unit.setOrders2(newOrders);
+			// this.unit.reparseOrders();
 		}
 		return didSomething;
 	}
@@ -975,10 +964,12 @@ public class ScriptUnit {
 		
 		if (this.originalFreeKapaFood==-1){
 			// kapa war noch nicht gesetzt
-			this.originalFreeKapaFood = (int)Math.floor((this.getUnit().getPayloadOnFoot() - this.getUnit().getModifiedLoad())/100);
-			this.originalFreeKapaHorse = (int)Math.floor((this.getUnit().getPayloadOnHorse() - this.getUnit().getModifiedLoad())/100);
+			
+			MovementEvaluator ME = scriptMain.gd_ScriptMain.getGameSpecificStuff().getMovementEvaluator(); 
+			this.originalFreeKapaFood = (int)Math.floor((ME.getPayloadOnFoot(this.getUnit()) - ME.getModifiedLoad(this.getUnit()))/100);
+			this.originalFreeKapaHorse = (int)Math.floor((ME.getPayloadOnHorse(this.getUnit()) - ME.getModifiedLoad(this.getUnit()))/100);
 			this.originalFreeKapaUser = userKapa;
-			this.originalModifiedLoad = (int)Math.ceil(this.getUnit().getModifiedLoad()/100);
+			this.originalModifiedLoad = (int)Math.ceil(ME.getModifiedLoad(this.getUnit())/100);
 		}
 			// test debug:
 			// this.unit.getRegion().refreshUnitRelations(true);
@@ -1059,23 +1050,20 @@ public class ScriptUnit {
 		boolean add_ok = true;
 		
 		if (no_doubles){
-			for (Iterator<String> i1 = this.getUnit().getOrders().iterator();(i1.hasNext() && add_ok);){
-				String s_old = (String)i1.next();
+			for (Iterator<Order> i1 = this.getUnit().getOrders2().iterator();(i1.hasNext() && add_ok);){
+				Order o = (Order)i1.next();
+				String s_old = o.getText();
 				if (s_old.equalsIgnoreCase(s)) {add_ok = false;}
 			}
 		}
 		if (add_ok){
 			// this.getUnit().addOrder(s,false, 1);
-			this.getUnit().addOrderAt(0, s, false);
-			this.getUnit().setOrdersChanged(true);
+			this.getUnit().addOrder(s);
+			// this.getUnit().reparseOrders();
 			this.ordersHaveChanged();
 			if (unit_may_confirm){
 				this.setUnitOrders_adjusted(true);
-			}
-			
-			// test
-			// this.getUnit().getRegion().refreshUnitRelations(true);
-			
+			}			
 		}
 	}
 
@@ -1088,15 +1076,16 @@ public class ScriptUnit {
 		boolean add_ok = true;
 		
 		if (no_doubles){
-			for (Iterator<String> i1 = this.getUnit().getOrders().iterator();(i1.hasNext() && add_ok);){
-				String s_old = (String)i1.next();
+			for (Iterator<Order> i1 = this.getUnit().getOrders2().iterator();(i1.hasNext() && add_ok);){
+				Order o = (Order)i1.next();
+				String s_old = o.getText();
 				if (s_old.equalsIgnoreCase("; " + s)) {add_ok = false;}
 			}
 		}
 		if (add_ok){
 			// this.getUnit().addOrder("; " + s,false, 1);
-			this.getUnit().addOrderAt(0,"; " + s, false);
-			this.getUnit().setOrdersChanged(true);
+			this.getUnit().addOrder("; " + s);
+			// this.getUnit().reparseOrders();
 			this.ordersHaveChanged();
 		}
 	}
@@ -1449,13 +1438,14 @@ public class ScriptUnit {
 
 		// also take care of passengers
 		Collection<Unit> passengers = this.unit.getPassengers();
+		MovementEvaluator ME = scriptMain.gd_ScriptMain.getGameSpecificStuff().getMovementEvaluator();
 
 		for(Iterator<Unit> iter = passengers.iterator(); iter.hasNext();) {
 			Unit passenger = (Unit) iter.next();
 			// checken, ob das auch ne scriptUnit ist
 			ScriptUnit passengerSU = this.getScriptMain().getScriptUnit(passenger);
 			if (passengerSU==null){
-				load += passenger.getModifiedWeight();
+				load += ME.getModifiedWeight(passenger);
 			} else {
 				load += passengerSU.getWeight();
 			}

@@ -354,7 +354,7 @@ public class ReportSettings {
 			myReportOptions.add(this.getRegionOptions(r));
 		} else if (geltungsbereich.equalsIgnoreCase("insel")){
 			// ok..für die ganze Insel
-			Map<CoordinateID,Region> regions = Islands.getIsland(_gd.rules,_gd.regions(),r);
+			Map<CoordinateID,Region> regions = Islands.getIsland(r);
 			if (regions==null){
 				// should never happen
 				outText.addOutLine("!!! ReportSettings: keine Insel gefunden.");

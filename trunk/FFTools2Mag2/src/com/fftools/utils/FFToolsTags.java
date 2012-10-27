@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import magellan.library.GameData;
+import magellan.library.Order;
 import magellan.library.TempUnit;
 import magellan.library.Unit;
 import magellan.library.UnitID;
@@ -35,13 +36,13 @@ public class FFToolsTags {
 		// alle anderen aber unterstützen...
 		
 		// normale units durchlaufen
-		for (Iterator<Unit> iter = gd.units().values().iterator();iter.hasNext();) {
-			Unit u = (Unit)iter.next();
+		for (Unit u:gd.getUnits()) {
 			FFToolsTags.Orders2TagsUnit(u);
 		}
 		
 		// TempUnits durchlaufen
-		for (Iterator<TempUnit> iter = gd.tempUnits().values().iterator();iter.hasNext();) {
+		for (@SuppressWarnings("deprecation")
+		Iterator<TempUnit> iter = gd.tempUnits().values().iterator();iter.hasNext();) {
 			Unit u = (Unit)iter.next();
 			FFToolsTags.Orders2TagsUnit(u);
 		}
@@ -54,13 +55,13 @@ public class FFToolsTags {
 		// alle anderen aber unterstützen...
 		
 		// normale units durchlaufen
-		for (Iterator<Unit> iter = gd.units().values().iterator();iter.hasNext();) {
-			// Unit u = (Unit)iter.next();
-			FFToolsTags.Tags2OrdersUnit(iter.next());
+		for (Unit u:gd.getUnits()) {
+			FFToolsTags.Tags2OrdersUnit(u);
 		}
 		
 		// TempUnits durchlaufen
-		for (Iterator<TempUnit> iter = gd.tempUnits().values().iterator();iter.hasNext();) {
+		for (@SuppressWarnings("deprecation")
+		Iterator<TempUnit> iter = gd.tempUnits().values().iterator();iter.hasNext();) {
 			// Unit u = (Unit)iter.next();
 			FFToolsTags.Tags2OrdersUnit(iter.next());
 		}
@@ -146,23 +147,24 @@ public class FFToolsTags {
 		boolean add_ok = true;
 		
 		if (no_doubles){
-			for (Iterator<String> i1 = u.getOrders().iterator();(i1.hasNext() && add_ok);){
-				String s_old = (String)i1.next();
-				if (s_old.equalsIgnoreCase(s)) {add_ok = false;}
+			for (Order o:u.getOrders2()){
+				String s_old = o.getText();
+				if (s_old.equalsIgnoreCase(s)) {add_ok = false;break;}
 			}
 		}
 		if (add_ok){
 			u.addOrder(s,false, 1);
-			u.setOrdersChanged(true);
-			u.ordersHaveChanged();
+			// u.setOrdersChanged(true);
+			// u.ordersHaveChanged();
+			u.reparseOrders();
 		}
 	}
 	
 	public static void Orders2TagsUnit(Unit u){
-		Collection<String> c = u.getOrders();
+		Collection<Order> c = u.getOrders2();
 		if (c.size()>0) {
-			for (Iterator<String> iter2 = c.iterator();iter2.hasNext();){
-				String s = (String)iter2.next();
+			for (Order o:c){
+				String s = o.getText();
 				// starten wir mit dem richtigen Anfang?
 				if (s.length()>8 && s.substring(0,9).equalsIgnoreCase("// setTag")) {
 					// yep...geht ohne tokenizer...
@@ -195,25 +197,24 @@ public class FFToolsTags {
 				}
 			}
 		  // Nun die lästigen // setTag löschen.
-		  ArrayList<String> neueOrders = new ArrayList<String>();
-		  for (Iterator<String> iter = c.iterator();iter.hasNext();){
-			  String zeile = (String) iter.next();
-			  
+		  ArrayList<Order> neueOrders = new ArrayList<Order>();
+		  for (Order o:c){
+			  String zeile = o.getText();
 			  // Alle Zeilen die nicht "setTag" enthalten wandern in neue Orders
 			 
 			  // sehr kurze Zeilen gehen immer....
 			  if (zeile.length()<9){
-				  neueOrders.add(zeile); 
+				  neueOrders.add(o); 
 			  }
 			  else {
 				  // längere Zeilen muß man prüfen
 				  if (!zeile.substring(0,9).equalsIgnoreCase("// setTag")){
-					  neueOrders.add(zeile);
+					  neueOrders.add(o);
 				  }
 			  }
 			  
 		  }
-		  u.setOrders(neueOrders,false);
+		  u.setOrders2(neueOrders);
 		 
 		}
 	}
@@ -240,9 +241,8 @@ public class FFToolsTags {
 			FileWriter fileWriter = new FileWriter("tags.tags",false);
 			
 			// normale units durchlaufen
-			for (Iterator<Unit> iter = gd.units().values().iterator();iter.hasNext();) {
-				// Unit u = (Unit)iter.next();
-				FFToolsTags.Tags2FileUnit(iter.next(),fileWriter);
+			for (Unit u:gd.getUnits()) {
+				FFToolsTags.Tags2FileUnit(u,fileWriter);
 			}
 			
 			fileWriter.flush();

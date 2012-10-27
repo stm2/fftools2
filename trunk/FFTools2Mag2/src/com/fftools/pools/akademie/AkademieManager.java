@@ -15,8 +15,8 @@ import com.fftools.overlord.OverlordRun;
 		
 		private static final OutTextClass outText = OutTextClass.getInstance();
 		
-		private static final int Durchlauf1 = 135;
-		private static final int Durchlauf2 = 147;
+		private static final int Durchlauf1 = 580;
+		private static final int Durchlauf2 = 710;
 		
 		private int[] runners = {Durchlauf1, Durchlauf2};
 		

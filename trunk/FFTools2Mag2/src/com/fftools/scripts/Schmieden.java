@@ -24,8 +24,8 @@ import com.fftools.utils.FFToolsUnits;
 public class Schmieden extends MatPoolScript{
 	// private static final ReportSettings reportSettings = ReportSettings.getInstance();
 	
-	private int Durchlauf_vorMatPool = 50;
-	private int Durchlauf_nachMatPool = 100;
+	private int Durchlauf_vorMatPool = 350;
+	private int Durchlauf_nachMatPool = 430;
 	
 	private int[] runners = {Durchlauf_vorMatPool,Durchlauf_nachMatPool};
 	
@@ -159,17 +159,21 @@ public void runScript(int scriptDurchlauf){
 		int prodPoints = 0;
 		Skill neededSkill=null;
 		int actSkillLevel = 0;
+		int actSkillLevel_old = 0;
 		if (this.neededSkillType!=null){
 			neededSkill = this.scriptUnit.getUnit().getModifiedSkill(this.neededSkillType);
 			if (neededSkill!=null){
-				// actSkillLevel = neededSkill.getModifiedLevel(this.scriptUnit.getUnit(), true); 
+				actSkillLevel_old = neededSkill.getLevel(); 
 				actSkillLevel = FFToolsUnits.getModifiedSkillLevel(neededSkill,this.scriptUnit.getUnit(), true);
-				prodPoints = actSkillLevel * this.scriptUnit.getUnit().getModifiedPersons();
+				if (actSkillLevel==0 && actSkillLevel_old>0){
+					actSkillLevel = actSkillLevel_old;
+				}
+				prodPoints = actSkillLevel *  this.scriptUnit.getUnit().getModifiedPersons();
 			}
 		}
 		
 		if (prodPoints==0){
-			this.addComment("Keine Produktion möglich - kein Talent.");
+			this.addComment("Keine Produktion möglich - keine Talentpunke.(modSkill:" + actSkillLevel +", modCount:" + this.scriptUnit.getUnit().getModifiedPersons() +",modSkill2:" + actSkillLevel_old + ")");
 			this.scriptUnit.doNotConfirmOrders();
 			return;
 		}

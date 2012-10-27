@@ -7,12 +7,14 @@ import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import magellan.client.utils.MagellanFinder;
+
 import com.fftools.utils.FileCopy;
 
 /**
  * 
  * @author Fiete
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.2 $
  * 
  */
 public class VersionInfo {
@@ -80,6 +82,16 @@ public class VersionInfo {
 			VersionInfo.setFFTools2Path(test);
 		} else {
 			outText.addOutLine("FFToolsPath problem: no Dir: " + test);
+			File test2 = MagellanFinder.findMagellanDirectory();
+			if (test2.exists()){
+				String test3=test2.getAbsolutePath() + File.separator + "plugins" + File.separator + "FFTools2.jar";
+				FFTools2InPlugins = new File(test3);
+				if (FFTools2InPlugins.exists()){
+					VersionInfo.setFFTools2Path(test3);
+				} else {
+					outText.addOutLine("FFToolsPath problem: no Dir: " + test3);
+				}
+			}
 		}
 	}
 }

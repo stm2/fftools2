@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import magellan.library.Order;
+
 import com.fftools.OutTextClass;
 import com.fftools.ScriptUnit;
 
@@ -78,8 +80,8 @@ public class FFToolsOptionParser {
 		}
 		
 		// gleich mal parsen..
-		for (Iterator<String> iter = this.scriptUnit.getUnit().getOrders().iterator();iter.hasNext();){
-			String order = (String)iter.next();
+		for (Order o:this.scriptUnit.getUnit().getOrders2()){
+			String order = o.getText();
 			for (Iterator<String> iter2 = this.filters.iterator();iter2.hasNext();){
 				String filter = (String)iter2.next();
 				if (order.toLowerCase().startsWith("// script " + filter.toLowerCase())){

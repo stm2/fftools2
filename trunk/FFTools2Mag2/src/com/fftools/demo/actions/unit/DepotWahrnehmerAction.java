@@ -74,11 +74,11 @@ public class DepotWahrnehmerAction extends MenuAction {
 	 */
 	private void setMaterial(Unit u){
 		String order = "// script Depot Lernen=aus";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		order = "// script Lernfix Talent=Wahrnehmung";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		order = "// setTag eTag1 Depot";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

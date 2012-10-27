@@ -27,7 +27,7 @@ import com.fftools.utils.FFToolsOptionParser;
 public class Alchemist extends MatPoolScript{
 	
 	
-	private static final int Durchlauf = 10;
+	private static final int Durchlauf = 106;
 	
 	private final int DEFAULT_KRAUT_PRIO=800;
 	private final int DEFAULT_MIN_AUSLASTUNG=70;
@@ -149,6 +149,7 @@ public class Alchemist extends MatPoolScript{
 	 * durchläuft alle bekannten Tränke und fordert entsprechend ItemTypes an
 	 *
 	 */
+	@SuppressWarnings("deprecation")
 	private void requestAllKraut(){
 		ArrayList<ItemType> itemTypes = new ArrayList<ItemType>();
 		if (this.gd_Script.potions()==null || this.gd_Script.potions().size()==0){

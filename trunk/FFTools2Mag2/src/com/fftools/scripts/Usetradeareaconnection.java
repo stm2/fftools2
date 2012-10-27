@@ -18,7 +18,7 @@ public class Usetradeareaconnection extends TradeAreaScript{
 	
 	
 
-	private static final int Durchlauf_vorMP1 = 10;
+	private static final int Durchlauf_vorMP1 = 104;
 	
 	private static final int default_request_prio=50;
 	

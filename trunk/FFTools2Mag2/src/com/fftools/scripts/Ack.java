@@ -16,7 +16,7 @@ import com.fftools.utils.FFToolsOptionParser;
 
 public class Ack extends Script {
 
-	private int Durchlauf_vorMatpool = 1;
+	private int Durchlauf_vorMatpool = 19;
 
 	/**
 	 * Parameterloser Constructor Drinne Lassen fuer die Instanzierung des

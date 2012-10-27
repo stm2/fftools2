@@ -74,11 +74,11 @@ public class TransporterAction extends MenuAction {
 	 */
 	private void doAction(Unit u){
 		String order = "// script Transport mode=auto";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		// order = "Benennen Einheit Transporter ;dnt";
-		// u.addOrderAt(0, order);
+		// u.addOrder( order);
 		order = "// setTag eTag1 Transporter";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

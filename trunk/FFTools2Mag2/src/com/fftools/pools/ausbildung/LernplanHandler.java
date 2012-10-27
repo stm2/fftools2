@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import magellan.library.Order;
 import magellan.library.StringID;
 
 import com.fftools.OutTextClass;
@@ -97,8 +98,8 @@ public class LernplanHandler implements OverlordInfo {
 		// neuen Optionparser
 		FFToolsOptionParser OP = new FFToolsOptionParser(u);
 		ArrayList<String> orders = new ArrayList<String>();
-		for (Iterator<String> iter = u.getUnit().getOrders().iterator();iter.hasNext();){
-			String order = (String)iter.next();
+		for (Order o:u.getUnit().getOrders2()){
+			String order = o.getText();
 			if (order.toLowerCase().indexOf(scriptIdentifier.toLowerCase())>0){
 				orders.add(order);
 			}

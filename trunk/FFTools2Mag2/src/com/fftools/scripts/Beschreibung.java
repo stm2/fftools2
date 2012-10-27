@@ -36,7 +36,7 @@ public class Beschreibung extends Script{
 	private static final String separator = ";";
 	private static final String detailSeparator = ",";
 	
-	private static final int Durchlauf = 159;
+	private static final int Durchlauf = 862;
 	
 	/**
 	 * Parameterloser Constructor

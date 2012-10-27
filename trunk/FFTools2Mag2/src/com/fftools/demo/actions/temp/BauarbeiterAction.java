@@ -79,15 +79,15 @@ public class BauarbeiterAction extends MenuAction {
 		// neue Unit ID
 		UnitID id = UnitID.createTempID(this.selectionObserver.getClient().getData(), this.selectionObserver.getClient().getProperties(), parentUnit);
 		// Die tempUnit anlegen
-		TempUnit tempUnit = parentUnit.createTemp(id);
+		TempUnit tempUnit = parentUnit.createTemp(this.selectionObserver.getClient().getData(),id);
 		
 		// name setzen
-		tempUnit.addOrderAt(0, "BENENNEN EINHEIT Bauarbeiter ;dnt");
+		tempUnit.addOrder("BENENNEN EINHEIT Bauarbeiter ;dnt");
 		// script Setzen
-		tempUnit.addOrderAt(0, "// script Bauen mode=auto minTalent=4 info=an");
+		tempUnit.addOrder("// script Bauen mode=auto minTalent=4 info=an");
 		
 		// rekrutieren
-		tempUnit.addOrderAt(0, "// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren 5", false);
+		tempUnit.addOrder("// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren 5");
 
 		this.selectionObserver.getClient().getDispatcher().fire(new TempUnitEvent(this, tempUnit, TempUnitEvent.CREATED));
 	}

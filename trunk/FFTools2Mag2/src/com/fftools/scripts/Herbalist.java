@@ -115,7 +115,7 @@ public class Herbalist extends MatPoolScript{
 		if (targetUnit!=null) {
 			Unit u = FFToolsGameData.getUnitInRegion(this.region(),targetUnit);
 			if (u!=null) {
-				this.scriptUnit.getUnit().addOrders("GIB " + u.toString(false) + " KRÄUTER ;dnt",false);
+				this.scriptUnit.addOrder("GIB " + u.toString(false) + " KRÄUTER ;dnt",false);
 				// und damit haben wir keine Kräuter mehr vorrätig!
 				currentHerbAmount=0;
 			} else {
@@ -128,14 +128,14 @@ public class Herbalist extends MatPoolScript{
 		int makeHerbAmount = targetHerbAmount - currentHerbAmount;
 		if (makeMore==1) {
 			if (makeHerbAmount>0) {
-				this.scriptUnit.getUnit().addOrders("MACHEN " + makeHerbAmount + " KRÄUTER", false);
+				this.scriptUnit.addOrder("MACHEN " + makeHerbAmount + " KRÄUTER", false);
 			} else {
 				this.scriptUnit.findScriptClass("Lernfix", "Talent=Tarnung");
 			}
 		}
 
 		// 5. Und zum Schluß merken wir uns, wieviel Kräuter wir aktuell haben 
-		this.scriptUnit.getUnit().addOrders("BESCHREIBEN PRIVAT \"krautvorrat=" + currentHerbAmount + "\"", false);
+		this.scriptUnit.addOrder("BESCHREIBEN PRIVAT \"krautvorrat=" + currentHerbAmount + "\"", false);
 	}
 	
 	/**

@@ -32,9 +32,9 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	
 	
 	// private static final ReportSettings reportSettings = ReportSettings.getInstance();
-	private int Durchlauf_Baumanager = 8;
-	private int Durchlauf_vorMatPool = 10;
-	private int Durchlauf_nachMatPool = 100;
+	private int Durchlauf_Baumanager = 94;
+	private int Durchlauf_vorMatPool = 102;
+	private int Durchlauf_nachMatPool = 440;
 	
 	private int[] runners = {Durchlauf_Baumanager,Durchlauf_vorMatPool,Durchlauf_nachMatPool};
 	
@@ -395,7 +395,7 @@ public void runScript(int scriptDurchlauf){
 				s = OP.getOptionString("Ziel");
 			}
 			try {
-				this.dir = new Direction(s);
+				this.dir = Direction.toDirection(s);
 			} catch (IllegalArgumentException e){
 				this.dir=null;
 				this.addComment("Bauen: Strassenrichtung nicht erkannt: " + s);

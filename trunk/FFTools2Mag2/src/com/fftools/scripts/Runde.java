@@ -6,7 +6,7 @@ package com.fftools.scripts;
 public class Runde extends Script{
 	
 	
-	private static final int Durchlauf = 1;
+	private static final int Durchlauf = 18;
 	
 	/**
 	 * Parameterloser Constructor

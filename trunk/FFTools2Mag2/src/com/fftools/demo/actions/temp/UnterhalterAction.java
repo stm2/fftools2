@@ -79,17 +79,17 @@ public class UnterhalterAction extends MenuAction {
 		// neue Unit ID
 		UnitID id = UnitID.createTempID(this.selectionObserver.getClient().getData(), this.selectionObserver.getClient().getProperties(), parentUnit);
 		// Die tempUnit anlegen
-		TempUnit tempUnit = parentUnit.createTemp(id);
+		TempUnit tempUnit = parentUnit.createTemp(this.selectionObserver.getClient().getData(),id);
 		
 		// name setzen
-		tempUnit.addOrderAt(0, "BENENNEN EINHEIT Zirkus ;dnt");
+		tempUnit.addOrder("BENENNEN EINHEIT Zirkus ;dnt");
 		// script Setzen
-		tempUnit.addOrderAt(0, "// Tip: mindestAuslastung=[XX]  (In prozent)");
-		tempUnit.addOrderAt(0, "// script Unterhalten minTalent=3 mode=auto");
+		tempUnit.addOrder("// Tip: mindestAuslastung=[XX]  (In prozent)");
+		tempUnit.addOrder("// script Unterhalten minTalent=3 mode=auto");
 		
 		
 		// rekrutieren
-		tempUnit.addOrderAt(0, "// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren 10", false);
+		tempUnit.addOrder("// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren 10");
 
 		this.selectionObserver.getClient().getDispatcher().fire(new TempUnitEvent(this, tempUnit, TempUnitEvent.CREATED));
 	}

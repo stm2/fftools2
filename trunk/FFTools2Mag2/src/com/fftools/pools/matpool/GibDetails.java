@@ -1,11 +1,11 @@
 package com.fftools.pools.matpool;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import magellan.library.Item;
+import magellan.library.Order;
 import magellan.library.StringID;
 import magellan.library.Unit;
 import magellan.library.rules.ItemType;
@@ -250,10 +250,10 @@ public class GibDetails {
 		}
 		
 		
-		ArrayList<String> newOrders = new ArrayList<String>(1);
+		ArrayList<Order> newOrders = new ArrayList<Order>(1);
 		boolean changed = false;
-		for (Iterator<String> iter = this.u.getUnit().getOrders().iterator();iter.hasNext();){
-			String s = (String)iter.next();
+		for (Order o : this.u.getUnit().getOrders2()){
+			String s = o.getText();
 			if (s.equalsIgnoreCase(this.originalOrder)){
 				changed=true;
 				// original order
@@ -267,7 +267,7 @@ public class GibDetails {
 				String oldKomment = this.originalOrder.substring(this.originalOrder.indexOf(";"));
 				newOrder = newOrder + oldKomment;
 				if (this.amount-transferChange>0){
-					newOrders.add(newOrder);
+					newOrders.add(this.u.getUnit().createOrder(newOrder));
 				}
 				
 				// neue Order
@@ -276,14 +276,14 @@ public class GibDetails {
 				newOrder += newComment;
 				
 				if (!newReceiver.equals(this.u.getUnit())){
-					newOrders.add(newOrder);
+					newOrders.add(this.u.getUnit().createOrder(newOrder));
 				}				
 			} else {
-				newOrders.add(s);
+				newOrders.add(this.u.getUnit().createOrder(s));
 			}
 		}
 		if (changed){
-			this.u.getUnit().setOrders(newOrders,false);
+			this.u.getUnit().setOrders2(newOrders);
 		} else {
 			return 2;
 		}

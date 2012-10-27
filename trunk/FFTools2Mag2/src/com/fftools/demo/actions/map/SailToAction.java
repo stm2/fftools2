@@ -21,15 +21,12 @@ import java.util.List;
 
 import magellan.client.event.OrderConfirmEvent;
 import magellan.client.event.UnitOrdersEvent;
-import magellan.library.CoordinateID;
 import magellan.library.GameData;
 import magellan.library.Region;
 import magellan.library.Ship;
-import magellan.library.StringID;
 import magellan.library.Unit;
 import magellan.library.UnitContainer;
 import magellan.library.gamebinding.EresseaConstants;
-import magellan.library.rules.BuildingType;
 import magellan.library.utils.Regions;
 import magellan.library.utils.Resources;
 
@@ -70,9 +67,8 @@ public class SailToAction extends MenuAction {
            this.isShipableRegion=true;  
         } else {
           // run through the neighbors
-          for (Iterator<CoordinateID> iter = targetRegion.getNeighbours().iterator(); iter.hasNext();) {
-            CoordinateID checkRegionID = (CoordinateID) iter.next();
-            if (data.getRegion(checkRegionID).getRegionType().isOcean()) {
+          for (Region r:targetRegion.getNeighbors().values()) {
+            if (r.getRegionType().isOcean()) {
               this.isShipableRegion=true;
               break;
             }
@@ -122,19 +118,13 @@ public class SailToAction extends MenuAction {
 		
 		String path = "";
 	   List<Region>regionList=null;
-	   int aquarianBonus = 0;
-	   BuildingType harbour = data.rules.getBuildingType(StringID.create("Hafen"));
+	   
 	   boolean PathNotFound = false;
 	   String order = "nix";
 	   
   	     
     	if (isSeaConnPossible(u)){
-  	    	aquarianBonus = 0;
-  	         try {
-  	           aquarianBonus = u.getFaction().getRace().getAdditiveShipBonus();
-  	         } catch(Exception exc) {}
-  	    	 
-  	       regionList = Regions.planShipRoute(u.getModifiedShip(), this.targetRegion.getCoordinate(), data.regions(), harbour, aquarianBonus);
+  	       regionList = Regions.planShipRoute(u.getModifiedShip(),data, this.targetRegion.getCoordinate());
            path=Regions.getDirections(regionList);
        } else {
     	   order = "; !!! nicht möglich (Kein Kapitän, ungünstige Zielregion)";
@@ -150,8 +140,8 @@ public class SailToAction extends MenuAction {
   	    	 PathNotFound=true;
   	     }
 	   
-	    u.addOrderAt(0, order);   
-		u.addOrderAt(0, command);
+	    u.addOrder(order);   
+		u.addOrder(command);
 		if (!PathNotFound){
 			u.setOrdersConfirmed(true);
 		}
