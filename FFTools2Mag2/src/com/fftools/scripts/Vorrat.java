@@ -14,8 +14,8 @@ import com.fftools.utils.FFToolsOptionParser;
 
 public class Vorrat extends TransportScript{
 	
-	private static final int Durchlauf_vorMP = 10;
-	private static final int Durchlauf_nachMP = 38;
+	private static final int Durchlauf_vorMP = 190;
+	private static final int Durchlauf_nachMP = 320;
 	
 	private int[] runsAt = {Durchlauf_vorMP,Durchlauf_nachMP};
 	

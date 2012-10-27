@@ -34,6 +34,7 @@ public class FFToolsGameData {
 	 * @param Name
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public static Potion getPotion(GameData data,String Name){
 		
 		if (data.potions()==null || data.potions().size()==0){

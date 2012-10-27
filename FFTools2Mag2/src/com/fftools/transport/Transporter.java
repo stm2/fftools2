@@ -7,6 +7,7 @@ import java.util.Iterator;
 import magellan.library.Item;
 import magellan.library.Region;
 import magellan.library.Skill;
+import magellan.library.gamebinding.MovementEvaluator;
 import magellan.library.rules.ItemType;
 
 import com.fftools.ReportSettings;
@@ -226,7 +227,9 @@ public class Transporter {
 		}
 		if (OP.isOptionString("kapa", "gehen")){
 			this.isRiding=false;
-			this.kapa = (int)(this.scriptUnit.getUnit().getPayloadOnFoot()/100);
+			// this.kapa = (int)(this.scriptUnit.getUnit().getPayloadOnFoot()/100);
+			MovementEvaluator ME = this.scriptUnit.getScriptMain().gd_ScriptMain.getGameSpecificStuff().getMovementEvaluator();
+			this.kapa = (int)(ME.getPayloadOnFoot(this.scriptUnit.getUnit())/100);
 			this.kapa_frei = this.kapa;
 		}
 		if (OP.getOptionInt("maxWagenPrio", -1)>=0){

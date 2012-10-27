@@ -41,7 +41,7 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 	 */
 	private boolean reportOFF = false;
 	
-	private static final int Durchlauf = 120;
+	private static final int Durchlauf = 500;
 
 	private int[] runners = {Durchlauf};
 	

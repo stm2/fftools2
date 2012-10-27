@@ -41,7 +41,7 @@ Rekrutieren			2 Geld beantragen
 					162 check + Befehl
 Request				10
 					100 (noch offen, unused!)
-RequestInfo			155
+RequestInfo			156
 Route				3
 Runde				1
 SailTo				4
@@ -83,3 +83,251 @@ TradeAreaHandler	8  vor Vorrat
 					12 nach Vorrat, vor MP, nach SetTradeAreaConnect, vor OnTAC
 					17 nach OnTAC
 					100 irgendwann nur islandinfo
+					
+					
+					
+------------------------------------------w o r k -------------------
+start
+Versions:
+FFTools2: 0.62, compiled: 20121003_010152
+Magellan: 2.0.6 (build 532)
+
+init done*
+
+start runTest
+found 22132 Regions and 25126 Units.
+new Script Main initialized (client)*
+
+Overall: found 22132 Regions and 25126 Units.*
+
+Faction to be ignored (from unitorder): umbr (Kalessin (ux87))*
+
+removing unprotected orders*
+
+refreshing regions after adding the scriptunits and removing unprotected orders*
+
+Scripter enthaelt 8769 units...starte scripter
+*
+
+Scripter enthaelt 8769 units...starte scripter*
+
+ReadReportSettings 1.
+ReadReportSettings 2......................
+TM-presetup
+Units to Matpools
+Removing deletet units
+10,11,12
+0->Settrankorder 10 ,Setlernplan 11:.[0:210ms]   
+
+1->Ifregion 15,Ack 19,Auramaxwarning 20,Ifunit 17 ,Ifnotregion 16,Runde 18:.[1:140ms]
+2->Depot 190,Trankeffekt 21,Setkapa 12,Pferde 28,Gibnix 22,Rekrutieren 26,Enterbuilding 25:.....[2:2020ms]*
+
+3->Route 40,Material 30,Handeln 32:........................[3:18851ms]
+4->Lohn 34,Sailto 42,Goto 44:....[4:1170ms]
+5->Unterhalten 70,Transport 50:..[5:610ms]
+6->Lernfix 62,Lernen 60:[6:2470ms]
+Circus pool I 74
+Circus pool II 76
+unterhalten II 78
+
+7->Unterhalten:..
+Ausbildungsmanager (7).. 80
+Ausbildungsmanager (7) benötigte:400ms[7:1020ms]
+8->Gebaeudeunterhalt 86 ,Bauen 94,Lehren 82,Burgenbau 90,Bauauftrag 92:....................[8:6370ms]*
+Baumanager 1 100
+9->Settradeareaconnection 33:.[9:2920ms]
+10->Vorrat 190,Request 108,Bauen 102,Alchemist 106,Usetradeareaconnection 104:.[10:240ms],11,12[12:1730ms],13.,14
+15->Ontradeareaconnection 110,Treiben 112:[15:50ms]
+16->Ontradeareaconnection 120:[16:10ms],17[17:10ms],18,19
+20->Steine 130,Eisen 135:
+MatPoolManager 200 -> MatPools. (1)......
+MatPoolManager benötigte 1930 ms![20:1940ms],21.,22,23,24
+25->Treiben 210:[25:10ms],26,27,28,29
+30->Islandinfo 220:[30:10ms],31,32,33,34
+30->TreiberPools 250
+35->Treiben 260 :[35:20ms]
+36->Transport 300,Pferde 310:...............................[36:9531ms],37
+38->Vorrat 320,Settradeareaconnection 330:..[38:780ms],39
+40->Gebaeudeunterhalt 340:[40:30ms],41..,42,43,44,45,46,47,48,49
+50->Schmieden 350:.[50:310ms],51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67*
+,68,69
+70->Handeln 360 :.....[70:1520ms],71,72,73,74,75,76,77,78,79,80
+MatPoolManager 400 -> MatPools. (2)*
+.....
+MatPoolManager benötigte 1630 ms![80:1640ms],81.,82,83,84,85,86,87,88,89,90*
+,91,92,93,94,95,96,97,98,99
+100->Lohn 420,Request 410,Bauen 440 ,Schmieden 430:..........................................*
+...............................[100:22631ms],101,102,103,104,105
+105->BauManager 450
+++++ *** ++++ **** ++++Bauunterstützung bei Gastarbeiter (7uto) in Cúsystusrul (-10, 8)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Monopolisten (zpqp) in Westkap (-62, 23)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Monopolisten (zpqp) in Westkap (-62, 23)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Monopolisten (zpqp) in Westkap (-62, 23)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Monopolisten (zpqp) in Westkap (-62, 23)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Monopolisten (zpqp) in Westkap (-62, 23) (moving)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Monopolisten (12n8) in Funkeltal (-62, 27)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Monopolisten (12n8) in Funkeltal (-62, 27)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Rekruten (uz04) in Arganthir (-34, 18) (moving)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Rekruten (uz04) in Arganthir (-34, 18) (moving)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Rekruten (uz04) in Arganthir (-34, 18) (moving)*
+
+++++ *** ++++ **** ++++Bauunterstützung bei Rekruten (uz04) in Arganthir (-34, 18) (moving)*
+[105:150ms]*
+,106.,107,108,109,110,111,112,113,114,115,116,117,118,119,120
+TransportManager 500 startet...generiere Anforderungen.*
+
+generiere Offers
+Info: TransportManager kennt 27946 Anforderungen und 3123 Angebote*
+
+***TM Nehovia T: 124/2075.., t=1160 ms.
+***TM Caldonia-W T: 29/2075., t=80 ms.
+***TM Kleine_Gletscher T: 10/2075., t=840 ms.
+***TM Jaw T: 61/2075., t=680 ms.
+***TM Sarnvalgaer T: 54/2075., t=170 ms.
+***TM Fetzenfisch T: 191/2075...., t=1680 ms.
+***TM Mannland T: 58/2075., t=230 ms.
+***TM Rigel T: 27/2075., t=160 ms.
+***TM Drachenbucht T: 130/2075., t=340 ms.
+***TM Jackals T: 135/2075.., t=1210 ms.
+***TM Orion T: 154/2075..., t=1330 ms.
+***TM Serpens T: 237/2075......, t=2380 ms.
+***TM Gems T: 20/2075., t=80 ms.
+***TM Namenor T: 54/2075., t=470 ms.
+***TM Kugelfisch T: 2/2075, t=10 ms.
+***TM Delta T: 252/2075......, t=3881 ms.
+***TM Gonkar T: 296/2075.......................99%, t=11300 ms.
+***TM GletscherSW *
+T: 45/2075.., t=620 ms.
+***TM Darkthrone T: 83/2075.., t=730 ms.
+***TM I2F T: 57/2075.., t=781 ms.
+***TM Südspitz T: 0/2075 - keine Transporter.
+***TM Telvinwur T: 0/2075 - keine Transporter.
+***TM Fenrasgivid T: 0/2075 - keine Transporter.
+***TM Aeraels Flucht T: 0/2075 - keine Transporter.
+***TM Saregoron T: 0/2075 - keine Transporter.
+***TM Salt T: 0/2075 - keine Transporter.
+***TM Dovin T: 0/2075 - keine Transporter.
+***TM Tecubin T: 0/2075 - keine Transporter.
+***TM Rolsal T: 33/2075.., t=440 ms.
+***TM Votpasgon T: 0/2075 - keine Transporter.
+***TM Possenfels T: 0/2075 - keine Transporter.
+***TM Gotríbat T: 0/2075 - keine Transporter.
+***TM Jooy T: 18/2075, t=140 ms.
+***TM null T: 0/2075 - keine Transporter.
+***TM Bètan T: 0/2075 - keine Transporter.
+***TM Aster T: 0/2075 - keine Transporter.
+***TM Vatron T: 0/2075 - keine Transporter.
+***TM Bekas T: 0/2075 - keine Transporter.
+***TM Pop T: 0/2075 - keine Transporter.
+***TM Kecicobyr T: 0/2075 - keine Transporter.
+***TM Mont Tenlair T: 0/2075 - keine Transporter.
+***TM Oeillet T: 0/2075 - keine Transporter.
+***TM New Skitia T: 5/2075, t=50 ms.
+***TM Edelweiss T: 0/2075 - keine Transporter.
+***TM Yzk T: 0/2075 - keine Transporter.
+TransportManager benötigte 28932 ms.*
+
+PathDistCache: 4986 Datensätze, Hits:399581/404567*
+.
+Ausbildungsmanager 550 (135)
+Ausbildungsmanager (135) benötigte:10ms
+MatPoolManager 600 -> MatPools. (3)........
+MatPoolManager benötigte 3370 ms!*
+[140:3380ms],141,142,143,144,145
+Ausbildungsmanager 650 (145)*
+
+AusbildungsPool: Einheit 8cm1 benötigt 2000 Silber für Taktik oder ein kostenfreis Lernfach*
+.*
+.
+Ausbildungsmanager 700 (145) benötigte:840ms[145:840ms],146...................*
+............................,147,148,149,150.
+MatPoolManager 750 -> MatPools. (4)*
+........
+MatPoolManager benötigte 2520 ms!*
+[150:2530ms],151
+152->Depot 800,Handeln 810:
+!!! DepotSilber ungenügend (1354/2180): Depot (9cf) in Sombre Prairie (8, 0)*
+[152:70ms]*
+,153,154
+155->Lernen 850:[155:10ms]
+156->Requestinfo 860:.............[156:4070ms],157,158
+159->Beschreibung 862:[159:10ms]
+160->Liefere 700:.......[160:19800ms],161
+162->Trankeffekt 710,Rekrutieren 720:[162:10ms],163
+Overlord Skriptinfos
+0:Settrankorder,Setlernplan
+1:Ifregion,Ack,Auramaxwarning,Ifunit,Ifnotregion,Runde*
+
+2:Depot,Trankeffekt,Setkapa,Pferde,Gibnix,Rekrutieren,Enterbuilding*
+
+3:Route,Material,Handeln*
+
+3->Manager:PferdeManager
+4:Lohn,Sailto,Goto
+5:Unterhalten,Transport
+6:Lernfix,Lernen
+6->Manager:CircusPoolManager
+7:Unterhalten
+7->Manager:AusbildungsManager,CircusPoolManager
+8:Gebaeudeunterhalt,Bauen,Lehren,Burgenbau,Bauauftrag*
+
+8->Manager:TradeAreaHandler*
+
+9:Settradeareaconnection
+9->Manager:BauManager
+10:Vorrat,Request,Bauen,Alchemist,Usetradeareaconnection*
+
+12->Manager:TradeAreaHandler*
+
+15:Ontradeareaconnection,Treiben
+16:Ontradeareaconnection
+17->Manager:TradeAreaHandler
+20:Steine,Eisen
+20->Manager:MatPoolManager
+25:Treiben
+30:Islandinfo
+30->Manager:TreiberPoolManager
+35:Treiben
+36:Transport,Pferde
+38:Vorrat,Settradeareaconnection
+40:Gebaeudeunterhalt
+40->Manager:AlchemistManager
+50:Schmieden
+70:Handeln
+80->Manager:MatPoolManager
+100:Lohn,Request,Bauen,Schmieden
+100->Manager:TradeAreaHandler
+105->Manager:BauManager
+120->Manager:TransportManager
+130:Transport
+135->Manager:AusbildungsManager
+140->Manager:MatPoolManager
+145->Manager:AusbildungsManager
+150->Manager:MatPoolManager
+152:Depot,Handeln
+155:Lernen
+156:Requestinfo
+159:Beschreibung
+160:Liefere
+162:Trankeffekt,Rekrutieren
+no info:LernplanHandler
+unit final confirm
+setting tags
+refreshing client
+refreshing client regions
+refreshing client regions...done
+refreshing GameData
+refreshing GameData...done
+runScripts benötigte 163478 ms.
+
+test finished

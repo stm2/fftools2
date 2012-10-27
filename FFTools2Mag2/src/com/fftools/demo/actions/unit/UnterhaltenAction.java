@@ -74,9 +74,9 @@ public class UnterhaltenAction extends MenuAction {
 	 */
 	private void doAction(Unit u){
 		String order = "// script Unterhalten mindestAuslastung=75 mode=Auto minTalent=4";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		order = "// setTag eTag1 Zirkus";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

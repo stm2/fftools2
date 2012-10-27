@@ -3,20 +3,18 @@ package com.fftools.scripts;
 
 import java.util.List;
 
-import com.fftools.utils.FFToolsRegions;
-
 import magellan.library.CoordinateID;
 import magellan.library.Region;
 import magellan.library.Ship;
-import magellan.library.StringID;
 import magellan.library.Unit;
-import magellan.library.rules.BuildingType;
 import magellan.library.utils.Regions;
+
+import com.fftools.utils.FFToolsRegions;
 
 public class Sailto extends Script{
 	private Ship ship = null;
 	
-	private static final int Durchlauf = 4;
+	private static final int Durchlauf = 42;
 	
 	// Parameterloser constructor
 	public Sailto() {
@@ -118,7 +116,7 @@ public class Sailto extends Script{
 		
 		
 		// FF 20070103: eingebauter check, ob es actDest auch gibt?!
-		if (!com.fftools.utils.FFToolsRegions.isInRegions(this.gd_Script.regions(), dest)){
+		if (!com.fftools.utils.FFToolsRegions.isInRegions(this.gd_Script.getRegions(), dest)){
 			// Problem  actDest nicht im CR -> abbruch
 			super.addComment("Sailto Ziel nicht im CR",true);
 			super.scriptUnit.doNotConfirmOrders();
@@ -127,11 +125,7 @@ public class Sailto extends Script{
 		} 
 
 		int speed = super.gd_Script.getGameSpecificStuff().getGameSpecificRules().getShipRange(this.ship);
-		
-		BuildingType harbour = super.gd_Script.rules.getBuildingType(StringID.create("Hafen"));
-
-		List<Region> pathL = Regions.planShipRoute(this.ship, dest,super.gd_Script.regions(), harbour,
-										  speed);
+		List<Region> pathL = Regions.planShipRoute(this.ship,super.gd_Script, dest);
 		
 		String path = null;
 		if (pathL!=null){

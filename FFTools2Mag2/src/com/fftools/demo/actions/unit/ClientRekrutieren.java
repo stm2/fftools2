@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import magellan.client.Client;
 import magellan.library.Item;
+import magellan.library.Order;
 import magellan.library.Region;
 import magellan.library.Unit;
 import magellan.library.event.GameDataEvent;
@@ -151,11 +152,9 @@ public class ClientRekrutieren implements Runnable{
 		
 		// bei empfängereinheit request und rekrutieren setzen setzen
 		int actRunde = this.selectionObserver.getClient().getData().getDate().getDate();
-		u.addOrders("REKRUTIEREN " + Anzahl + " ; [manuell " + actRunde + "]",false);
-		// u.addOrders("// script RUNDE " + actRunde + " script request " + neededSilber + " SILBER 2 ;Rekrutierungskosten", false);
-		// u.addOrders("// script RUNDE " + actRunde + " REKRUTIEREN " + Anzahl + " ; [manuell " + actRunde + "]", false);
-		u.addOrders("// script RUNDE " + actRunde + " script REKRUTIEREN " + Anzahl, false);
-		u.getRegion().refreshUnitRelations(true);
+		u.addOrder("REKRUTIEREN " + Anzahl + " ; [manuell " + actRunde + "]");
+		u.addOrder("// script RUNDE " + actRunde + " script REKRUTIEREN " + Anzahl);
+		u.reparseOrders();
 	}
 	
 	/**
@@ -177,7 +176,7 @@ public class ClientRekrutieren implements Runnable{
 		int betrag = Math.min(vorhanden,silber);
 		// beim Depot die Order generieren, wenn nicht gleich u
 		if (!this.depotUnit.equals(u)){
-			this.depotUnit.addOrders("GIB " + u.toString(false) + " " + betrag + " Silber ; Rekrutierunskosten [manuell]",false);
+			this.depotUnit.addOrder("GIB " + u.toString(false) + " " + betrag + " Silber ; Rekrutierunskosten [manuell]");
 		}
 		erg += betrag;
 		return erg;
@@ -193,15 +192,16 @@ public class ClientRekrutieren implements Runnable{
 	private int processUnit(Unit geber,Unit nehmer,int silber ){
 		String searchString = "GIB " + this.depotUnit.toString(false);
 		searchString = searchString.toLowerCase();
-		ArrayList<String> newOrders = new ArrayList<String>(1);
+		ArrayList<Order> newOrders = new ArrayList<Order>(1);
 		int erg = 0;
 		if (silber<=0){
 			return 0;
 		}
 		
 		boolean needNewOrders = false;
-		for (Iterator<String> iter = geber.getOrders().iterator();iter.hasNext();){
-			String order = (String)iter.next();
+		for (Iterator<Order> iter = geber.getOrders2().iterator();iter.hasNext();){
+			Order o = (Order)iter.next();
+			String order = o.getText();
 			String returnOrder = order;
 			order = order.toLowerCase();
 			if (order.startsWith(searchString) && order.indexOf("silber")>0
@@ -241,7 +241,7 @@ public class ClientRekrutieren implements Runnable{
 				String newS = "";
 				if (!geber.equals(nehmer)){
 					newS = "GIB " + nehmer.toString(false) + " " + betrag + " SILBER ;Rekrutieren [manuell]";
-					newOrders.add(newS);
+					newOrders.add(geber.createOrder(newS));
 				} else {
 					// die gleiche unit...nix machen
 				}
@@ -257,7 +257,7 @@ public class ClientRekrutieren implements Runnable{
 							newS = newS.concat(Anzahl + " ");
 						}
 					}
-					newOrders.add(newS);
+					newOrders.add(geber.createOrder(newS));
 				}
 				
 				// silber reduzieren
@@ -265,13 +265,13 @@ public class ClientRekrutieren implements Runnable{
 				erg+=betrag;
 				
 			} else {
-				newOrders.add(returnOrder);
+				newOrders.add(geber.createOrder(returnOrder));
 			}
 		}
 		
 		if (needNewOrders){
-			geber.setOrders(newOrders);
-			geber.getRegion().refreshUnitRelations(true);
+			geber.setOrders2(newOrders);
+			geber.reparseOrders();
 		}
 		return erg;
 	}

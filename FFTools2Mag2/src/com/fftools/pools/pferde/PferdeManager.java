@@ -42,7 +42,7 @@ public class PferdeManager implements OverlordRun,OverlordInfo {
 	 * Wann soll er laufen
 	 * VOR Lernfix NACH Pferde
 	 */
-	private static final int Durchlauf = 3;
+	private static final int Durchlauf = 55;
 	
 	// Rückgabe als Array
 	private int[] runners = {Durchlauf};

@@ -23,9 +23,9 @@ import com.fftools.utils.FFToolsOptionParser;
 public class Treiben extends TransportScript{
 	private static final ReportSettings reportSettings = ReportSettings.getInstance();
 	
-	private int Durchlauf_VorMatPool = 15;
-	private int Durchlauf_vorTreiberPool = 25;
-	private int Durchlauf_nachTreiberPool = 35;
+	private int Durchlauf_VorMatPool = 112;
+	private int Durchlauf_vorTreiberPool = 210;
+	private int Durchlauf_nachTreiberPool = 260;
 	
 	private int[] runners = {Durchlauf_VorMatPool,Durchlauf_vorTreiberPool, Durchlauf_nachTreiberPool};
 	

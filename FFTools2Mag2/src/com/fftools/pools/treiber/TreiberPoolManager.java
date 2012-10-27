@@ -26,7 +26,7 @@ public class TreiberPoolManager implements OverlordRun,OverlordInfo {
 	
 	// private static final OutTextClass outText = OutTextClass.getInstance();
 	
-	private static final int Durchlauf = 30;
+	private static final int Durchlauf = 250;
 	
 	private int[] runners = {Durchlauf};
 	//  Verbindung zu FFtools halten über Scriptmain

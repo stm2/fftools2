@@ -13,6 +13,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import magellan.client.swing.InternationalizedDialog;
+import magellan.library.Order;
 import magellan.library.Unit;
 
 import com.fftools.OutTextClass;
@@ -96,12 +97,11 @@ public class LernFixReadCRAction extends MenuAction{
 			// wir müssen durch alle units....oha
 			ScriptMain scriptMain = null;
 			LernplanHandler LPH = null;
-			for (Iterator<Unit> iter = selectionObserver.getClient().getData().units().values().iterator();iter.hasNext();){
+			for (Unit u:selectionObserver.getClient().getData().getUnits()){
 				outText.addPoint();
-				Unit u = iter.next();
 				boolean treffer=false;
-				for (Iterator<String> iter2 = u.getOrders().iterator();iter2.hasNext();){
-					String order = iter2.next();
+				for (Order o:u.getOrders2()){
+					String order = o.getText();
 					if (order.toLowerCase().startsWith("// script setlernplan")){
 						treffer=true;
 						break;

@@ -18,8 +18,8 @@ import com.fftools.utils.FFToolsRegions;
 
 public class Depot extends TransportScript{
 	
-	private static final int Duchlauf_main=2;
-	private static final int Durchlauf_nachLetztemMP = 152; //nur Info
+	private static final int Duchlauf_main=20;
+	private static final int Durchlauf_nachLetztemMP = 800; //nur Info
 	
 	private int[] runsAt = {Duchlauf_main,Durchlauf_nachLetztemMP};
 	

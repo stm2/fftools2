@@ -14,11 +14,11 @@ import com.fftools.transport.Transporter;
 public class Transport extends TransportScript{
 	
 	// vor erstem Matpool, nach Goto und Route...
-	private static final int Durchlauf_anfang = 5;
+	private static final int Durchlauf_anfang = 50;
 	// nach erstem Matpool, aber vor TM
-	private static final int Durchlauf_mitte = 36;
+	private static final int Durchlauf_mitte = 300;
 	// nach TM
-	private static final int Durchlauf_ende = 130;
+	private static final int Durchlauf_ende = 520;
 	
 	private int[] runners = {Durchlauf_anfang,Durchlauf_mitte,Durchlauf_ende};
 	

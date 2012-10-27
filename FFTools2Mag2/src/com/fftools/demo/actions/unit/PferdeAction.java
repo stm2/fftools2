@@ -74,7 +74,7 @@ public class PferdeAction extends MenuAction {
 	 */
 	private void doAction(Unit u){
 		String order = "// script Pferde mode=auto";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

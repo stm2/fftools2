@@ -26,10 +26,10 @@ public class MatPoolManager implements OverlordRun,OverlordInfo{
 	 */
 	private boolean reportOFF = false;
 	
-	private static final int Durchlauf1 = 20;
-	private static final int Durchlauf2 = 80;
-	private static final int Durchlauf3 = 140; // Lernpool braucht den sehr spät
-	private static final int Durchlauf4 = 150;
+	private static final int Durchlauf1 = 200;
+	private static final int Durchlauf2 = 400;
+	private static final int Durchlauf3 = 600; // Lernpool braucht den sehr spät
+	private static final int Durchlauf4 = 700;
 	
 	private int[] runners = {Durchlauf1,Durchlauf2,Durchlauf3, Durchlauf4};
 	

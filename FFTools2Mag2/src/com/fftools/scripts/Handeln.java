@@ -21,9 +21,9 @@ public class Handeln extends TradeAreaScript{
 	
 	private Region r = null;
 	
-	public static final int Durchlauf_VorMatpool = 3;
-	public static final int Durchlauf_NachMatpool = 70;
-	public static final int Durchlauf_NachMatpool2 = 152;
+	public static final int Durchlauf_VorMatpool = 32;
+	public static final int Durchlauf_NachMatpool = 360;
+	public static final int Durchlauf_NachMatpool2 = 810;
 	
 	
 	private int[] runsAt = {Durchlauf_VorMatpool,Durchlauf_NachMatpool,Durchlauf_NachMatpool2};

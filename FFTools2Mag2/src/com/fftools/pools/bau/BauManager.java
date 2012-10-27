@@ -22,8 +22,8 @@ import com.fftools.trade.TradeAreaHandler;
 public class BauManager implements OverlordRun,OverlordInfo{
 	private static final OutTextClass outText = OutTextClass.getInstance();
 	
-	private static final int Durchlauf0 = 9;
-	private static final int Durchlauf1 = 105;
+	private static final int Durchlauf0 = 100;
+	private static final int Durchlauf1 = 450;
 	
 	
 	private int[] runners = {Durchlauf0,Durchlauf1};

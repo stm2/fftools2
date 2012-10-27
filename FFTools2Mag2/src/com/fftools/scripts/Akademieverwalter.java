@@ -14,7 +14,7 @@ import com.fftools.pools.akademie.*;
 public class Akademieverwalter extends Script{
 	
 	
-	private static final int Durchlauf = 2;
+	private static final int Durchlauf = 84;
 	
 	private ScriptAkademie scriptAkademie = null;
 	private int schuelerPlaetze=25;

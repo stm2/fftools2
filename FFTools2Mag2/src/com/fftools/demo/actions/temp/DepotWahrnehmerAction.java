@@ -79,16 +79,16 @@ public class DepotWahrnehmerAction extends MenuAction {
 		// neue Unit ID
 		UnitID id = UnitID.createTempID(this.selectionObserver.getClient().getData(), this.selectionObserver.getClient().getProperties(), parentUnit);
 		// Die tempUnit anlegen
-		TempUnit tempUnit = parentUnit.createTemp(id);
+		TempUnit tempUnit = parentUnit.createTemp(this.selectionObserver.getClient().getData(),id);
 		
 		// name setzen
-		tempUnit.addOrderAt(0, "BENENNEN EINHEIT Depot ;dnt");
+		tempUnit.addOrder("BENENNEN EINHEIT Depot ;dnt");
 		// script Setzen
-		tempUnit.addOrderAt(0, "// script Lernfix Talent=Wahrnehmung");
-		tempUnit.addOrderAt(0, "// script Depot Lernen=aus");
+		tempUnit.addOrder("// script Lernfix Talent=Wahrnehmung");
+		tempUnit.addOrder("// script Depot Lernen=aus");
 		
 		// rekrutieren
-		tempUnit.addOrderAt(0, "// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren 1", false);
+		tempUnit.addOrder("// script Runde " + this.selectionObserver.getClient().getData().getDate().getDate() + " script Rekrutieren 1");
 
 		this.selectionObserver.getClient().getDispatcher().fire(new TempUnitEvent(this, tempUnit, TempUnitEvent.CREATED));
 	}

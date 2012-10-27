@@ -34,8 +34,8 @@ public class Gebaeudeunterhalt extends MatPoolScript{
 		
 	// Parameter des Scripts... Zuweisung im Konstruktor!
 	
-	private int durchlaufVorMatpool = 8;    // Anfordern von Unterhalt
-	private int durchlaufNachMatpool = 40;  // Test ob Unterhalt gegeben wurde
+	private int durchlaufVorMatpool = 86;    // Anfordern von Unterhalt
+	private int durchlaufNachMatpool = 340;  // Test ob Unterhalt gegeben wurde
 	private int[] runners; 
 	
 	int aktuelleRunde=0;

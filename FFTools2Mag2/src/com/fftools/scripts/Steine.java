@@ -10,7 +10,7 @@ public class Steine extends MatPoolScript{
 	
 	
 	
-	int Durchlauf_1 = 20;
+	int Durchlauf_1 = 130;
 	
 
 	

@@ -85,6 +85,7 @@ public class Overlord {
 	 *
 	 */
 	public void run(){
+		boolean sayTime = false;
 		if (maxDurchLauf<0){
 			outText.addOutLine("Overlord: run nicht möglich: kein Max Durchlauf");
 			return;
@@ -94,7 +95,7 @@ public class Overlord {
 			return;
 		}
 		
-		// Scriptgeteuerte Tags 3, 4 und 5 zurücksetzen, weil diese bei jedem scriptlauf neu vergeben werden.
+		// Scriptgesteuerte Tags 3, 4 und 5 zurücksetzen, weil diese bei jedem scriptlauf neu vergeben werden.
 		for (Iterator<ScriptUnit> iter = this.scriptMain.getScriptUnits().values().iterator();iter.hasNext();){
 			ScriptUnit scrU = (ScriptUnit)iter.next();
 			if (!isDeleted(scrU)){ 
@@ -117,6 +118,19 @@ public class Overlord {
 		
 		
 		for (mainDurchlauf = 0;mainDurchlauf<Integer.MAX_VALUE;mainDurchlauf++){
+			sayTime=false;
+			long time1 = System.currentTimeMillis();
+			// Info doch vorab
+			String scriptNames = getScriptsForRunNumber(mainDurchlauf);
+			if (scriptNames.length()>0){
+				outText.addNewLine();
+				outText.addOutChars(mainDurchlauf + "->" + scriptNames + ":");
+				sayTime=true;
+			} else {
+				// outText.addOutChars("," + mainDurchlauf);
+			}
+			
+			
 			// scriptunits anstossen
 			for (Iterator<ScriptUnit> iter = this.scriptMain.getScriptUnits().values().iterator();iter.hasNext();){
 				ScriptUnit scrU = (ScriptUnit)iter.next();
@@ -131,18 +145,29 @@ public class Overlord {
 					Object o = iter.next();
 					OverlordInfo oI = (OverlordInfo)o;
 					if (isInRun(oI, mainDurchlauf)){
+						outText.addNewLine();
+						outText.addOutChars(mainDurchlauf + "->" + this.getSimpleClassName(oI.getClass()) + ":");
 						OverlordRun oR = (OverlordRun)o;
 						oR.run(mainDurchlauf);
+						sayTime=true;
 					}
 				}
 			}
+			
+			if (sayTime){
+				long time2 = System.currentTimeMillis();
+				long tDiff = time2 - time1;
+				outText.addOutChars("[" + mainDurchlauf + ":" + tDiff + "ms]");
+				// outText.addNewLine();
+			}
+			
 			
 			// maximalen Durchlauf erreicht?
 			if (mainDurchlauf>maxDurchLauf){
 				// Abbruch
 				break;
 			}
-			outText.addOutChars("," + mainDurchlauf);
+			
 		}
 		
 		
@@ -186,6 +211,27 @@ public class Overlord {
 			}
 		}
 	}
+	
+	
+	private String getScriptsForRunNumber(int runN){
+		String erg  = "";
+		for (OverlordInfo oI:this.infoObjects){
+			if (oI.runAt()!=null){
+				for (int i = 0;i<=oI.runAt().length-1;i++){
+					int actX = (int)oI.runAt()[i];
+					if (actX==runN){
+						String className = oI.getClass().getSimpleName();
+						if (erg.length()>0){
+							erg = erg + ",";
+						}
+						erg = erg + className;
+					}
+				}
+			}
+		}
+		return erg;
+	}
+	
 	
 	/**
 	 * Ist eine OverlordInfo im aktuellen Durchlauf enthalten?
@@ -474,6 +520,8 @@ public class Overlord {
 	public int getMainDurchlauf() {
 		return mainDurchlauf;
 	}
+	
+	
 	
 	
 }

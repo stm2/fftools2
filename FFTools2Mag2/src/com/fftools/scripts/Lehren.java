@@ -1,8 +1,7 @@
 package com.fftools.scripts;
 
 
-import java.util.Iterator;
-
+import magellan.library.Order;
 import magellan.library.Skill;
 import magellan.library.Unit;
 import magellan.library.io.cr.CRParser;
@@ -10,7 +9,7 @@ import magellan.library.rules.SkillType;
 
 public class Lehren extends Script{
 	
-	private static final int Durchlauf = 8;
+	private static final int Durchlauf = 82;
 	
 	// Parameterloser constructor
 	public Lehren() {
@@ -125,8 +124,8 @@ public class Lehren extends Script{
 	
 	private String getLearnSkillName(Unit u){
 		String erg = "";
-		for(Iterator<String> iter = u.getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		for(Order o : u.getOrders2()) {
+			String s = o.getText();
 			String s_low = s.toLowerCase();
 			if (s_low.startsWith("lerne")){
 				// eine Lernorder gefunden. Kann nun lerne oder lernen sein

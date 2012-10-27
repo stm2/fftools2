@@ -74,9 +74,9 @@ public class BauarbeiterAction extends MenuAction {
 	 */
 	private void doAction(Unit u){
 		String order = "// script Bauen mode=auto minTalent=4 info=an";
-		u.addOrderAt(0, order);
+		u.addOrder(order);
 		order = "// setTag eTag1 Bauarbeiter";
-		u.addOrderAt(0, order);
+		u.addOrder(order);
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

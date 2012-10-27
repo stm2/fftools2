@@ -6,7 +6,7 @@ package com.fftools.scripts;
 public class Abrunde extends Script{
 	
 	
-	private static final int Durchlauf = 1;
+	private static final int Durchlauf = 14;
 	
 	/**
 	 * Parameterloser Constructor

@@ -10,9 +10,11 @@ import javax.swing.JTextArea;
 import magellan.client.Client;
 import magellan.library.Faction;
 import magellan.library.GameData;
+import magellan.library.Order;
 import magellan.library.Region;
 import magellan.library.Unit;
 import magellan.library.event.GameDataEvent;
+import magellan.library.gamebinding.EresseaRelationFactory;
 
 import com.fftools.overlord.Overlord;
 import com.fftools.utils.FFToolsTags;
@@ -132,6 +134,11 @@ public class ScriptMain {
 		reportSettings.setGameData(this.gd_ScriptMain);
 		reportSettings.reset();
 		reportSettings.setScriptMain(this);
+		
+		
+		this.stopRelationUpdates();
+		
+		
 		this.readReportSettings();
 		
 		// not the the console, but to the logfile...
@@ -181,6 +188,9 @@ public class ScriptMain {
 		// und zum schluss refreshen
 		// natuerlich nur, wenn wir nen client haben..
 		outText.addOutLine("refreshing client");
+		
+		this.restartRelationUpdates();
+		
 		this.refreshClient();
 		
 		long endT = System.currentTimeMillis();
@@ -208,9 +218,11 @@ public class ScriptMain {
 			*/
 			outText.addOutLine("refreshing client regions");
 			// neuer Anlauf...regionen refreshen
+			/*
 			for (Region r:this.scriptRegions){
 				r.refreshUnitRelations(true);
 			}
+			*/
 			outText.addOutLine("refreshing client regions...done");
 			outText.addOutLine("refreshing GameData");
 			this.client.getMagellanContext().getEventDispatcher().fire(new GameDataEvent(this, this.client.getData()));
@@ -238,6 +250,7 @@ public class ScriptMain {
 		// weil für prepare Handel schon reportsettungs notwendig
 		// Lauf 1
 		// System.out.println("ReadReportSettings 1");
+		outText.addOutLine("ReadReportSettings 1");
 		for (Iterator<ScriptUnit> iter = scriptUnits.values().iterator();iter.hasNext();){
 			ScriptUnit scrU = (ScriptUnit)iter.next();
 			// auf reportsetting einträge prüfen
@@ -249,6 +262,7 @@ public class ScriptMain {
 		}
 		// Lauf 2
 		// System.out.println("ReadReportSettings 2");
+		outText.addOutLine("ReadReportSettings 2");
 		for (Iterator<ScriptUnit> iter = scriptUnits.values().iterator();iter.hasNext();){
 			ScriptUnit scrU = (ScriptUnit)iter.next();
 			// auf Handel prüfen (TradeArea bauen)
@@ -265,11 +279,13 @@ public class ScriptMain {
 		
 		// TM anstossen
 		// System.out.println("TM");
+		outText.addOutLine("TM-presetup");
 		this.getOverlord().getTransportManager().initReportSettings(reportSettings);
 		
 		
 		// Jetzt alle scriptunits bei den matpools anmelden..
 		// System.out.println("MP-Anmeldungen");
+		outText.addOutLine("Units to Matpools");
 		for (Iterator<ScriptUnit> iter = scriptUnits.values().iterator();iter.hasNext();){
 			ScriptUnit scrU = (ScriptUnit)iter.next();
 			if (!this.getOverlord().isDeleted(scrU)){
@@ -278,7 +294,7 @@ public class ScriptMain {
 			}
 		}
 		// System.out.println("finished ReadReportSettings\n");
-		
+		outText.addOutLine("Removing deletet units");
 		// Entfernte ScriptUnits tatsächlich entfernen
 		ArrayList<ScriptUnit> removeIt = new ArrayList<ScriptUnit>();
 		for (Iterator<ScriptUnit> iter = scriptUnits.values().iterator();iter.hasNext();){
@@ -296,8 +312,8 @@ public class ScriptMain {
 		if (gd_ScriptMain == null) {
 			return;
 		}
-		int numberOfRegions = gd_ScriptMain.regions().size();
-		int numberOfUnits = gd_ScriptMain.units().size();
+		int numberOfRegions = gd_ScriptMain.getRegions().size();
+		int numberOfUnits = gd_ScriptMain.getUnits().size();
 		outText.addOutLine("Overall: found " + numberOfRegions + " Regions and " + numberOfUnits + " Units.");
 		
 		// ignore Factions ermittlen
@@ -321,20 +337,21 @@ public class ScriptMain {
 		// -> // private final static String FFTools2_ignoreFactions = "FFTools2.ignoreFactions";
 		// durch die Regionen wandern..
 		String ids = "// " + ScriptMain.FFTools2_ignoreFactions + " ";
-		for (Iterator<Region> i=gd_ScriptMain.regions().values().iterator(); i.hasNext(); ){
-			Region r = (Region) i.next();			
-			for (Iterator<Unit> i2=r.units().iterator();i2.hasNext();){
-				Unit u = (Unit) i2.next();
-				if (u.getOrders()!=null && u.getOrders().size()>0){
-					for (String so:u.getOrders()){
-						if (so.startsWith(ids)){
-							String factionToAdd =  so.substring(ids.length());
-							if (factionToAdd.length()>1){
-								if (ignoreList==null){
-									ignoreList = new ArrayList<String>();
+		for (Region r: gd_ScriptMain.getRegions()){
+			if (r.getUnits()!=null && r.getUnits().size()>0){
+				for (Unit u:r.getUnits().values()){			
+					if (u.getOrders2()!=null && u.getOrders2().size()>0){
+						for (Order ord:u.getOrders2()){
+							String so = ord.getText();
+							if (so.startsWith(ids)){
+								String factionToAdd =  so.substring(ids.length());
+								if (factionToAdd.length()>1){
+									if (ignoreList==null){
+										ignoreList = new ArrayList<String>();
+									}
+									ignoreList.add(factionToAdd);
+									outText.addOutLine("Faction to be ignored (from unitorder): " + factionToAdd + " (" + u.toString() + ")");
 								}
-								ignoreList.add(factionToAdd);
-								outText.addOutLine("Faction to be ignored (from unitorder): " + factionToAdd + " (" + u.toString() + ")");
 							}
 						}
 					}
@@ -345,27 +362,38 @@ public class ScriptMain {
 		
 		
 		// durch die Regionen wandern..
-		for (Iterator<Region> i=gd_ScriptMain.regions().values().iterator(); i.hasNext(); ){
-			Region r = (Region) i.next();			
-			for (Iterator<Unit> i2=r.units().iterator();i2.hasNext();){
-				Unit u = (Unit) i2.next();
-				boolean ignore = false;
-				if (ignoreList != null){
-					for (String ss : ignoreList){
-						if (u.getFaction().getID().toString().equalsIgnoreCase(ss)){
-							ignore=true;
-							break;
+		for (Region r:gd_ScriptMain.getRegions()){
+			if (r.getUnits()!=null && r.getUnits().size()>0){
+				for (Unit u:r.getUnits().values()){
+					boolean ignore = false;
+					if (ignoreList != null){	
+						for (String ss : ignoreList){
+							if (u.getFaction().getID().toString().equalsIgnoreCase(ss)){
+								ignore=true;
+								break;
+							}
 						}
 					}
-				}
-				
-				
-				if (!ignore && ScriptUnit.isScriptUnit(u)){
-					this.addUnit(u);
-					this.setFactionTrustlevel(u.getFaction());
+					
+					
+					if (!ignore && ScriptUnit.isScriptUnit(u)){
+						this.addUnit(u);
+						this.setFactionTrustlevel(u.getFaction());
+					}
 				}
 			}
 		}
+		
+		// Gleich die Orders einmal saven = clearen
+		outText.addOutLine("removing unprotected orders");
+		for (ScriptUnit su: this.scriptUnits.values()){
+			su.saveOriginalScriptOrders();
+		}
+		
+		// einmal updaten
+		outText.addOutLine("refreshing regions after adding the scriptunits and removing unprotected orders");
+		this.refreshScripterRegions();
+		
 		outText.addOutLine("Scripter enthaelt " + getNumberOfScriptUnits() + " units...starte scripter\n");
 	}
 	
@@ -410,8 +438,8 @@ public class ScriptMain {
 		// MatPool mp = this.getOverlord().getMatPoolManager().getRegionsMatPool(u);
 		
 		boolean isHandel = false;
-		for(Iterator<String> iter = u.getUnit().getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		for(Order o:u.getUnit().getOrders2()) {
+			String s = o.getText();
 			if (s.toLowerCase().startsWith("// script handeln")){
 				isHandel=true;
 				break;
@@ -439,16 +467,33 @@ public class ScriptMain {
 	public void refreshScripterRegions(){
 		if (this.scriptUnits==null){return;}
 		if (this.scriptRegions==null) {return;}
+		EresseaRelationFactory ERF = ((EresseaRelationFactory) gd_ScriptMain.getGameSpecificStuff().getRelationFactory());
+		boolean updaterStopped = ERF.isUpdaterStopped();
+		if (!updaterStopped){
+			ERF.stopUpdating();
+		}
 		for (Iterator<Region> iter = this.scriptRegions.iterator();iter.hasNext();){
 			Region r = (Region)iter.next();
-			r.refreshUnitRelations(true);
+			// r.refreshUnitRelations(true);
+			// gd_ScriptMain.getGameSpecificStuff().getRelationFactory().createRelations(r);
+			
+			ERF.processRegionNow(r);
+		}
+		if (!updaterStopped){
+			ERF.restartUpdating();
 		}
 	}
 
 	
-	
+	public void stopRelationUpdates(){
+		EresseaRelationFactory ERF = ((EresseaRelationFactory) gd_ScriptMain.getGameSpecificStuff().getRelationFactory());
+		ERF.stopUpdating();
+	}
 			
-
+	public void restartRelationUpdates(){
+		EresseaRelationFactory ERF = ((EresseaRelationFactory) gd_ScriptMain.getGameSpecificStuff().getRelationFactory());
+		ERF.restartUpdating();
+	}
 
   public Overlord getOverlord(){
 	  if (this.overlord==null){

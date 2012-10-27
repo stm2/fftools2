@@ -8,7 +8,7 @@ import magellan.library.Unit;
 
 public class Ifunit extends Script{
 	
-	private static final int Durchlauf = 1;
+	private static final int Durchlauf = 17;
 	
 	
 	/**

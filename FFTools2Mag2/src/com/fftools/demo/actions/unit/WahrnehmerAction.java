@@ -74,9 +74,9 @@ public class WahrnehmerAction extends MenuAction {
 	 */
 	private void doAction(Unit u){
 		String order = "// script Lernfix Talent=Wahrnehmung";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		order = "// setTag eTag1 Wahrnehmer";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

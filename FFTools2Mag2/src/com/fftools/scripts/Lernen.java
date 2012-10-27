@@ -13,8 +13,8 @@ import com.fftools.utils.FFToolsUnits;
 public class Lernen extends MatPoolScript{
 	public static final ReportSettings reportSettings = ReportSettings.getInstance();
 	
-	private static final int Vorlauf = 6;
-	private static final int Nachlauf =155; //Nach letzten Matpool?
+	private static final int Vorlauf = 60;
+	private static final int Nachlauf =850; //Nach letzten Matpool?
 	
 	private int[] runners = {Vorlauf,Nachlauf};
 	

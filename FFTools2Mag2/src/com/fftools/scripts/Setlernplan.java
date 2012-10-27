@@ -8,7 +8,7 @@ import com.fftools.pools.ausbildung.LernplanHandler;
 public class Setlernplan extends Script{
 	
 	
-	private static final int Durchlauf = 0;
+	private static final int Durchlauf = 11;
 	
 	/**
 	 * Parameterloser Constructor

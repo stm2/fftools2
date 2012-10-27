@@ -6,7 +6,7 @@ package com.fftools.scripts;
 public class Gibnix extends Script{
 	
 	
-	private static final int Durchlauf = 2;
+	private static final int Durchlauf = 22;
 	
 	/**
 	 * Parameterloser Constructor

@@ -8,7 +8,7 @@ import com.fftools.utils.GotoInfo;
 
 public class Goto extends Script implements WithGotoInfo{
 	
-	private int Durchlauf1 = 4;
+	private int Durchlauf1 = 44;
 	
 	private int[] runners = {Durchlauf1};
 	
@@ -82,7 +82,7 @@ public class Goto extends Script implements WithGotoInfo{
 					makeOrderNACH(actRegCoordID,actDest);
 				}
 			} else {
-				// fehler beim parsen des Ziels
+				// Fehler beim Parsen des Ziels
 				zielParseFehler();
 			}
 		}
@@ -98,7 +98,13 @@ public class Goto extends Script implements WithGotoInfo{
 	private void makeOrderNACH(CoordinateID act,CoordinateID dest){		
 		this.gotoInfo = new GotoInfo();
 		this.gotoInfo = FFToolsRegions.makeOrderNACH(this.scriptUnit, act, dest,true,"Goto - makeOrderNach");
-		
+		// Falls wir im Gebäude sind, und da nicht schon raus gehen, verlassen setzen
+		// Hat den Effekt, was wir keinen Gebäudeunterhalt mehr bekommen, welcher
+		// uns eventuell überlädt
+		if (this.scriptUnit.getUnit().getBuilding()!=null && this.scriptUnit.getUnit().getModifiedBuilding()==null){
+			this.addComment("Goto: VERLASSEN wird explizit gesetzt");
+			this.addOrder("VERLASSSEN ;von GOTO", true);
+		}
 	}
 
 	public GotoInfo getGotoInfo(){

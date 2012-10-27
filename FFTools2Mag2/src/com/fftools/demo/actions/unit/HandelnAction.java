@@ -74,9 +74,9 @@ public class HandelnAction extends MenuAction {
 	 */
 	private void doAction(Unit u){
 		String order = "// script Handeln";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		order = "// setTag eTag1 Handelsgilde";
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		u.setOrdersConfirmed(true);
 		List<Unit> units = new LinkedList<Unit>();
 		units.add(u);

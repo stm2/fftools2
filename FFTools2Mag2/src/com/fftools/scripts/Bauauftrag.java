@@ -12,7 +12,7 @@ package com.fftools.scripts;
 public class Bauauftrag extends MatPoolScript{
 	// private static final ReportSettings reportSettings = ReportSettings.getInstance();
 	
-	private int Durchlauf1 = 8;
+	private int Durchlauf1 = 92;
 	
 	private int[] runners = {Durchlauf1};
 	

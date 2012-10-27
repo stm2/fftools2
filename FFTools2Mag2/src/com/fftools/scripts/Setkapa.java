@@ -17,7 +17,7 @@ import com.fftools.utils.FFToolsOptionParser;
 
 public class Setkapa extends Script {
 	
-	private static final int Durchlauf = 2;
+	private static final int Durchlauf = 12;
 	
 	private int kapa=-1;
 	

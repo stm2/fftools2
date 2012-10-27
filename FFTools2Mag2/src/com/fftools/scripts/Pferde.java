@@ -21,8 +21,8 @@ import com.fftools.utils.GotoInfo;
 public class Pferde extends MatPoolScript{
 	
 	
-	private static final int Durchlauf_vorMP1 = 2;
-	private static final int Durchlauf_nachMP1 = 36;
+	private static final int Durchlauf_vorMP1 = 28;
+	private static final int Durchlauf_nachMP1 = 310;
 	
 	/**
 	 * Anforderung der Pferde

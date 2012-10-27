@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import magellan.library.Item;
+import magellan.library.Order;
 import magellan.library.Unit;
 import magellan.library.rules.ItemType;
 
@@ -25,7 +26,7 @@ public class Liefere extends Script{
 	/**
 	 * sollte ganz zum schluss laufen
 	 */
-	private static final int Durchlauf = 160;
+	private static final int Durchlauf = 730;
 	
 	private int menge = -1;
 	
@@ -210,8 +211,8 @@ public class Liefere extends Script{
 				while (changedOrders){
 					changedOrders = false;
 					worstCaseCounter = 0;
-					for (Iterator<String> iter2 = actUnit.getOrders().iterator();iter2.hasNext();){
-						String actOrder = (String)iter2.next();
+					for (Order o:actUnit.getOrders2()){
+						String actOrder = o.getText();
 						GibDetails GD=new GibDetails(actScriptUnit,actOrder);
 						if (GD.getItemType()!=null && GD.getItemType().equals(this.itemType)){
 							if (GD.getTargetScriptUnit()!=null && GD.getTargetScriptUnit().equals(this.scriptUnit)){

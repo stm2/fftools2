@@ -942,7 +942,13 @@ private MatPool matPool = null;
 					Unit schuelerU = schuelerSU.getUnit();
 					Building schuelerB = schuelerU.getModifiedBuilding();
 					if (schuelerB!=null){
+						/*
 						if (schuelerB.getBuildingType().getName().equalsIgnoreCase("Akademie")){
+							SchuelerInAka = true;
+						}
+						*/
+						// es muss die gleiche Aka sein !
+						if (schuelerB.equals(b)){
 							SchuelerInAka = true;
 						}
 					}

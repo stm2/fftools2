@@ -16,7 +16,7 @@ import com.fftools.utils.FFToolsRegions;
 public class Burgenbau extends MatPoolScript{
 	// private static final ReportSettings reportSettings = ReportSettings.getInstance();
 	
-	private int Durchlauf1 = 8;
+	private int Durchlauf1 = 90;
 	
 	private int[] runners = {Durchlauf1};
 	

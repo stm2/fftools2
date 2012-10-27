@@ -108,7 +108,7 @@ public class MaterialAction extends MenuAction {
 			order+=" pferde=an";
 		}
 		
-		u.addOrderAt(0, order);
+		u.addOrder( order);
 		this.selectionObserver.getClient().getDispatcher().fire(new UnitOrdersEvent(this,u));
 	}
 }

@@ -1,8 +1,8 @@
 package com.fftools.scripts;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
+import magellan.library.Order;
 import magellan.library.Unit;
 
 import com.fftools.utils.FFToolsOptionParser;
@@ -13,7 +13,7 @@ import com.fftools.utils.FFToolsOptionParser;
 public class Auramaxwarning extends Script{
 	
 	
-	private static final int Durchlauf = 1;
+	private static final int Durchlauf = 14;
 
 	
 	/**
@@ -110,9 +110,10 @@ public class Auramaxwarning extends Script{
 	private int setGivenOrders(String keyword){
 		int anzahl = 0;
 		String searchPhrase = "// " + keyword;
-		ArrayList<String> L = new ArrayList<String>(); 
-		L.addAll(this.scriptUnit.getUnit().getOrders());
-		for (String s:L){
+		ArrayList<Order> L = new ArrayList<Order>(); 
+		L.addAll(this.scriptUnit.getUnit().getOrders2());
+		for (Order o:L){
+			String s = o.getText();
 			if (s.toLowerCase().startsWith(searchPhrase.toLowerCase())){
 				anzahl++;
 				s = s.substring(searchPhrase.length() + 1);
@@ -172,11 +173,11 @@ public class Auramaxwarning extends Script{
 	 */
 	private boolean zaubert(){
 		
-		if (this.scriptUnit.getUnit().getOrders()==null || this.scriptUnit.getUnit().getOrders().size()==0){
+		if (this.scriptUnit.getUnit().getOrders2()==null || this.scriptUnit.getUnit().getOrders2().size()==0){
 			return false;
 		}
-		for(Iterator<String> iter = this.scriptUnit.getUnit().getOrders().iterator(); iter.hasNext();) {
-			String s = (String) iter.next();
+		for(Order o: this.scriptUnit.getUnit().getOrders2()) {
+			String s = o.getText();
 			if (s.toUpperCase().startsWith("ZAUBERE") || s.toUpperCase().startsWith("@ZAUBERE")){
 				this.addComment("auramax: Einheit zaubert.");
 				return true;

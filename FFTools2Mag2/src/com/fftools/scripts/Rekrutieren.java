@@ -1,5 +1,6 @@
 package com.fftools.scripts;
 
+import magellan.library.Order;
 import magellan.library.Region;
 import magellan.library.TempUnit;
 import magellan.library.Unit;
@@ -18,8 +19,8 @@ import com.fftools.utils.FFToolsOptionParser;
  */
 public class Rekrutieren extends MatPoolScript{
 	
-	private static final int Durchlauf_vorMP = 2;
-	private static final int Durchlauf_nachMP = 162;
+	private static final int Durchlauf_vorMP = 26;
+	private static final int Durchlauf_nachMP = 720;
 	
 	private int[] runsAt = {Durchlauf_vorMP,Durchlauf_nachMP};
 	
@@ -143,7 +144,8 @@ public class Rekrutieren extends MatPoolScript{
 		super.addOrder("REKRUTIEREN " + anzahl, true);
 		
 		// ?? sonderfall ??
-		this.region().refreshUnitRelations(true);
+		// this.region().refreshUnitRelations(true);
+		this.getUnit().reparseOrders();
 		
 		// debug
 		// int test = this.scriptUnit.getUnit().getModifiedPersons();
@@ -169,14 +171,15 @@ public class Rekrutieren extends MatPoolScript{
 				Unit parentUnit = this.scriptUnit.getUnit();
 				UnitID id = UnitID.createTempID(this.gd_Script, this.scriptUnit.getScriptMain().getSettings(), parentUnit);
 				// Die tempUnit anlegen
-				TempUnit tempUnit = parentUnit.createTemp(id);
-				tempUnit.addOrderAt(0,Rekrutieren.scriptCreatedTempMark);
+				TempUnit tempUnit = parentUnit.createTemp(this.gd_Script,id);
+				tempUnit.addOrder(Rekrutieren.scriptCreatedTempMark);
 				// Kommandos setzen
 				// Kommandos durchlaufen
-				for (String s:this.scriptUnit.getUnit().getOrders()){
+				for (Order o:this.scriptUnit.getUnit().getOrders2()){
+					String s = o.getText();
 					if (s.startsWith("// tempunit:")){
 						s = s.substring(12);
-						tempUnit.addOrderAt(0,s);
+						tempUnit.addOrder(s);
 					}
 				}
 				tempUnit.setOrdersConfirmed(true);

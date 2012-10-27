@@ -33,8 +33,8 @@ public class CircusPoolManager implements OverlordRun,OverlordInfo {
 	
 	// private static final OutTextClass outText = OutTextClass.getInstance();
 	
-	private static final int Durchlauf1 = 6;
-	private static final int Durchlauf2 = 7;
+	private static final int Durchlauf1 = 74;
+	private static final int Durchlauf2 = 79;
 	
 	
 	private int[] runners = {Durchlauf1,Durchlauf2};

@@ -4,7 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.util.Map;
+import java.util.Collection;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -12,7 +12,6 @@ import javax.swing.JTextArea;
 
 import magellan.client.Client;
 import magellan.client.swing.InternationalizedDialog;
-import magellan.library.CoordinateID;
 import magellan.library.GameData;
 import magellan.library.Region;
 import magellan.library.utils.logging.Logger;
@@ -37,7 +36,7 @@ public class FFToolsRunScript extends InternationalizedDialog implements Runnabl
 	private GameData gd = null;
     private Client c = null;
     private JScrollPane sp = null;
-    private Map<CoordinateID,Region> regions = null;
+    private Collection<Region> regions = null;
     
     
     /**
@@ -50,22 +49,11 @@ public class FFToolsRunScript extends InternationalizedDialog implements Runnabl
 		gd = _data;
 		c = (Client)owner;
 		init();
-		this.regions = _data.regions();
+		this.regions = _data.getRegions();
 		// runTest();
     }
     
-	/**
-	 * Create a new FFToolsRunTest Object
-	 * 
-	 */
-	public FFToolsRunScript(Frame owner, boolean modal, GameData _data, Map<CoordinateID,Region> _regions) {
-		super(owner, modal);
-		gd = _data;
-		c = (Client)owner;
-		init();
-		this.regions = _regions;
-		// runTest();
-	}
+	
 
 	private void init() {
 		// FFTools2 path to jar
@@ -103,7 +91,7 @@ public class FFToolsRunScript extends InternationalizedDialog implements Runnabl
 		log.info("FFTools lauf gestartet");
 		outText.addOutLine("start runTest");
 		int numberOfRegions = regions.size();
-		int numberOfUnits = gd.units().size();
+		int numberOfUnits = gd.getUnits().size();
 		outText.addOutLine("found " + numberOfRegions + " Regions and " + numberOfUnits + " Units.");
 		
 		// boolean RegionHasScripter = false;
