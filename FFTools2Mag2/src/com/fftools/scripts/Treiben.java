@@ -3,9 +3,11 @@ package com.fftools.scripts;
 import java.util.ArrayList;
 
 import magellan.library.Skill;
+import magellan.library.rules.ItemType;
 import magellan.library.rules.SkillType;
 
 import com.fftools.ReportSettings;
+import com.fftools.pools.matpool.MatPool;
 import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.pools.treiber.TreiberPool;
 import com.fftools.pools.treiber.TreiberPoolRelation;
@@ -121,6 +123,36 @@ public void runScript(int scriptDurchlauf){
 					}
 				}
 				
+				// :ToDo
+				// Fremde Requests ? (Material, Request) 
+				// Bug Report von Thorsten Holst, 20121104
+				MatPool MP = this.getMatPool();
+				if (MP.getRequests(this.scriptUnit)!=null){
+					for (MatPoolRequest mpr : MP.getRequests(this.scriptUnit)){
+						if (mpr.getBearbeitet()>0){
+							// handelt es sich um einen passenden Request?
+							if (mpr.getItemTypes()!=null){
+								boolean myWeapons = false;
+								for (ItemType it : mpr.getItemTypes()){
+									// passt eine der Waffen zu meinem Talent
+									Skill sk = it.getUseSkill();
+									if (sk!=null){
+										SkillType sT = sk.getSkillType();
+										sk=this.getUnit().getSkill(sT);
+										if (sk.getLevel()>0){
+											myWeapons=true;											
+										}
+									}
+								}
+								if (myWeapons){
+									waffenanzahl+=mpr.getBearbeitet();
+								}
+							}
+						}
+					}
+				}
+				
+				
 				if (waffenanzahl>this.scriptUnit.getUnit().getModifiedPersons()){
 					waffenanzahl = this.scriptUnit.getUnit().getModifiedPersons();
 					this.addComment("!!! Zu viele Waffen beim Treiber?!");
@@ -225,52 +257,90 @@ public void runScript(int scriptDurchlauf){
 			this.addComment("Silberstandsfaktor gesetzt auf: " + newFaktor);
 		}
 		
-		String comment = "Treiberbewaffnung";
-		if (OP.getOptionString("Waffe").length()>0){
-			// Mit Waffen-Argument
-			// einfach übergeben
-			MatPoolRequest MPR = new MatPoolRequest(this,this.scriptUnit.getUnit().getModifiedPersons(),OP.getOptionString("Waffe"),this.WaffenPrio,comment);
-			this.addMatPoolRequest(MPR);
-			this.requests.add(MPR);
-		} else {
-			// Kein Waffen-Argument
-			// Liste bauen
-			boolean didSomething = false;
-			for (int i = 0;i<this.talentNamen.length;i++){
-				String actName = this.talentNamen[i];
-				SkillType actSkillType = this.gd_Script.rules.getSkillType(actName);
-				if (actSkillType!=null){
-					Skill actSkill = this.scriptUnit.getUnit().getModifiedSkill(actSkillType);
-					if (actSkill!=null && actSkill.getLevel()>0){
-						// Was gefunden
-						// Zum Talent das passendste Gerät definieren
-						String materialName = actSkillType.getName();
-						String matNameNeu="nix";
-						if (materialName.equalsIgnoreCase("Hiebwaffen")) {
-							matNameNeu = "Schwert";
-						} else if(materialName.equalsIgnoreCase("Stangenwaffen")){
-							matNameNeu = "Speer";
-						} else if(materialName.equalsIgnoreCase("Bogenschießen")){
-							matNameNeu = "Bogen";
-						} else if(materialName.equalsIgnoreCase("Armbrustschießen")){
-							matNameNeu = "Armbrust";
-						} else if (materialName.equalsIgnoreCase("Katapultbedienung")){
-							matNameNeu="Katapult";
-						} 
-						if (matNameNeu!="nix"){
-							// Bestellen
-							MatPoolRequest MPR = new MatPoolRequest(this,this.scriptUnit.getUnit().getModifiedPersons(),matNameNeu,this.WaffenPrio,comment);
-							this.addMatPoolRequest(MPR);
-							didSomething=true;
-							this.requests.add(MPR);
+		// Gibt es bereits MPR für diese Unit?
+		// :ToDo
+		// Fremde Requests ? (Material, Request) 
+		// Bug Report von Thorsten Holst, 20121104
+		int otherWeaponRequests = 0;
+		MatPool MP = this.getMatPool();
+		if (MP.getRequests(this.scriptUnit)!=null){
+			for (MatPoolRequest mpr : MP.getRequests(this.scriptUnit)){
+				// handelt es sich um einen passenden Request?
+				boolean myWeapons = false;
+				if (mpr.getItemTypes()!=null){
+					for (ItemType it : mpr.getItemTypes()){
+						// passt eine der Waffen zu meinem Talent
+						Skill sk = it.getUseSkill();
+						if (sk!=null){
+							SkillType sT = sk.getSkillType();
+							sk=this.getUnit().getSkill(sT);
+							if (sk.getLevel()>0){
+								myWeapons=true;
+							}
 						}
 					}
 				}
+				if (myWeapons){
+					otherWeaponRequests+=mpr.getOriginalGefordert();
+					addComment("Treiben. found other request for Weapons: " + mpr.toString());
+				}
 			}
-			if (!didSomething){
-				this.addComment("Treiben: keine Waffenanforderung! - kein Waffentalent?!");
-				this.doNotConfirmOrders();
+		}
+		if (otherWeaponRequests>0){
+			addComment("Treiben: " + otherWeaponRequests + " bereit angeforderte Waffen gefunden - nicht erneut angefordert");
+		}
+		
+		int remainingWeaponsNeeded = this.scriptUnit.getUnit().getModifiedPersons() - otherWeaponRequests;
+		String comment = "Treiberbewaffnung";
+		if (remainingWeaponsNeeded>0){
+			if (OP.getOptionString("Waffe").length()>0){
+				// Mit Waffen-Argument
+				// einfach übergeben
+				MatPoolRequest MPR = new MatPoolRequest(this,remainingWeaponsNeeded,OP.getOptionString("Waffe"),this.WaffenPrio,comment);
+				this.addMatPoolRequest(MPR);
+				this.requests.add(MPR);
+			} else {
+				// Kein Waffen-Argument
+				// Liste bauen
+				boolean didSomething = false;
+				for (int i = 0;i<this.talentNamen.length;i++){
+					String actName = this.talentNamen[i];
+					SkillType actSkillType = this.gd_Script.rules.getSkillType(actName);
+					if (actSkillType!=null){
+						Skill actSkill = this.scriptUnit.getUnit().getModifiedSkill(actSkillType);
+						if (actSkill!=null && actSkill.getLevel()>0){
+							// Was gefunden
+							// Zum Talent das passendste Gerät definieren
+							String materialName = actSkillType.getName();
+							String matNameNeu="nix";
+							if (materialName.equalsIgnoreCase("Hiebwaffen")) {
+								matNameNeu = "Schwert";
+							} else if(materialName.equalsIgnoreCase("Stangenwaffen")){
+								matNameNeu = "Speer";
+							} else if(materialName.equalsIgnoreCase("Bogenschießen")){
+								matNameNeu = "Bogen";
+							} else if(materialName.equalsIgnoreCase("Armbrustschießen")){
+								matNameNeu = "Armbrust";
+							} else if (materialName.equalsIgnoreCase("Katapultbedienung")){
+								matNameNeu="Katapult";
+							} 
+							if (matNameNeu!="nix"){
+								// Bestellen
+								MatPoolRequest MPR = new MatPoolRequest(this,remainingWeaponsNeeded,matNameNeu,this.WaffenPrio,comment);
+								this.addMatPoolRequest(MPR);
+								didSomething=true;
+								this.requests.add(MPR);
+							}
+						}
+					}
+				}
+				if (!didSomething){
+					this.addComment("Treiben: keine Waffenanforderung! - kein Waffentalent?!");
+					this.doNotConfirmOrders();
+				}
 			}
+		} else {
+			this.addComment("Treiben: keine weiteren Waffen angefordert - anderweitig genügend angefordert");
 		}
 	}
 	

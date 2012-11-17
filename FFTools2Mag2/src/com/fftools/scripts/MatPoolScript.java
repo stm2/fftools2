@@ -123,7 +123,7 @@ public class MatPoolScript extends LernPoolScript {
 	 * sets the according MatPool for our scriptunit
 	 *
 	 */
-	private MatPool getMatPool(){
+	public MatPool getMatPool(){
 		// liefert immer einen MMM
 		MatPoolManager MMM = this.scriptUnit.getScriptMain().getOverlord().getMatPoolManager();
 		return MMM.getRegionsMatPool(this.scriptUnit);
