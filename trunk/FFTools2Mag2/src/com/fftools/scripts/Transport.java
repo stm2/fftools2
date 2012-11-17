@@ -258,10 +258,10 @@ public class Transport extends TransportScript{
 		this.transporter.generateTransporterRequests(this);
 		if (this.transporter.getGotoInfo()==null && this.transporter.getMode()==Transporter.transporterMode_fullautomatic ){
 			// wenn keine GoTo anliegt....irgendetwas machen
-			if (this.transporter.getTransporterErstPferdePrio()<=0){
+			// if (this.transporter.getTransporterErstPferdePrio()<=0){
 				this.addOrder("LERNEN Reiten", true);
 				this.addComment("TM: keine Aufträge, freie Kapa:" + this.transporter.getKapa_frei());
-			} 
+			// } 
 		}
 	}
 }
