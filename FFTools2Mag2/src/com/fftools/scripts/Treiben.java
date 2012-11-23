@@ -109,7 +109,7 @@ public void runScript(int scriptDurchlauf){
 		SkillType skillType = super.gd_Script.rules.getSkillType("Steuereintreiben");
 		
 		// Kann die Einheit das Talent Treiben?
-		skill = super.scriptUnit.getUnit().getSkill(skillType);
+		skill = super.scriptUnit.getUnit().getModifiedSkill(skillType);
 		if (skill!= null) {
 			
 			// Einheit kann Treiben ABER lohnt es sich? MindestTalent prüfen!
@@ -132,18 +132,23 @@ public void runScript(int scriptDurchlauf){
 				MatPool MP = this.getMatPool();
 				if (MP.getRequests(this.scriptUnit)!=null){
 					for (MatPoolRequest mpr : MP.getRequests(this.scriptUnit)){
-						if (mpr.getBearbeitet()>0 && this.requests.size()>0 && !this.requests.contains(mpr)){
+						// this.addComment("Debug-Treiben...checking another request: " + mpr.toString(),false);
+						if (mpr.getBearbeitet()>0 && !this.requests.contains(mpr)){
 							// handelt es sich um einen passenden Request?
 							if (mpr.getItemTypes()!=null){
 								boolean myWeapons = false;
 								for (ItemType it : mpr.getItemTypes()){
 									// passt eine der Waffen zu meinem Talent
+									// this.addComment("Debug-Treiben...checking an Item of last Request: " + it.toString(),false);
 									Skill sk = it.getUseSkill();
 									if (sk!=null){
+										// this.addComment("Debug-Treiben...checking the requested skill: " + sk.toString(),false);
 										SkillType sT = sk.getSkillType();
 										sk=this.getUnit().getSkill(sT);
 										if (sk.getLevel()>0){
 											myWeapons=true;											
+										} else {
+											// this.addComment("Debug-Treiben...no skill, level: " + sk.getLevel(),false);
 										}
 									}
 								}
