@@ -120,6 +120,9 @@ public void runScript(int scriptDurchlauf){
 				if (this.requests.size()>0){
 					for (MatPoolRequest MPR : this.requests){
 						waffenanzahl+=MPR.getBearbeitet();
+						if (MPR.getBearbeitet()>0){
+							this.addComment("Treiben - gefundene Waffen:" + MPR.toString());
+						}
 					}
 				}
 				
@@ -129,7 +132,7 @@ public void runScript(int scriptDurchlauf){
 				MatPool MP = this.getMatPool();
 				if (MP.getRequests(this.scriptUnit)!=null){
 					for (MatPoolRequest mpr : MP.getRequests(this.scriptUnit)){
-						if (mpr.getBearbeitet()>0){
+						if (mpr.getBearbeitet()>0 && this.requests.size()>0 && !this.requests.contains(mpr)){
 							// handelt es sich um einen passenden Request?
 							if (mpr.getItemTypes()!=null){
 								boolean myWeapons = false;
@@ -146,6 +149,7 @@ public void runScript(int scriptDurchlauf){
 								}
 								if (myWeapons){
 									waffenanzahl+=mpr.getBearbeitet();
+									this.addComment("Treiben - gefundene Waffen:" + mpr.toString());
 								}
 							}
 						}
