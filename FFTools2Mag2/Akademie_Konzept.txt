@@ -1,0 +1,25 @@
+Konzept der Akademie
+
+- Stationäre Einheit der Region wird Akaverwalter (standard: Akabesitzer)
+- legt fest, welche Akademie wieviele Plätze automatisch vergibt
+- legt weiterhin fest, welche Magiegebiete mit welcher prio wieviele plätze
+  belegen können.
+  
+- besitzer der Akademie ist immer gesetzt, warnung, wenn das nicht eine 1
+  - personen Einheit ist.
+  
+- Alle Lernfix Einheiten mit <=20 Leuten bewerben sich um einene Akaplatz
+
+- Run erst nach dem LernPool, idealerweise vor dem letzten MatPool
+
+- Jede Aka poolt für sich
+  - geht die definierten Talente durch
+    - geht die Talentstufen durch, fängt oben
+      - Lehrer (max Talentstufe) - Schülerkombis, die reinpassen, zuerst
+      - dann selbstlerner
+      
+- nicht genutzte Plätze eines Talentes werden für das nächste Talent verwendet
+
+
+
+  
