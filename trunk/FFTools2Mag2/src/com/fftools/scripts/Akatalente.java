@@ -8,6 +8,7 @@ import magellan.library.rules.SkillType;
 import com.fftools.pools.akademie.AkademieManager;
 import com.fftools.pools.akademie.AkademiePool;
 import com.fftools.pools.akademie.AkademieTalent;
+import com.fftools.utils.FFToolsRegions;
 
 /**
  * Entscheidet, dass die Akademie, deren Besitzer diese Einheit ist
@@ -54,89 +55,90 @@ public class Akatalente extends Script{
 	}
 	
 	private void scriptStart(){
-		// 	gibt es eigentlich eine Akademie zum verwalten?
-		Building b = this.scriptUnit.getUnit().getModifiedBuilding();		
-		if (b!=null){
-			// ah, wir sind in einem gebäude! eine akademie?
-			if (b.getBuildingType().getName().equals("Akademie")){
-				if (b.getOwnerUnit().equals(this.scriptUnit.getUnit())){
-				    // ok wir sind besitzer einer akademie! dann melden wir das dem mächtigen AkaManager
-					AkademieManager AM = this.getOverlord().getAkademieManager();
-					AkademiePool _AP = AM.addAkademie(b,this);
-					if (_AP == null){
-						// Problem, Pool bereits vorhanden
-						addComment("!!! Akademiepool konnte nicht angelegt werden, Besitzerwechsel??");
-						doNotConfirmOrders();
-					} else {
-						// kein Problem
-						addComment("AkaTalente: die Aka wurde erfolgreich dem AkaManger bekannt gemacht.");
-						this.AP = _AP;
-					}
-				}
-			}else{
-				// naja, die hütte ist kein gebäude..
-				this.keinVerwalter();
-			}
-			
-		}
-		else{
-			this.keinVerwalter();
-		}	
+		
 		
 		// Gibt es überhaupt Argumente?
-		if (super.getArgCount() > 0 && this.AP!=null) {
+		if (super.getArgCount() > 0) {
             // gleich die übergebenen Talente parsen
 			ArrayList<AkademieTalent> akademieTalente = new ArrayList<AkademieTalent>();
 			for (String s:this.getArguments()){
-				// s hat die Form TalentName:Anzahl
-				String[] ss = s.split(":");
-				if (ss.length!=2){
-					this.addComment("!!! Fehler. Argument " + s + " hat nicht die Form Talent:Anzahl, es fehlt das :");
-				} else {
-					String talentName = ss[0];
-					String talentAnzahl = ss[1];
-					SkillType sK = null;
-					// SkillType festStellen
-					if (talentName.equalsIgnoreCase("draig")||talentName.equalsIgnoreCase("illaun")||talentName.equalsIgnoreCase("tybied")||talentName.equalsIgnoreCase("gwyrrd")||talentName.equalsIgnoreCase("cerddor")){
-						// !! Tada MagieTalent
-						// entsprechenden SkillType generieren!
-						sK=this.scriptUnit.getScriptMain().gd_ScriptMain.rules.getSkillType(talentName.toLowerCase(), true);
+				if (s.toLowerCase().startsWith("aka")){
+					// das ist die aka-zeile
+					String[] ss = s.split("=");
+					if (ss.length!=2){
+						this.addComment("!!! Fehler. Argument " + s + " hat nicht die Form aka=ID, es fehlt das =");
 					} else {
-						// keine Magiename, also muss Talent vorhanden sein
-						sK = this.gd_Script.rules.getSkillType(talentName);
-					}
-					if (sK==null){
-						this.addComment("!!! Akatalente: Talent nicht erkannt: " + talentName);
-					} else {
-						// wir haben ein gültiges Talent...haben wir auch ne Anzahl
-						int Anz = Integer.parseInt(talentAnzahl);
-						if (Anz<=0 || Anz>25){
-							this.addComment("!!! Akatalente: Anzahl nicht erkannt in: " + s + " (" + talentAnzahl + ")");
+						Building b = FFToolsRegions.getBuilding(this.region(), ss[1]);
+						if (b==null){
+							this.addComment("!!!aka ist kein Gebäude! (" + ss[1]+ ")");
+							return;
+						}
+						if (!b.getBuildingType().toString().equalsIgnoreCase("Akademie")){
+							this.addComment("!!!aka ist keine Akademie! (" + ss[1] + ")");
+							return;
+						}
+						AkademieManager AM = this.getOverlord().getAkademieManager();
+						AkademiePool _AP = AM.addAkademie(b,this);
+						if (_AP == null){
+							// Problem, Pool bereits vorhanden
+							addComment("!!! Akademiepool " + b.getID().toString() + " konnte nicht angelegt werden, Besitzerwechsel??");
+							doNotConfirmOrders();
 						} else {
-							// hier stimmt Alles
-							AkademieTalent AT = new AkademieTalent(sK,Anz);
-							akademieTalente.add(AT);
+							// kein Problem
+							addComment("AkaTalenten " + b.getID().toString() + ": die Aka wurde erfolgreich dem AkaManger bekannt gemacht.");
+							this.AP = _AP;
+						}
+					}
+				} else {
+					// s hat die Form TalentName:Anzahl
+					String[] ss = s.split(":");
+					if (ss.length!=2){
+						this.addComment("!!! Fehler. Argument " + s + " hat nicht die Form Talent:Anzahl, es fehlt das :",false);
+					} else {
+						String talentName = ss[0];
+						String talentAnzahl = ss[1];
+						SkillType sK = null;
+						// SkillType festStellen
+						if (talentName.equalsIgnoreCase("draig")||talentName.equalsIgnoreCase("illaun")||talentName.equalsIgnoreCase("tybied")||talentName.equalsIgnoreCase("gwyrrd")||talentName.equalsIgnoreCase("cerddor")){
+							// !! Tada MagieTalent
+							// entsprechenden SkillType generieren!
+							sK=this.scriptUnit.getScriptMain().gd_ScriptMain.rules.getSkillType(talentName.toLowerCase(), true);
+						} else {
+							// keine Magiename, also muss Talent vorhanden sein
+							sK = this.gd_Script.rules.getSkillType(talentName);
+						}
+						if (sK==null){
+							this.addComment("!!! Akatalente: Talent nicht erkannt: " + talentName,false);
+						} else {
+							// wir haben ein gültiges Talent...haben wir auch ne Anzahl
+							int Anz = Integer.parseInt(talentAnzahl);
+							if (Anz<=0 || Anz>25){
+								this.addComment("!!! Akatalente: Anzahl nicht erkannt in: " + s + " (" + talentAnzahl + ")",false);
+							} else {
+								// hier stimmt Alles
+								AkademieTalent AT = new AkademieTalent(sK,Anz);
+								akademieTalente.add(AT);
+							}
 						}
 					}
 				}
 			}
-			
-			this.addComment("Akatalente: " + akademieTalente.size() + " Talentangaben gelesen");
-			this.AP.setAkademieTalente(akademieTalente);
+			this.addComment("Akatalente: " + akademieTalente.size() + " Talentangaben gelesen",false);
+			if (this.AP!=null){
+				this.AP.setAkademieTalente(akademieTalente);
+			} else {
+				this.addComment("(Akatalente wurden wegen nicht erkannter Akademie nicht übergeben)",false);
+			}
 		}	
-				
-		
+	
 	 }
 	
-	/*
-	 * Wenn Einheit kein Akademieverwalter ist!
-	 *
+	/**
+	 * mehrere sind OK
 	 */
-	
-	 private void keinVerwalter(){
-    	this.addComment("Unbestätigt, da Einheit keine Akademie verwaltet!");
-		this.scriptUnit.doNotConfirmOrders();
-	 }
+	public boolean allowMultipleScripts(){
+		return true;
+	}
 	
 	
 }

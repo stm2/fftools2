@@ -1,12 +1,10 @@
 Konzept der Akademie
 
-- Akaverwalter = Akabesitzer
+- Akaverwalter - beliebige unit
 - legt fest, welche Akademie wieviele Plätze automatisch vergibt
 - legt weiterhin fest, welche Magiegebiete mit welcher prio wieviele plätze
   belegen können.
-  
-- besitzer der Akademie ist immer gesetzt, warnung, wenn das nicht eine 1
-  - personen Einheit ist.
+ 
   
 - Alle Lernfix Einheiten mit <=20 Leuten bewerben sich um einene Akaplatz
 
@@ -15,9 +13,8 @@ Konzept der Akademie
 - Jede Aka poolt für sich
   - geht die definierten Talente durch
     - geht die Talentstufen durch, fängt oben an, Reihenfolge
-      - Heldenschüler
-      - Heldenlehrer
       - Besitzer als Lehrer
+      - Heldenlehrer
       - Lehrer (max Talentstufe) - Schülerkombis, die reinpassen, zuerst
       - dann selbstlerner
       
@@ -29,7 +26,8 @@ Konzept der Akademie
   
   
   Befehle
-  // script AkaTalente [Talent:Anzahl] [Talent:Anzahl]
+  // script AkaTalente aka=nummer [Talent:Anzahl] [Talent:Anzahl]
+  nummer = ID des Gebäudes
   Reihenfolge gibt Prio an 
   nur // script AkaTalente schaltet Auto ein mit Standard Talentreihenfolge
   

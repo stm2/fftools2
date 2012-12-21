@@ -90,6 +90,23 @@ import com.fftools.scripts.Akatalente;
 			        			if (needEnterOrder){
 			        				AR.getScriptUnit().addOrder("BETRETEN BURG " + AR.getAkademieFromAM().getID() + " ; AkaPool", true);
 			        			}
+			        			// Für Lehrer auch die Schüler prüfen
+			        			if (AR.isTeacher()){
+			        				for (AusbildungsRelation AR2:AR.getPooledRelation()){
+			        					needEnterOrder = false;
+					        			neueAka = AR2.getScriptUnit().getUnit().getModifiedBuilding();
+					        			if (neueAka==null){
+					        				needEnterOrder=true;
+					        			} else {
+					        				if (!neueAka.equals(AR2.getAkademieFromAM())){
+					        					needEnterOrder=true;
+					        				}
+					        			}
+					        			if (needEnterOrder){
+					        				AR2.getScriptUnit().addOrder("BETRETEN BURG " + AR.getAkademieFromAM().getID() + " ; AkaPool-Schüler", true);
+					        			}
+			        				}
+			        			}
 			        		}
 			        	}
 			        	outText.addPoint();
@@ -184,12 +201,23 @@ import com.fftools.scripts.Akatalente;
 	    			isInFilter=false;
 	    		}
 	    		// reine Schueler raus
-	    		if (AR.isSchueler()){
-	    			isInFilter=false;
-	    		}
+	    		// if (AR.isSchueler()){
+	    		//	isInFilter=false;
+	    		//}
+	    		
+	    		/*
+	    		 * Schüler drinne lassen, aber nicht poolen
+	    		 * müssen aber gecleant werden...
+	    		 */
+	    		
 	    		// Schiffsesatzungen raus
 	    		if (AR.getScriptUnit().getUnit().getModifiedShip()!=null){
 	    			isInFilter=false;
+	    		}
+	    		// Akademiebesitzer immer drinne ?!
+	    		Building b = AR.getScriptUnit().getUnit().getModifiedBuilding();
+	    		if (b!=null && b.getOwner()!=null && b.getOwner().equals(AR.getScriptUnit().getUnit())){
+	    			isInFilter=true;
 	    		}
 	    		if (isInFilter){
 	    			AR.setAkademieFromAM(null);

@@ -12,6 +12,7 @@ import magellan.library.Building;
 import magellan.library.Region;
 import magellan.library.Skill;
 import magellan.library.Unit;
+import magellan.library.gamebinding.EresseaRelationFactory;
 import magellan.library.io.cr.CRParser;
 import magellan.library.rules.SkillType;
 
@@ -487,13 +488,30 @@ private MatPool matPool = null;
     
     
     public void AkaWarnungen(){
-    	 // Relations werden in Befehle umgesetzt. Wegen übersicht in SubMethode
+    	// Aka-Zuteilungen checken
+    	// vorher betrete usw umsetzen, Region refresh ?!
+    	// wenn wir keine Aka haben - dann nicht!
+    	boolean akaDa = false;
+    	if (this.region.buildings()!=null && !this.region.buildings().isEmpty()){
+    		for (Building b:this.region.buildings()){
+    			if (b.getBuildingType().getName().equalsIgnoreCase("Akademie") && b.getSize()==25){
+    				akaDa=true;
+    				break;
+    			}
+    		}
+    	}
+    	if (!akaDa){
+    		return;
+    	}
+    	EresseaRelationFactory ERF = ((EresseaRelationFactory) reportSettings.getScriptMain().gd_ScriptMain.getGameSpecificStuff().getRelationFactory());
+		ERF.processRegionNow(this.region);		
         if ( this.relationList!=null){
       	    for (Iterator<AusbildungsRelation> iter = this.relationList.iterator();iter.hasNext();){
       	    	AusbildungsRelation AR = (AusbildungsRelation) iter.next();
       	    	this.akademieWarnungscheck(AR);
        	   }
         }
+    	
     }
 	
    /**

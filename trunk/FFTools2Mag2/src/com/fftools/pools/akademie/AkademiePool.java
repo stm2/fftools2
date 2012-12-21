@@ -82,15 +82,15 @@ public class AkademiePool {
 			}
 			if (!isRelevant){
 				verfPlätze-=u.getModifiedPersons();
-				this.verwalterScript.addComment("AkaPool - ignoriere Einheit " + u.toString() + " (kein Lernfix...)");
+				this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + "- ignoriere Einheit " + u.toString() + " (kein Lernfix...)");
 			} else {
 				// ist relevant
-				this.verwalterScript.addComment("AkaPool - Insasse wird gepoolt " + u.toString());
+				this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + " - Insasse wird gepoolt " + u.toString());
 			}
 		}
-		this.verwalterScript.addComment("AkaPool: verfügbare Plätze:" + verfPlätze);
+		this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": verfügbare Plätze:" + verfPlätze);
 		if (verfPlätze<=0){
-			this.verwalterScript.addComment("AkaPool: abbruch, nix zu tun und voll...");
+			this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": abbruch, nix zu tun und voll...");
 			return;
 		}
 		
@@ -99,7 +99,7 @@ public class AkademiePool {
 			// die relevanten Sortieren, nach dem aktuellen SkillType...
 			// Submenge der relevanten Bilden, mit dem richtigen
 			// Skilltype und der maximalen Anzahl
-			this.verwalterScript.addComment("Debug: poole Talent:" + AT.getSkillType().toString());
+			this.verwalterScript.addComment("Debug " + this.akademieBuilding.getID().toString() + ": poole Talent:" + AT.getSkillType().toString());
 			ArrayList<AusbildungsRelation> actRel = new ArrayList<AusbildungsRelation>();
 			for (AusbildungsRelation AR:this.relevantRelations){
 				if (AR.getAkademieFromAM()==null && AR.getOrderedSkillType().equals(AT.getSkillType())){
@@ -110,6 +110,13 @@ public class AkademiePool {
 						if (AR.isTeacher() && AR.getScriptUnit().getUnit().getModifiedPersons() + AR.getOrdererdSchüleranzahl()>verfPlätze){
 							passtNoch=false;
 						}
+						/*
+						 * Schüler wandern immer mit Lehrer mit, 
+						 * werden nicht selber relevant gepoolt
+						 */
+						if (AR.isSchueler()){
+							passtNoch=false;
+						}
 						if (passtNoch){
 							actRel.add(AR);
 						}
@@ -117,7 +124,7 @@ public class AkademiePool {
 				}
 			}
 			
-			this.verwalterScript.addComment("Debug: Anzahl der reduzierten relevanten Lernfixer: " + actRel.size());
+			this.verwalterScript.addComment("Debug " + this.akademieBuilding.getID().toString() + ": Anzahl der reduzierten relevanten Lernfixer: " + actRel.size());
 			
 			// fertige Liste...>0 ?
 			if (actRel.isEmpty()){
@@ -126,6 +133,8 @@ public class AkademiePool {
 			}
 			// Liste sortieren
 			Collections.sort(actRel, new AusbildungsRelationComparator(this.akademieBuilding));
+			// stehen jetzt aber falsch rum
+			Collections.reverse(actRel);
 			// Liste abarbeiten
 			for (AusbildungsRelation AR:actRel){
 				// immer noch passig ?
@@ -143,13 +152,13 @@ public class AkademiePool {
 					// verf reduzieren
 					verfPlätze -= AR.getSchuelerPlaetze();
 					// info
-					this.verwalterScript.addComment("AkaPool: aufgenommen für " + AT.getSkillType().toString() + ": " + AR.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)" );
+					this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": IN für " + AT.getSkillType().toString() + ": " + AR.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)" );
 					// wenn Lehrer, auch die Schüler mit rein
 					if (AR.isTeacher()){
 						for (AusbildungsRelation schueler : AR.getPooledRelation()){
 							schueler.setAkademieFromAM(this.akademieBuilding);
 							verfPlätze -= schueler.getSchuelerPlaetze();
-							this.verwalterScript.addComment("AkaPool: mit Schüler für " + AT.getSkillType().toString() + ": " + schueler.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)");
+							this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": mit Schüler für " + AT.getSkillType().toString() + ": " + schueler.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)");
 						}
 					}
 					// was passiert, wenn verfPl = 0 ?!
@@ -164,7 +173,7 @@ public class AkademiePool {
 				break;
 			}
 		}
-		this.verwalterScript.addComment("AkaPool final Statement: noch " + verfPlätze + " Plätze frei.");
+		this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + " final Statement: noch " + verfPlätze + " Plätze frei.");
 	}
 	
 	/**
@@ -181,9 +190,9 @@ public class AkademiePool {
 						isRelevant=true;
 					}
 					if (isRelevant){
-						AR.getScriptUnit().addComment("AkaPool: Einheit darf in " + this.akademieBuilding.toString() + " bleiben.");
+						AR.getScriptUnit().addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": Einheit darf in " + this.akademieBuilding.toString() + " bleiben.");
 					} else {
-						AR.getScriptUnit().addComment("AkaPool: Einheit muss " + this.akademieBuilding.toString() + " verlassen.");
+						AR.getScriptUnit().addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": Einheit muss " + this.akademieBuilding.toString() + " verlassen.");
 						if (AR.getAkademieFromAM()==null){
 							AR.getScriptUnit().addOrder("verlassen ; Akapool",true);
 						}
