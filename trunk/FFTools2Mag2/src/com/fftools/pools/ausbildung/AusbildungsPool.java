@@ -477,13 +477,24 @@ private MatPool matPool = null;
        	    for (Iterator<AusbildungsRelation> iter = this.relationList.iterator();iter.hasNext();){
        	    	AusbildungsRelation AR = (AusbildungsRelation) iter.next();
        	    	this.relation2Order(AR); 
-       	    	this.akademieWarnungscheck(AR);
+       	    	// this.akademieWarnungscheck(AR);
         	 }
          }
      
     	 outText.setFileStandard();
     
     } // end run
+    
+    
+    public void AkaWarnungen(){
+    	 // Relations werden in Befehle umgesetzt. Wegen übersicht in SubMethode
+        if ( this.relationList!=null){
+      	    for (Iterator<AusbildungsRelation> iter = this.relationList.iterator();iter.hasNext();){
+      	    	AusbildungsRelation AR = (AusbildungsRelation) iter.next();
+      	    	this.akademieWarnungscheck(AR);
+       	   }
+        }
+    }
 	
    /**
     * Baut eine Lehrer-Liste vorgegebener Länge rekursiv auf. Wegen Performance gibt es keine if(!null) abfragen   voricht!!
@@ -849,15 +860,18 @@ private MatPool matPool = null;
 			if (relation.isTeacher()) {
 				String spacer = " "; // Stellt Leerzeichen bereit.
 				String schuelerId = ""; // Sammelt Ids
+				int anzSchueler = 0;
 				if (relation.getPooledRelation() != null) {
 					// Die zugepoolten Relations der Schüler des Lehrers abfragen
 					for (Iterator<AusbildungsRelation> iter1 = relation.getPooledRelation().iterator(); iter1.hasNext();) {
 						AusbildungsRelation schueler = (AusbildungsRelation) iter1.next();
 						// Schrittweise Liste der Schüler Id's in String sammeln und Leerzeichen dran!
 						schuelerId += schueler.getScriptUnit().getUnit().toString(false) + spacer;
+						anzSchueler += schueler.getSchuelerPlaetze();
 					}
 					relation.getScriptUnit().addComment("AusbildungsPool: Einheit ist Lehrer!");
 					Skill lehrfach = (Skill)relation.getSubject().values().toArray()[relation.getSubject().values().toArray().length-1];
+					relation.setOrderedSkillType(lehrfach.getSkillType());
 					// Tags setzen
 					relation.getScriptUnit().putTag(CRParser.TAGGABLE_STRING3, "Lehrer - Pool");				
 					relation.getScriptUnit().putTag(CRParser.TAGGABLE_STRING4, lehrfach.getName());
@@ -867,6 +881,7 @@ private MatPool matPool = null;
 					relation.getScriptUnit().addComment("AusbildungsPool: Lehrer ohne Schüler!");
 					relation.getScriptUnit().doNotConfirmOrders();
 				}
+				relation.setOrdererdSchüleranzahl(anzSchueler);
 			}
 			// relation.isTeacher=false => Schüler oder Selbstlerner! 
 			else {
@@ -880,11 +895,14 @@ private MatPool matPool = null;
 				// Lernfach ein fiktives magisches Talent?
 				if (lernfach.getName().equals("draig")||lernfach.getName().equals("illaun")||lernfach.getName().equals("tybied")||lernfach.getName().equals("gwyrrd")||lernfach.getName().equals("cerddor")){
 					relation.getScriptUnit().addOrder("LERNEN " + "Magie",true);
+					
 				}
 				else{
 					// Ok kein magier.. dann standard
 					relation.getScriptUnit().addOrder("LERNEN " + lernfach.getName(),true);
-				}			
+					
+				}	
+				relation.setOrderedSkillType(lernfach.getSkillType());
                 // Kommentare und Bestätigungen setzen
 				if (relation.getPooledRelation() == null) {
 					// Schüler Selbstlerner ohne Lehrer
@@ -1432,6 +1450,14 @@ private MatPool matPool = null;
 	    //    }
 	   
    }
+
+
+/**
+ * @return the relationList
+ */
+public ArrayList<AusbildungsRelation> getRelationList() {
+	return relationList;
+}
   
    
    

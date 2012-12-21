@@ -30,6 +30,12 @@ public class AusbildungsRelation {
 	//Lernfach oder Lehrfach
 	private HashMap<SkillType,Skill> subject =null;
 	
+	// der finale beim Order setzen benutzte skillType
+	private SkillType orderedSkillType = null;
+	
+	// die finale beim Order setzen bnekante Schüleranzahl 
+	private int ordererdSchüleranzahl = -1;
+	
 	// Ist die Einheit ein Lehrer?.
 	private boolean isTeacher=false;
 	private boolean isSchueler=false;
@@ -63,7 +69,15 @@ public class AusbildungsRelation {
      */
 	private int actLernplanLevel = Lernplan.level_unset;
 	
+	/**
+	 * zur Berechung der Lernkosten
+	 */
 	private Building akademie= null;
+	
+	/**
+	 * für den Akademiemanager
+	 */
+	private Building akademieFromAM = null;
 	
 	
 	/**
@@ -521,6 +535,48 @@ public class AusbildungsRelation {
 	public int getLernKosten(SkillType _skilltype){
 	  return this.getLernKosten(this.getStudyRequest().get(_skilltype));
 	}
+
+		/**
+		 * @return the orderedSkillType
+		 */
+		public SkillType getOrderedSkillType() {
+			return orderedSkillType;
+		}
+
+		/**
+		 * @param orderedSkillType the orderedSkillType to set
+		 */
+		public void setOrderedSkillType(SkillType orderedSkillType) {
+			this.orderedSkillType = orderedSkillType;
+		}
+
+		/**
+		 * @return the ordererdSchüleranzahl
+		 */
+		public int getOrdererdSchüleranzahl() {
+			return ordererdSchüleranzahl;
+		}
+
+		/**
+		 * @param ordererdSchüleranzahl the ordererdSchüleranzahl to set
+		 */
+		public void setOrdererdSchüleranzahl(int ordererdSchüleranzahl) {
+			this.ordererdSchüleranzahl = ordererdSchüleranzahl;
+		}
+
+		/**
+		 * @return the akademieFromAM
+		 */
+		public Building getAkademieFromAM() {
+			return akademieFromAM;
+		}
+
+		/**
+		 * @param akademieFromAM the akademieFromAM to set
+		 */
+		public void setAkademieFromAM(Building akademieFromAM) {
+			this.akademieFromAM = akademieFromAM;
+		}
 	 
 	
 }

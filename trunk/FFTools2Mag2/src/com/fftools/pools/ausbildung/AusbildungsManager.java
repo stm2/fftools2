@@ -62,6 +62,18 @@ public class AusbildungsManager implements OverlordRun,OverlordInfo {
 	
 	}	
 
+	/**
+	 * Liefert den AP zu einer Region, falls nicht da, wird der auch nicht angelegt!
+	 * @param r Die angefragte Region
+	 * @return
+	 */
+	public AusbildungsPool getAusbildungsPool(Region r){
+		if (AusbildungsPoolMap==null) {
+			return null;
+		}
+		return AusbildungsPoolMap.get(r);
+	}
+	
 
 /**
  * 
@@ -90,6 +102,21 @@ public class AusbildungsManager implements OverlordRun,OverlordInfo {
     	
     	}
     }
+    
+    /**
+     * 
+     */
+    public void runAkaWarnungen(){
+    	if (AusbildungsPoolMap != null){
+	        for (Iterator<AusbildungsPool> iter = AusbildungsPoolMap.values().iterator();iter.hasNext();){
+	        	AusbildungsPool ap = (AusbildungsPool)iter.next();
+		        ap.AkaWarnungen();
+		        outText.addPoint();
+	        }
+    	 }
+    }
+    
+    
     /**
      * Meldung an den Overlord
      * @return
