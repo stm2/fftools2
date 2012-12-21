@@ -185,7 +185,11 @@ public class Lernfix extends MatPoolScript{
 			  if (actSkill.getSkillType().equals(this.scriptUnit.getScriptMain().gd_ScriptMain.rules.getSkillType("Magie"))){
 				  // OK ist ein Magier...
 				  
-				  magieType = this.scriptUnit.getScriptMain().gd_ScriptMain.rules.getSkillType(this.scriptUnit.getUnit().getFaction().getSpellSchool(), true); 
+				  magieType = this.scriptUnit.getScriptMain().gd_ScriptMain.rules.getSkillType(this.scriptUnit.getUnit().getFaction().getSpellSchool(), true);
+				  this.addComment("Lernfix: (debug) SillType-Name generiert mit :" + this.scriptUnit.getUnit().getFaction().getSpellSchool());
+				  this.addComment("Lernfix: (debug) SillType to String liefert 1:" + magieType.toString());
+				  this.addComment("Lernfix: (debug) SillType to String liefert 2:" + magieType.getName());
+				  
                   magieSkill = new Skill (magieType,0, actSkill.getLevel()  ,this.scriptUnit.getUnit().getModifiedPersons(),true);
                   // magische skills einfügen 		  
                   liste.put(magieType, magieSkill);  
