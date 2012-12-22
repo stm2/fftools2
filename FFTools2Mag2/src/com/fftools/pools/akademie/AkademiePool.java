@@ -97,12 +97,16 @@ public class AkademiePool {
 			return;
 		}
 		
+		int übergabePlätze = 0;
+		
 		// alle Talente durchgehen
 		for (AkademieTalent AT:this.akademieTalente){
 			// die relevanten Sortieren, nach dem aktuellen SkillType...
 			// Submenge der relevanten Bilden, mit dem richtigen
 			// Skilltype und der maximalen Anzahl
-			this.verwalterScript.addComment("Debug " + this.akademieBuilding.getID().toString() + ": poole Talent:" + AT.getSkillType().toString(),false);
+			int übernommeneÜbergabeplätze = übergabePlätze;
+			übergabePlätze += AT.getAnzahl();
+			this.verwalterScript.addComment("Debug " + this.akademieBuilding.getID().toString() + ": poole Talent:" + AT.getSkillType().toString() + " definiertes Limit: " + übergabePlätze + ", davon " + übernommeneÜbergabeplätze + " bereits übernommen.",false);
 			ArrayList<AusbildungsRelation> actRel = new ArrayList<AusbildungsRelation>();
 			for (AusbildungsRelation AR:this.relevantRelations){
 				if (AR.getAkademieFromAM()==null && AR.getOrderedSkillType().equals(AT.getSkillType())){
@@ -125,10 +129,13 @@ public class AkademiePool {
 			// stehen jetzt aber falsch rum
 			Collections.reverse(actRel);
 			// Liste abarbeiten
+			
+			
+			
 			for (AusbildungsRelation AR:actRel){
 				boolean passtNoch = false;
 				// passen wir hier noch rein?
-				if (AR.getScriptUnit().getUnit().getModifiedPersons()<=verfPlätze){
+				if (AR.getScriptUnit().getUnit().getModifiedPersons()<=verfPlätze && AR.getScriptUnit().getUnit().getModifiedPersons()<=übergabePlätze){
 					// richtiger Type und passige Einheit
 					// kein Lehrer, dessen Schüler nicht auch reinpassen...
 					passtNoch = true;
@@ -139,7 +146,7 @@ public class AkademiePool {
 						AusbildungsRelation einSchueler = AR.getPooledRelation().get(0);
 						// Anzahl der Lehrer feststellen
 						checkInt += einSchueler.getAnzahlPooledPersons();
-						if (checkInt>verfPlätze){
+						if (checkInt>verfPlätze || checkInt>übergabePlätze){
 							passtNoch=false;
 						}
 					}
@@ -149,6 +156,8 @@ public class AkademiePool {
 					AR.setAkademieFromAM(this.akademieBuilding);
 					// verf reduzieren
 					verfPlätze -= AR.getSchuelerPlaetze();
+					übergabePlätze -= AR.getSchuelerPlaetze();
+					
 					// info
 					this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": IN für " + AT.getSkillType().toString() + ": " + AR.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)" );
 					// wenn Lehrer, auch die Schüler mit rein
@@ -156,6 +165,7 @@ public class AkademiePool {
 						for (AusbildungsRelation schueler : AR.getPooledRelation()){
 							schueler.setAkademieFromAM(this.akademieBuilding);
 							verfPlätze -= schueler.getSchuelerPlaetze();
+							übergabePlätze -= schueler.getSchuelerPlaetze();
 							this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": mit Schüler für " + AT.getSkillType().toString() + ": " + schueler.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)");
 						}
 						// die weiteren Lehrer auch noch mitnehmen
@@ -169,6 +179,7 @@ public class AkademiePool {
 							if (!AR.equals(einLehrer)){
 								einLehrer.setAkademieFromAM(this.akademieBuilding);
 								verfPlätze -= einLehrer.getSchuelerPlaetze();
+								übergabePlätze -= einLehrer.getSchuelerPlaetze();
 								this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": weiterer Lehrer für " + AT.getSkillType().toString() + ": " + einLehrer.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)");
 							} else {
 								this.verwalterScript.addComment("Debug: (bereits eingezählter Lehrer ignoriert)",false);
@@ -178,11 +189,16 @@ public class AkademiePool {
 					}
 				}
 				// was passiert, wenn verfPl = 0 ?!
+				if (übergabePlätze<=0){
+					this.verwalterScript.addComment("Debug: definiertes Limit erreicht.",false);
+					// fertig
+					break;
+				}
+				// was passiert, wenn verfPl = 0 ?!
 				if (verfPlätze<=0){
 					// fertig
 					break;
 				}
-				
 			}
 			if (verfPlätze<=0){
 				// fertig
