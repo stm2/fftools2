@@ -470,6 +470,11 @@ private MatPool matPool = null;
          // oder default-Talet, falls vorhannden
          this.autoDidaktenSetzen();
          
+         // -> !!
+         // Lernketten wenn möglich splitten, damit die in die Akademien passen...
+         this.verboseOutText("AusbildungsPool: splitte Lernketten für Region " + this.region.getName());
+         this.splitLernKetten();
+         
          //Hurra der pool ist durch
          this.verboseOutText("AusbildungsPool: Schreibe Lernketten für Region " + this.region.getName());
          
@@ -485,6 +490,80 @@ private MatPool matPool = null;
     	 outText.setFileStandard();
     
     } // end run
+    
+    /**
+     * herausnehmbare x:10*x Ketten entfernen
+     */
+    private void splitLernKetten(){
+    	// wir brauchen nur die ARs mit 1 oder 2 Personen als Lehrer.
+    	// wir sparen uns das Sortieren und fügen erste die 1 Personen hinzu
+    	// dann die 2 Personen
+    	ArrayList<AusbildungsRelation> relList = new ArrayList<AusbildungsRelation>();
+    	for (AusbildungsRelation AR:this.relationList){
+    		if (AR.isTeacher() && AR.getSchuelerPlaetze()==1){
+    			relList.add(AR);
+    		}
+    	}
+    	for (AusbildungsRelation AR:this.relationList){
+    		if (AR.isTeacher() && AR.getSchuelerPlaetze()==2){
+    			relList.add(AR);
+    		}
+    	}
+    	
+    	// diese Liste jetzt durchgehen
+    	for (AusbildungsRelation AR:relList){
+    		// wir müssen checken, ob die Lernbeziehung "sauber" ist...1:10
+    		// Anzahl der Schüler checken
+    		int actAnzSchüler = AR.getAnzahlPooledPersons();
+    		// Anzahl Lehrer schwieriger...einen Schüler nehmen
+    		AusbildungsRelation einSchüler = AR.getPooledRelation().get(0);
+    		int actAnzLehrer = einSchüler.getAnzahlPooledPersons();
+    		
+    		if (actAnzSchüler == 10 * actAnzLehrer){
+	    		// yep, eine "feine" Relation	
+	    		// finde einen Schüler, der die geforderte Anzahl an Leuten hat
+	    		int neededSchuelerAnzahl = AR.getTeachPlaetze();
+	    		AusbildungsRelation passenderSchüler = null;
+	    		for (AusbildungsRelation suchSchüler:AR.getPooledRelation()){
+	    			if (suchSchüler.getSchuelerPlaetze()==neededSchuelerAnzahl){
+	    				// bingo
+	    				passenderSchüler = suchSchüler;
+	    				break;
+	    			}
+	    		}
+	    		if (passenderSchüler!=null){
+	    			// bingo Fall
+	    			ArrayList<AusbildungsRelation> LehrerListe = passenderSchüler.getPooledRelation();
+	    			// für alle Lehrer diesen Schüler entfernen, so lange es nicht "unser" Lehrer ist
+	    			for (AusbildungsRelation einLehrer:LehrerListe){
+	    				if (!einLehrer.equals(AR)){
+		    				if (einLehrer.getPooledRelation().contains(passenderSchüler)){
+		    					einLehrer.getPooledRelation().remove(passenderSchüler);
+		    				}
+	    				}
+	    			}
+	    			// für alle Schüler unseren Lehrer entfernen
+	    			for (AusbildungsRelation laufSchüler:AR.getPooledRelation()){
+	    				if (laufSchüler.getPooledRelation().contains(AR)){
+	    					laufSchüler.getPooledRelation().remove(AR);
+	    				}
+	    			}
+	    			
+	    			// für unseren Lehrer nur den passenden Setzen
+	    			AR.getPooledRelation().clear();
+	    			AR.getPooledRelation().add(passenderSchüler);
+	    			
+	    			//  für unseren Schüler nur unseren Lehrer setzen
+	    			passenderSchüler.getPooledRelation().clear();
+	    			passenderSchüler.getPooledRelation().add(AR);
+	    			
+	    			// fertig ?!
+	    		}
+    		}
+    	}
+    
+    	
+    }
     
     
     public void AkaWarnungen(){

@@ -223,6 +223,11 @@ public class Lernplan {
 			return true;
 		} else {
 			// nein, alles erfüllt bzw keine Restiktionen
+			// erfüllte Talente wenn nicht anders vorgegeben als Lehrangebot hinzufügen
+			for (Iterator<LernplanTalent> iter=this.talente.values().iterator();iter.hasNext();){
+				LernplanTalent LPT = (LernplanTalent)iter.next();
+				LPT.appendAusbildungsRelationTeacher(u, AR);
+			}
 			return false;
 		}
 	}

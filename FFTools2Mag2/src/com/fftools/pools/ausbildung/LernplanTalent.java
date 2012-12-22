@@ -244,7 +244,7 @@ public class LernplanTalent {
 		// Kann man unser Talent noch Lernen
 		Skill actLernSkill =u.getUnit().getModifiedSkill(this.skillType);
 		
-		// Wird geraucht falls actLernSkill = Magie
+		// Wird gebraucht falls actLernSkill = Magie
 		SkillType magieType =null;
 		Skill magieSkill =null;
 		
@@ -296,6 +296,56 @@ public class LernplanTalent {
 		}
 	}
 
+	
+	/**
+	 * wo möglich, wird TeachOffer ergänzt
+	 * gebraucht, um abgeschlossene LP trotzdem anzubieten, soweit erlaubt
+	 * @param u
+	 * @param AB
+	 */
+	public void appendAusbildungsRelationTeacher(ScriptUnit u,AusbildungsRelation AB){
+		// Kann man unser Talent noch Lernen
+		Skill actLernSkill =u.getUnit().getModifiedSkill(this.skillType);
+		
+		// Wird gebraucht falls actLernSkill = Magie
+		SkillType magieType =null;
+		Skill magieSkill =null;
+		
+		
+		// ergänzen
+		if (actLernSkill==null){
+			// neuen skill anlegen, der Ausbildungspool mag keinen skill=null mapeinträge
+								
+			actLernSkill = new Skill(this.skillType,0,0,u.getUnit().getModifiedPersons(),true);
+		}
+		
+		// Wen skilltype magie ist, dann schieben wir der Ausbildungsrelation fiktive Magieskills unter die einen rückschluss auf
+		// das magiegebiet erlauben. damit kann der ausbildungspool dann magier gleicher Gebiete verketten ohne patzer.
+		
+		if (this.skillType.equals(u.getScriptMain().gd_ScriptMain.rules.getSkillType("Magie"))){
+			// ist magiegebiet bekannt?
+			if (u.getUnit().getFaction().getSpellSchool()!=null){
+                magieType =u.getScriptMain().gd_ScriptMain.rules.getSkillType(u.getUnit().getFaction().getSpellSchool(), true); 
+                magieSkill = new Skill (magieType,0, this.getActUnitLevel(u)  ,u.getUnit().getModifiedPersons(),true);                
+			}
+			
+		}
+		
+		
+		// darf die Unit noch Lehren
+		if (this.kannLehrerSein){
+			if (actLernSkill!=null && actLernSkill.getLevel()>1){
+				if (!this.skillType.equals(u.getScriptMain().gd_ScriptMain.rules.getSkillType("Magie"))){
+				    // KEIN MAGIER
+					AB.addTeachOffer(this.skillType, actLernSkill);
+				}
+				if (magieSkill!=null){
+					AB.addTeachOffer(magieType, magieSkill);
+				}
+			}
+		}
+	}
+	
 	/**
 	 * überprüft, ob ein Skill die angegebenen VerlaufsRestriktionen erfüllt
 	 * @param u
