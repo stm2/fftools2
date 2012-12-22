@@ -18,7 +18,7 @@ import com.fftools.utils.FFToolsRegions;
  *
  */
 
-public class Akatalente extends Script{
+public class Akademie extends Script{
 	
 	
 	private static final int Durchlauf = 662;
@@ -31,7 +31,7 @@ public class Akatalente extends Script{
 	 * Drinne Lassen fuer die Instanzierung des Objectes
 	 */
 	
-	public Akatalente() {
+	public Akademie() {
 		super.setRunAt(Durchlauf);
 	}
 	
@@ -108,12 +108,12 @@ public class Akatalente extends Script{
 							sK = this.gd_Script.rules.getSkillType(talentName);
 						}
 						if (sK==null){
-							this.addComment("!!! Akatalente: Talent nicht erkannt: " + talentName,false);
+							this.addComment("!!! Akademie: Talent nicht erkannt: " + talentName,false);
 						} else {
 							// wir haben ein gültiges Talent...haben wir auch ne Anzahl
 							int Anz = Integer.parseInt(talentAnzahl);
 							if (Anz<=0 || Anz>25){
-								this.addComment("!!! Akatalente: Anzahl nicht erkannt in: " + s + " (" + talentAnzahl + ")",false);
+								this.addComment("!!! Akademie: Anzahl nicht erkannt in: " + s + " (" + talentAnzahl + ")",false);
 							} else {
 								// hier stimmt Alles
 								AkademieTalent AT = new AkademieTalent(sK,Anz);
@@ -123,11 +123,11 @@ public class Akatalente extends Script{
 					}
 				}
 			}
-			this.addComment("Akatalente: " + akademieTalente.size() + " Talentangaben gelesen",false);
+			this.addComment("Akademie: " + akademieTalente.size() + " Talentangaben gelesen",false);
 			if (this.AP!=null){
 				this.AP.setAkademieTalente(akademieTalente);
 			} else {
-				this.addComment("(Akatalente wurden wegen nicht erkannter Akademie nicht übergeben)",false);
+				this.addComment("(Akademie wurden wegen nicht erkannter Akademie nicht übergeben)",false);
 			}
 		}	
 	

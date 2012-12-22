@@ -79,6 +79,11 @@ public class AusbildungsRelation {
 	 */
 	private Building akademieFromAM = null;
 	
+	/**
+	 * damit schüler nicht von jedem Lehrer in die Aka geschickt werdeb
+	 */
+	private boolean orderedNewAka = false;
+	
 	
 	/**
 	 * Konstruktor
@@ -126,9 +131,12 @@ public class AusbildungsRelation {
 		if (this.teachOffer==null){
 			this.teachOffer = new HashMap<SkillType, Skill>();
 		}
-		if (!this.teachOffer.containsKey(skillType)){
-			this.teachOffer.put(skillType, skill);
+		// 20121222: soll vorhandene Ersetzen!
+		if (this.teachOffer.containsKey(skillType))
+		{
+			this.teachOffer.remove(skillType);
 		}
+		this.teachOffer.put(skillType, skill);
 	}
 	
 	
@@ -176,11 +184,18 @@ public class AusbildungsRelation {
 			return this.defaultGratisTalent;
 		}
 		
-	
+	/**
+	 * 
+	 * @return modified * 10
+	 */
 	public int getTeachPlaetze(){
 		return this.scriptUnit.getUnit().getModifiedPersons()*10;
 	}
 	
+	/**
+	 * 
+	 * @return modified Pers
+	 */
 	public int getSchuelerPlaetze(){
 		return this.scriptUnit.getUnit().getModifiedPersons();
 	}
@@ -579,6 +594,36 @@ public class AusbildungsRelation {
 		}
 	 
 	
+		/**
+		 * Liefert Anzahl (modified) Personen in den pooled Relationen
+		 * bei isTeacher -> Anzahl der Schüler
+		 * bei isSchueler -> Anzahl der Lehrer
+		 */
+		public int getAnzahlPooledPersons(){
+			if (this.pooledRelation==null || this.pooledRelation.isEmpty()){
+				return 0;
+			}
+			int erg = 0;
+			for (AusbildungsRelation AR:this.pooledRelation){
+				erg += AR.getScriptUnit().getUnit().getModifiedPersons();
+			}
+			return erg;
+		}
+
+		/**
+		 * @return the orderedNewAka
+		 */
+		public boolean isOrderedNewAka() {
+			return orderedNewAka;
+		}
+
+		/**
+		 * @param orderedNewAka the orderedNewAka to set
+		 */
+		public void setOrderedNewAka(boolean orderedNewAka) {
+			this.orderedNewAka = orderedNewAka;
+		}
+		
 }
 
 

@@ -8,7 +8,7 @@ import magellan.library.Unit;
 
 import com.fftools.ReportSettings;
 import com.fftools.pools.ausbildung.relations.AusbildungsRelation;
-import com.fftools.scripts.Akatalente;
+import com.fftools.scripts.Akademie;
 
 
 public class AkademiePool {
@@ -19,7 +19,7 @@ public class AkademiePool {
 	public static final ReportSettings reportSettings = ReportSettings.getInstance();
 	
 	private Building akademieBuilding;
-	private Akatalente verwalterScript;
+	private Akademie verwalterScript;
 	
 	private ArrayList<AusbildungsRelation> relevantRelations;
 	private ArrayList<AkademieTalent> akademieTalente;
@@ -29,7 +29,7 @@ public class AkademiePool {
 	 *
 	 */
 	
-	public AkademiePool(Building akademie, Akatalente AT){
+	public AkademiePool(Building akademie, Akademie AT){
 		this.akademieBuilding = akademie;
 		this.verwalterScript = AT;
     }
@@ -40,6 +40,9 @@ public class AkademiePool {
      */
 	
 	public void runPool(){
+		
+		this.verwalterScript.addComment("Akademie Pool start für: " + this.akademieBuilding.getID().toString() + ")");
+		
 		// die Liste der relevanten ARs besorgen
 		this.relevantRelations = reportSettings.getScriptMain().getOverlord().getAkademieManager().getRelevantAR(this.akademieBuilding.getRegion());
 		if (this.relevantRelations==null || this.relevantRelations.isEmpty()){
@@ -47,7 +50,7 @@ public class AkademiePool {
 			return;
 		}
 		
-		this.verwalterScript.addComment("Debug: Anzahl relavanter Lernfixer:" + this.relevantRelations.size());
+		this.verwalterScript.addComment("Debug: Anzahl relavanter Lernfixer (alle Talente):" + this.relevantRelations.size(),false);
 		
 		if (this.akademieTalente==null || this.akademieTalente.isEmpty()){
 			this.akademieTalente = verwalterScript.getOverlord().getAkademieManager().getDefaultTalentList();
@@ -99,32 +102,18 @@ public class AkademiePool {
 			// die relevanten Sortieren, nach dem aktuellen SkillType...
 			// Submenge der relevanten Bilden, mit dem richtigen
 			// Skilltype und der maximalen Anzahl
-			this.verwalterScript.addComment("Debug " + this.akademieBuilding.getID().toString() + ": poole Talent:" + AT.getSkillType().toString());
+			this.verwalterScript.addComment("Debug " + this.akademieBuilding.getID().toString() + ": poole Talent:" + AT.getSkillType().toString(),false);
 			ArrayList<AusbildungsRelation> actRel = new ArrayList<AusbildungsRelation>();
 			for (AusbildungsRelation AR:this.relevantRelations){
 				if (AR.getAkademieFromAM()==null && AR.getOrderedSkillType().equals(AT.getSkillType())){
-					if (AR.getScriptUnit().getUnit().getModifiedPersons()<=verfPlätze){
-						// richtiger Type und passige Einheit
-						// kein Lehrer, dessen Schüler nicht auch reinpassen...
-						boolean passtNoch = true;
-						if (AR.isTeacher() && AR.getScriptUnit().getUnit().getModifiedPersons() + AR.getOrdererdSchüleranzahl()>verfPlätze){
-							passtNoch=false;
-						}
-						/*
-						 * Schüler wandern immer mit Lehrer mit, 
-						 * werden nicht selber relevant gepoolt
-						 */
-						if (AR.isSchueler()){
-							passtNoch=false;
-						}
-						if (passtNoch){
-							actRel.add(AR);
-						}
+					if (!AR.isSchueler()){
+						actRel.add(AR);
 					}
+					
 				}
 			}
 			
-			this.verwalterScript.addComment("Debug " + this.akademieBuilding.getID().toString() + ": Anzahl der reduzierten relevanten Lernfixer: " + actRel.size());
+			this.verwalterScript.addComment("Debug " + this.akademieBuilding.getID().toString() + ": Anzahl der reduzierten relevanten Lernfixer: " + actRel.size(),false);
 			
 			// fertige Liste...>0 ?
 			if (actRel.isEmpty()){
@@ -137,16 +126,25 @@ public class AkademiePool {
 			Collections.reverse(actRel);
 			// Liste abarbeiten
 			for (AusbildungsRelation AR:actRel){
-				// immer noch passig ?
-				boolean passtNoch = true;
-				if (AR.getScriptUnit().getUnit().getModifiedPersons()>verfPlätze){
-					passtNoch=false;
-				}
-				if (passtNoch && AR.isTeacher() && (AR.getScriptUnit().getUnit().getModifiedPersons() + AR.getOrdererdSchüleranzahl()>verfPlätze)){
-					passtNoch=false;
+				boolean passtNoch = false;
+				// passen wir hier noch rein?
+				if (AR.getScriptUnit().getUnit().getModifiedPersons()<=verfPlätze){
+					// richtiger Type und passige Einheit
+					// kein Lehrer, dessen Schüler nicht auch reinpassen...
+					passtNoch = true;
+					int checkInt=0; 
+					if (AR.isTeacher() ){
+						checkInt = AR.getOrdererdSchüleranzahl();
+						// Einen Schüler holen
+						AusbildungsRelation einSchueler = AR.getPooledRelation().get(0);
+						// Anzahl der Lehrer feststellen
+						checkInt += einSchueler.getAnzahlPooledPersons();
+						if (checkInt>verfPlätze){
+							passtNoch=false;
+						}
+					}
 				}
 				if (passtNoch){
-					// chaka!
 					// Gebäude setzen
 					AR.setAkademieFromAM(this.akademieBuilding);
 					// verf reduzieren
@@ -160,13 +158,31 @@ public class AkademiePool {
 							verfPlätze -= schueler.getSchuelerPlaetze();
 							this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": mit Schüler für " + AT.getSkillType().toString() + ": " + schueler.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)");
 						}
-					}
-					// was passiert, wenn verfPl = 0 ?!
-					if (verfPlätze<=0){
-						// fertig
-						break;
+						// die weiteren Lehrer auch noch mitnehmen
+						// einen Schüler holen
+						AusbildungsRelation einSchueler = AR.getPooledRelation().get(0);
+						if (einSchueler.getPooledRelation().isEmpty()){
+							this.verwalterScript.addComment("Debug: schüler liefert keine Lehrer-Liste",false);
+						}
+						// alle Lehrer setzen
+						for (AusbildungsRelation einLehrer : einSchueler.getPooledRelation()){
+							if (!AR.equals(einLehrer)){
+								einLehrer.setAkademieFromAM(this.akademieBuilding);
+								verfPlätze -= einLehrer.getSchuelerPlaetze();
+								this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": weiterer Lehrer für " + AT.getSkillType().toString() + ": " + einLehrer.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)");
+							} else {
+								this.verwalterScript.addComment("Debug: (bereits eingezählter Lehrer ignoriert)",false);
+							}
+						}
+						
 					}
 				}
+				// was passiert, wenn verfPl = 0 ?!
+				if (verfPlätze<=0){
+					// fertig
+					break;
+				}
+				
 			}
 			if (verfPlätze<=0){
 				// fertig
@@ -217,7 +233,7 @@ public class AkademiePool {
 	/**
 	 * @return the verwalterScript
 	 */
-	public Akatalente getVerwalterScript() {
+	public Akademie getVerwalterScript() {
 		return verwalterScript;
 	}
 

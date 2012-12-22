@@ -15,13 +15,13 @@ import com.fftools.overlord.OverlordRun;
 import com.fftools.pools.ausbildung.AusbildungsManager;
 import com.fftools.pools.ausbildung.AusbildungsPool;
 import com.fftools.pools.ausbildung.relations.AusbildungsRelation;
-import com.fftools.scripts.Akatalente;
+import com.fftools.scripts.Akademie;
 
 	public class AkademieManager implements OverlordRun,OverlordInfo {
 		
 		private static final OutTextClass outText = OutTextClass.getInstance();
 		
-		private static final int Durchlauf1 = 664;  // eigentliches Poolen, Akatalente laufen 662
+		private static final int Durchlauf1 = 664;  // eigentliches Poolen, Akademie laufen 662
 		private static final int Durchlauf2 = 666;  // aka-warning checks?
 		
 		private int[] runners = {Durchlauf1, Durchlauf2};
@@ -88,9 +88,11 @@ import com.fftools.scripts.Akatalente;
 			        				}
 			        			}
 			        			if (needEnterOrder){
-			        				AR.getScriptUnit().addOrder("BETRETEN BURG " + AR.getAkademieFromAM().getID() + " ; AkaPool", true);
+			        				AR.getScriptUnit().addOrder("BETRETEN BURG " + AR.getAkademieFromAM().getID() + " ; AkaPool-> " + AR.getAkademieFromAM().toString(), true);
+			        				AR.setOrderedNewAka(true);
 			        			}
 			        			// Für Lehrer auch die Schüler prüfen
+			        			/*
 			        			if (AR.isTeacher()){
 			        				for (AusbildungsRelation AR2:AR.getPooledRelation()){
 			        					needEnterOrder = false;
@@ -102,11 +104,16 @@ import com.fftools.scripts.Akatalente;
 					        					needEnterOrder=true;
 					        				}
 					        			}
+					        			if (AR2.isOrderedNewAka()){
+					        				needEnterOrder=false;
+					        			}
 					        			if (needEnterOrder){
-					        				AR2.getScriptUnit().addOrder("BETRETEN BURG " + AR.getAkademieFromAM().getID() + " ; AkaPool-Schüler", true);
+					        				AR2.getScriptUnit().addOrder("BETRETEN BURG " + AR.getAkademieFromAM().getID() + " ; AkaPool-Schüler (von " + AR.getScriptUnit().getUnit().toString(true)+ ") -> " + neueAka.toString(), false);
+					        				AR2.setOrderedNewAka(true);
 					        			}
 			        				}
 			        			}
+			        			*/
 			        		}
 			        	}
 			        	outText.addPoint();
@@ -135,7 +142,7 @@ import com.fftools.scripts.Akatalente;
 	     * @param b MUSS eine Aka sein
 	     * @return der Pool oder null, als schon da
 	     */
-	    public AkademiePool addAkademie(Building b, Akatalente AT){
+	    public AkademiePool addAkademie(Building b, Akademie AT){
 	    	// gibts schon Pool-List?
 	    	if (this.AkademiePools==null){
 	    		this.AkademiePools = new ArrayList<AkademiePool>();
@@ -196,27 +203,14 @@ import com.fftools.scripts.Akatalente;
 	    	for (AusbildungsRelation AR:regionList){
 	    		boolean isInFilter=true;
 	    		ScriptUnit sU = AR.getScriptUnit();
-	    		// Filter 1: Anzahl Pers <=20
-	    		if (sU.getUnit().getModifiedPersons()>20){
-	    			isInFilter=false;
-	    		}
-	    		// reine Schueler raus
-	    		// if (AR.isSchueler()){
-	    		//	isInFilter=false;
-	    		//}
-	    		
-	    		/*
-	    		 * Schüler drinne lassen, aber nicht poolen
-	    		 * müssen aber gecleant werden...
-	    		 */
-	    		
+
 	    		// Schiffsesatzungen raus
-	    		if (AR.getScriptUnit().getUnit().getModifiedShip()!=null){
+	    		if (sU.getUnit().getModifiedShip()!=null){
 	    			isInFilter=false;
 	    		}
-	    		// Akademiebesitzer immer drinne ?!
+	    		// Akademiebesitzer immer drinne ?! (Nur wenn <=25 Pers!
 	    		Building b = AR.getScriptUnit().getUnit().getModifiedBuilding();
-	    		if (b!=null && b.getOwner()!=null && b.getOwner().equals(AR.getScriptUnit().getUnit())){
+	    		if (b!=null && b.getOwner()!=null && b.getOwner().equals(sU.getUnit()) && sU.getUnit().getModifiedPersons()<=25){
 	    			isInFilter=true;
 	    		}
 	    		if (isInFilter){
