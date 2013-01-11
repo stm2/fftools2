@@ -99,6 +99,13 @@ public class ScriptUnit {
 	private int usedKapa = 0;
 	private int setKapaPolicy = MatPoolRequest.KAPA_unbenutzt;
 	
+	/**
+	 * Ausschliesslich für Kapitäne mit gewicht=schiff
+	 * Dann wird auch dass Gewicht von Einheiten mit // onboard bzw // Crew
+	 * berücksichtigt
+	 */
+	private boolean includeSailorsWeight = false;
+	
 	// MatPool2
 	/**
 	 * enthält die Items nach geschützten Ordern und Matpoollauf/läufen
@@ -1533,11 +1540,86 @@ public class ScriptUnit {
 		case MatPoolRequest.KAPA_benutzer:
 			return this.originalFreeKapaUser - (int)Math.ceil((double)this.getModifiedLoad()/100);
 		case MatPoolRequest.KAPA_weight:
-			return this.originalFreeKapaUserWeight - (int)Math.ceil((double)this.getWeight()/100);	
+			if (!this.isIncludeSailorsWeight()){
+				return this.originalFreeKapaUserWeight - (int)Math.ceil((double)this.getWeight()/100);
+			} else {
+				// Gewicht von weiteren Insassen auf dem Schiff miberechnen
+				int erg = this.originalFreeKapaUserWeight;
+				// wie gehabt, unser Gewicht abziehen
+				erg -=  (int)Math.ceil((double)this.getWeight()/100);
+				// Gewicht der anderen abziehen
+				erg -= calcWeightOfSailors();
+				return erg;
+			}
 		default:
 			return -1;
 		}
 	}
+	
+	/**
+	 * Berechnet das Gewicht der als Mitfahrer deklarierten Einheiten
+	 * (// onboard oder // crew)
+	 * @return
+	 */
+	private int calcWeightOfSailors(){
+		int erg = 0;
+		Ship ship = this.getUnit().getModifiedShip();
+		if (ship==null){
+			this.addComment("!!! Insassen des Schiffes sollen berücksichtigt werden, aber wir sind nicht auf einem Schiff!!");
+			this.doNotConfirmOrders();
+			return 0;
+		}
+		// Liste der Insassen
+		Collection<Unit> insassen = ship.modifiedUnits();
+		if (insassen==null || insassen.isEmpty()){
+			this.addComment("!!! Insassen des Schiffes sollen berücksichtigt werden, aber es gibt keine Insassen!!");
+			this.doNotConfirmOrders();
+			return 0;
+		}
+		for (Unit u:insassen){
+			// eigene Unit ausschliessen
+			if (!u.equals(this.getUnit())){
+				// orders durchgehen und die richtige finden
+				boolean isCrew = false;
+				for (Order o:u.getOrders2()){
+					String s = o.getText();
+					if (s.toLowerCase().startsWith("// onboard")){
+						isCrew=true;
+						break;
+					}
+					if (s.toLowerCase().startsWith("// crew")){
+						isCrew=true;
+						break;
+					}
+				}
+				if (isCrew){
+					// scriptUnit finden
+					ScriptUnit otherSC = this.scriptMain.getScriptUnit(u);
+					if (otherSC==null){
+						// ok, wir haben keine ScriptUnit...dann das Gewicht so
+						// abziehen
+						MovementEvaluator EME=this.scriptMain.gd_ScriptMain.getRules().getGameSpecificStuff().getMovementEvaluator();
+						int unitWeight = (int)Math.ceil(EME.getModifiedWeight(u)/100);
+						erg+=unitWeight;
+						this.addComment("Crew " + u.toString(true) + " ist keine ScriptUnit, das Gewicht wurde mit " + unitWeight + " GE calculiert.");
+					} else {
+						// ganz normale ScriptUnit
+						int unitWeight = (int)Math.ceil((double)otherSC.getWeight()/100);
+						erg+=unitWeight;
+						this.addComment("Crew " + u.toString(true) + " wurde mit " + unitWeight + " GE calculiert.");
+						otherSC.addComment("als Crew von " + ship.toString() + " berücksichtigt.");
+					}
+				} else {
+					// Wir haben eine Unit an Board, die nicht Crew ist...
+					// dass kann schief gehen
+					this.addComment("!!! Hinweis: " + u.toString(true) + " ist an Bord und wurde nicht bei Kapa-Berechnung berücksichtigt.");
+					this.doNotConfirmOrders();
+				}
+			}
+		}
+		return erg;
+	}
+	
 	
 	/**
 	 * Setzt eine Änderung der Items um
@@ -1684,6 +1766,20 @@ public class ScriptUnit {
 	 */
 	public int getMainDurchlauf(){
 		return this.getOverlord().getMainDurchlauf();
+	}
+
+	/**
+	 * @return the includeSailorsWeight
+	 */
+	public boolean isIncludeSailorsWeight() {
+		return includeSailorsWeight;
+	}
+
+	/**
+	 * @param includeSailorsWeight the includeSailorsWeight to set
+	 */
+	public void setIncludeSailorsWeight(boolean includeSailorsWeight) {
+		this.includeSailorsWeight = includeSailorsWeight;
 	}
 	
 	

@@ -1377,7 +1377,7 @@ public void runScript(int scriptDurchlauf){
 		
 		// debug: zum Wiederfinden
 		
-		outText.addOutLine("++++ *** ++++ **** ++++Bauunterstützung bei " + this.unitDesc(), true);
+		// outText.addOutLine("++++ *** ++++ **** ++++Bauunterstützung bei " + this.unitDesc(), true);
 		
 	}
 	
@@ -1430,7 +1430,7 @@ public void runScript(int scriptDurchlauf){
 				
 				// debug: zum Wiederfinden
 				
-				outText.addOutLine("++++ *** ++++ **** ++++Bauunterstützung bei " + this.unitDesc() + " (moving)", true);
+				// outText.addOutLine("++++ *** ++++ **** ++++Bauunterstützung bei " + this.unitDesc() + " (moving)", true);
 				
 				
 			}

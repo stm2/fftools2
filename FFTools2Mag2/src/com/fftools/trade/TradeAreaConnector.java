@@ -213,6 +213,7 @@ public class TradeAreaConnector {
 	 * erstellt die neuen Vorratsanfragen für alle Transfers
 	 */
 	public void process_Transfers(){
+		outText.addOutLine("!!!debug: doing transfers for TAC " + this.Name, true);
 		if (this.transfersTo1.size()>0){
 			process_Transfers_Dir(this.transfersTo1,this.getSU2());
 		}
@@ -249,9 +250,10 @@ public class TradeAreaConnector {
 			vorrat.setArguments(order);
 			sourceSCU.addAScriptNow(vorrat);
 			
-			vorrat.vorMatpool();
+			// wird bei 190 im script vorrat aufgerufen
+			// vorrat.vorMatpool();
 			
-			sourceSCU.addComment("TAC: Vorratsscript hinzugefügt: " + order.toString());
+			sourceSCU.addComment("TAC: Vorratsscript hinzugefügt: " + order.toString(),false);
 		}
 	}
 	

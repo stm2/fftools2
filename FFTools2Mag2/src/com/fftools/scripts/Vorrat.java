@@ -163,8 +163,7 @@ public class Vorrat extends TransportScript{
 			myMPR.setTMsortMode(MatPoolRequest.TM_sortMode_amount);
 		}
 		
-		this.addMatPoolRequest(myMPR);	
-		
+		this.addMatPoolRequest(myMPR);
 		
 		// request INfo
 		this.scriptUnit.findScriptClass("RequestInfo");
