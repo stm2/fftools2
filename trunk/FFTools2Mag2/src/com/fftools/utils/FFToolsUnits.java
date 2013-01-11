@@ -3,9 +3,12 @@ package com.fftools.utils;
 import java.util.Iterator;
 
 import magellan.library.GameData;
+import magellan.library.Ship;
 import magellan.library.Skill;
 import magellan.library.Unit;
 import magellan.library.rules.SkillType;
+
+import com.fftools.scripts.Script;
 
 /**
  * Unit-Handling
@@ -104,5 +107,34 @@ public class FFToolsUnits {
 		return null;
 	}
 	
+	/**
+	 * ?berpr?ft, ob einheit Kapitän eines schiffes
+	 * versucht, das shiff zu setzen (wird für pathbuilding en?tigt)
+	 * wenn beides OK -> true, sonst false
+	 * @return
+	 */
+	public static boolean checkShip(Script aScript){
+		// schiff checken
+		Ship myS = aScript.scriptUnit.getUnit().getModifiedShip();
+		if (myS==null){
+			return false;
+		}
+		Ship ship = myS;
+		
+		// Kaptän checken
+		Unit captn = ship.getOwnerUnit();
+		// ist es unsere unit?
+		if (captn!=null && captn.equals(aScript.scriptUnit.getUnit())){
+			return true;
+		}
+		
+		// Sonderfall: wir sind jetzt auf keinem oder einem anderen Shiff
+		// und betreten ein neues ... dann doch OK geben
+		Ship actShip = aScript.scriptUnit.getUnit().getShip();
+		if (actShip==null || !actShip.equals(ship)){
+			return true;
+		}
+		return false;
+	}
 	
 }

@@ -5,15 +5,12 @@ import java.util.List;
 
 import magellan.library.CoordinateID;
 import magellan.library.Region;
-import magellan.library.Ship;
-import magellan.library.Unit;
 import magellan.library.utils.Regions;
 
 import com.fftools.utils.FFToolsRegions;
+import com.fftools.utils.FFToolsUnits;
 
 public class Sailto extends Script{
-	private Ship ship = null;
-	
 	private static final int Durchlauf = 42;
 	
 	// Parameterloser constructor
@@ -23,12 +20,9 @@ public class Sailto extends Script{
 	
 	public void runScript(int scriptDurchlauf){
 		if (scriptDurchlauf!=Durchlauf){return;}
-		
 		// hier code fuer Sailto
 		// addOutLine("....start SAILTO mit " + super.getArgCount() + " Argumenten");
-		
-		if (checkShip()){
-		
+		if (FFToolsUnits.checkShip(this)){
 			if (super.getArgCount()<1) {
 				super.addComment("Das Ziel fehlt beim Aufruf von SAILTO!",true);
 				super.addComment("Unit wurde durch SAILTO NICHT bestaetigt", true);
@@ -112,9 +106,7 @@ public class Sailto extends Script{
 	}
 	
 	private void makeOrderNACH(CoordinateID act,CoordinateID dest){
-		
-		
-		
+
 		// FF 20070103: eingebauter check, ob es actDest auch gibt?!
 		if (!com.fftools.utils.FFToolsRegions.isInRegions(this.gd_Script.getRegions(), dest)){
 			// Problem  actDest nicht im CR -> abbruch
@@ -124,8 +116,8 @@ public class Sailto extends Script{
 			return;
 		} 
 
-		int speed = super.gd_Script.getGameSpecificStuff().getGameSpecificRules().getShipRange(this.ship);
-		List<Region> pathL = Regions.planShipRoute(this.ship,super.gd_Script, dest);
+		int speed = super.gd_Script.getGameSpecificStuff().getGameSpecificRules().getShipRange(this.scriptUnit.getUnit().getModifiedShip());
+		List<Region> pathL = Regions.planShipRoute(this.scriptUnit.getUnit().getModifiedShip(),super.gd_Script, dest);
 		
 		String path = null;
 		if (pathL!=null){
@@ -146,30 +138,6 @@ public class Sailto extends Script{
 			addOutLine("X....kein Weg gefunden für " + this.scriptUnit.getUnit().toString(true) + " in " + this.scriptUnit.getUnit().getRegion().toString());
 		}
 	}
-	/**
-	 * überprüft, ob einheit Kapitän eines schiffes
-	 * versucht, das shiff zu setzen (wird für pathbuilding enötigt)
-	 * wenn beides OK -> true, sonst false
-	 * @return
-	 */
-	private boolean checkShip(){
-		// schiff checken
-		Ship myS = super.scriptUnit.getUnit().getShip();
-		if (myS==null){
-			return false;
-		}
-		this.ship = myS;
-		
-		// Kaptän checken
-		Unit captn = this.ship.getOwnerUnit();
-		if (captn==null){return false;}
-		
-		// ist es unsere unit?
-		if (!captn.equals(super.scriptUnit.getUnit())){
-			return false;
-		}
-		
-		return true;
-	}
+	
 	
 }

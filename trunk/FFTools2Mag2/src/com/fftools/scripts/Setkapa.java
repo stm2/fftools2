@@ -5,6 +5,7 @@ import magellan.library.Ship;
 
 import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.utils.FFToolsOptionParser;
+import com.fftools.utils.FFToolsUnits;
 
 
 
@@ -78,19 +79,20 @@ public class Setkapa extends Script {
 		
 		if(OP.isOptionString("gewicht", "schiff") || OP.isOptionString("weight","ship")){
 			// gewicht = maximale Kapa des schiffes
-			Ship ship = this.scriptUnit.getUnit().getShip();
+			Ship ship = this.scriptUnit.getUnit().getModifiedShip();
 			if (ship!=null){
 				// Kapitän?
-				if (ship.getOwnerUnit()!=null || ship.getOwnerUnit().equals(this.scriptUnit.getUnit())){
+				if (FFToolsUnits.checkShip(this)){
 					// alles fein
-					benutzerWeight = ship.getCapacity();
+					benutzerWeight = ship.getMaxCapacity();
 					if (benutzerWeight>0){
 						benutzerWeight=(int) Math.ceil(((double)benutzerWeight)/100);
 						kapaPolicy = MatPoolRequest.KAPA_weight;
 						kapaUser=benutzerWeight;
 						this.addComment("setKapa Schiff auf: " + benutzerWeight + " GE");
+						this.scriptUnit.setIncludeSailorsWeight(true);
 					} else {
-						this.addComment("!!! setkapa -> Schiff: Schiff hat ungültige Kapazität");
+						this.addComment("!!! setkapa -> Schiff: Schiff hat ungültige Kapazität (" + benutzerWeight + ")");
 						this.doNotConfirmOrders();
 					}
 				} else {

@@ -2,10 +2,9 @@ package com.fftools.scripts;
 
 
 import magellan.library.CoordinateID;
-import magellan.library.Ship;
-import magellan.library.Unit;
 
 import com.fftools.utils.FFToolsRegions;
+import com.fftools.utils.FFToolsUnits;
 
 public class Route extends Script{
 	
@@ -101,36 +100,12 @@ public class Route extends Script{
 	private void setGOTO(CoordinateID dest){
 		// lediglich ein GOTO script zum dest erzeugen...wird in späterem Lauf dort bearbeitet
 		// naja...wenn Kapitän, dann ein SAILTO....
-		if (this.checkShip()){
+		if (FFToolsUnits.checkShip(this)){
 			super.scriptUnit.findScriptClass("Sailto",dest.toString(","));
 		} else {
 			super.scriptUnit.findScriptClass("Goto",dest.toString(","));
 		}
 	}
-	
-	/**
-	 * ?berpr?ft, ob einheit Kapitän eines schiffes
-	 * versucht, das shiff zu setzen (wird für pathbuilding en?tigt)
-	 * wenn beides OK -> true, sonst false
-	 * @return
-	 */
-	private boolean checkShip(){
-		// schiff checken
-		Ship myS = super.scriptUnit.getUnit().getShip();
-		if (myS==null){
-			return false;
-		}
-		Ship ship = myS;
-		
-		// Kaptän checken
-		Unit captn = ship.getOwnerUnit();
-		if (captn==null){return false;}
-		
-		// ist es unsere unit?
-		if (!captn.equals(super.scriptUnit.getUnit())){
-			return false;
-		}
-		return true;
-	}
+
 	
 }
