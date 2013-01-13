@@ -213,7 +213,7 @@ public class TradeAreaConnector {
 	 * erstellt die neuen Vorratsanfragen für alle Transfers
 	 */
 	public void process_Transfers(){
-		outText.addOutLine("!!!debug: doing transfers for TAC " + this.Name, true);
+		// outText.addOutLine("!!!debug: doing transfers for TAC " + this.Name, true);
 		if (this.transfersTo1.size()>0){
 			process_Transfers_Dir(this.transfersTo1,this.getSU2());
 		}
