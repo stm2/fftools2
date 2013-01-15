@@ -223,6 +223,12 @@ public class MatPool2 implements MatPool{
 		// Offeset für Pferde und Wagen
 		this.preRequestOffsets(true);
 		// Sortieren der Requests
+		
+		/*
+		if (this.getRegion().getName()!=null && this.getRegion().getName().equalsIgnoreCase("Kusufybín")){
+			int iiii=2;
+		}
+		*/
 		Collections.sort(this.requests);
 	
 		// zurücksetzen der Offsets, werden nicht mehr benötigt, da requests nicht 
@@ -251,6 +257,14 @@ public class MatPool2 implements MatPool{
 		
 		// alle Requests durchlaufen, sortierung stellt Priorisierung sicher, 
 		for (MatPoolRequest actRequest : this.requests){
+			/*
+			if 	(actRequest.getReihenfolgeNummer()==1488){
+				int jjjj = 200;
+			}
+			if (actRequest.getOriginalGegenstand().equalsIgnoreCase("Silber")){
+				int jjjj2 = 200;
+			}
+			*/
 			this.processRequest(actRequest);
 			outText.addPoint();
 		}
@@ -757,7 +771,8 @@ public class MatPool2 implements MatPool{
 				if (itemModified!=null && itemModified.getAmount()>0){
 					MatPoolOffer mpr = new MatPoolOffer(sU,item);
 					if (itemModified.getAmount()<item.getAmount()){
-						mpr = new MatPoolOffer(sU,itemModified);
+						Item newModifiedItem = new Item(itemModified.getItemType(),itemModified.getAmount());
+						mpr = new MatPoolOffer(sU,newModifiedItem);
 					}
 					this.addMatPoolOffer(mpr);
 				}
