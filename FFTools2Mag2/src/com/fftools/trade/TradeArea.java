@@ -1331,4 +1331,13 @@ public class TradeArea {
 		return true;
 	}
 	
+	public boolean includesRegion(Region r){
+		for (TradeRegion TR:this.tradeRegions){
+			if (TR.getRegion().equals(r)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }

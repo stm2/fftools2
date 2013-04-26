@@ -3,6 +3,7 @@ package com.fftools.transport;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 
@@ -1408,5 +1409,191 @@ public class TransportManager implements OverlordInfo,OverlordRun{
 		
 	}
 	
+	/**
+	 * bereitet Request-Statistim vor und kommentiert diese zur Unit
+	 * @param su
+	 */
+	public void statistik_Requests(ScriptUnit su){
+		HashMap<String,TransportStatistikEintrag> liste = new HashMap<String,TransportStatistikEintrag>();
+		// alle Requests durchgehen
+		TradeArea TA = su.getOverlord().getTradeAreaHandler().getTAinRange(su.getUnit().getRegion());
+		if (TA==null){
+			su.addComment("no statistik available - no TA found.");
+			return;
+		}
+		su.addComment("checking Requests in TA " + TA.getName());
+		int cntI = 0;
+		long time1 = System.currentTimeMillis();
+		for (TransportRequest TR:this.transportRequests){
+			// Schon vorhanden
+			// nur die nicht *alle* und nicht mit prio 1
+			// *alle* werden gar nicht an den TM weiter gebeben
+			// und wir brauchen alle die, die auch im gleichen TA sind
+			boolean isGoodRequest=true;
+			if (TR.getPrio()<200){isGoodRequest=false;}
+			
+			if (!TA.includesRegion(TR.getRegion())){
+				isGoodRequest=false;
+			}
+			
+			if (TR.getForderung()==0){
+				isGoodRequest=false;
+			}
+			
+			if (isGoodRequest){
+				TransportStatistikEintrag TSE = null;
+				if (!liste.containsKey(TR.getOriginalGegenstand().toLowerCase())){
+					TSE = new TransportStatistikEintrag(TR.getOriginalGegenstand().toLowerCase());
+					liste.put(TR.getOriginalGegenstand().toLowerCase(),TSE);
+				} else {
+					TSE = liste.get(TR.getOriginalGegenstand().toLowerCase());
+				}
+				
+				TSE.add(TR.getBearbeitet(),TR.getForderung());
+				cntI+=1;
+			}
+		}
+		su.addComment("Found " + liste.keySet().size() + " different items. (checked " + cntI + " Requests)");
+		// Sortieren
+		ArrayList<TransportStatistikEintrag> sortList = new ArrayList<TransportStatistikEintrag>();
+		sortList.addAll(liste.values());
+		Collections.sort(sortList);
+		for (TransportStatistikEintrag TE:sortList){
+			String ss = TE.getGegenstand() + ": offen " + TE.getAnzahl_offen() + ", " + TE.getAnzahl_bearbeitet() + " bearbeitet. ";
+			int available = 0;
+			int off = 0;
+			// itemgroup
+			if (reportSettings.getItemTypes(TE.getGegenstand())!=null){
+				String ss2 = "(";
+				for (ItemType IT : reportSettings.getItemTypes(TE.getGegenstand())){
+					off = this.offerd_Items(IT, TA);
+					available+=off;
+					ss2 += IT.getName() + "[" + off + "]";
+				}
+				ss2 = "vorhanden: " + available + " (" + ss2 + ")";
+				ss += ss2;
+			}
+			
+			// direkt ein Item
+			ItemType IT2 = this.scriptMain.gd_ScriptMain.rules.getItemType(TE.getGegenstand(), false);
+			if (IT2!=null){
+				ss += " vorhanden: " + this.offerd_Items(IT2, TA) + "."; 
+			}
+			
+			su.addComment(ss);
+		}
+		long time2 = System.currentTimeMillis();
+		long tDiff = time2 - time1;
+		su.addComment("Request-Statistik benötigte " + tDiff + "ms.");
+	}
 	
+	/**
+	 * liefert Anzahl noch offerierter Items im TA
+	 * @param IT
+	 * @param TA
+	 * @return
+	 */
+	private int offerd_Items(ItemType IT, TradeArea TA){
+		int erg = 0;
+		
+		for (TransportOffer TO:this.transportOffers){
+			boolean isGoodOffer=true;
+			if (!TA.includesRegion(TO.getRegion())){
+				isGoodOffer=false;
+			}
+			if (isGoodOffer && TO.getAnzahl_nochOfferiert()<=0){
+				isGoodOffer=false;
+			}
+			if (isGoodOffer && !TO.getItem().getItemType().equals(IT)){
+				isGoodOffer=false;
+			}
+			if (isGoodOffer){
+				erg+=TO.getAnzahl_nochOfferiert();
+			}
+		}
+		
+		return erg;
+	}
+	
+	
+	/**
+	 * bereitet Request-Statistim vor und kommentiert diese zur Unit
+	 * @param su
+	 */
+	public void statistik_Transporter(ScriptUnit su){
+		
+		// alle Requests durchgehen
+		TradeArea TA = su.getOverlord().getTradeAreaHandler().getTAinRange(su.getUnit().getRegion());
+		if (TA==null){
+			su.addComment("no statistik available - no TA found.");
+			return;
+		}
+		su.addComment("checking Transporter in TA " + TA.getName());
+		long time1 = System.currentTimeMillis();
+		
+		// Gesamtanzahl (Personen, Einheiten, Pferde)
+		// wieviele Leerfahrten
+		// Auslastung
+		// geringste Prio als erstAuslöser... (? geht dass?)
+		int Gesamtanzahl_Einheiten = 0;
+		int Gesamtanzahl_Personen = 0;
+		int Gesamtanzahl_Pferde = 0;
+		int Gesamtanzahl_Wagen = 0;
+		int Anzahl_Leerfahrten = 0;
+		int Anzahl_Iddle = 0;
+		double MaxKapa_alle_Fahrten = 0;
+		double FreieKapa_alle_Fahrten = 0;
+		double MaxKapa_keine_Leerfahrten = 0;
+		double FreieKapa_keine_Leerfahrten = 0;
+		
+		ItemType PferdType = this.scriptMain.gd_ScriptMain.rules.getItemType("Pferd", false);
+		ItemType WagenType = this.scriptMain.gd_ScriptMain.rules.getItemType("Wagen", false);
+		
+		for (Transporter T:this.allTransporters.values()){
+			if (TA.includesRegion(T.getActRegion())){
+				Gesamtanzahl_Einheiten+=1;
+				Gesamtanzahl_Personen+=T.getScriptUnit().getUnit().getModifiedPersons();
+				Item i = T.getScriptUnit().getModifiedItem(PferdType);
+				if (i!=null){
+					Gesamtanzahl_Pferde+=i.getAmount();
+				}
+				i = T.getScriptUnit().getModifiedItem(WagenType);
+				if (i!=null){
+					Gesamtanzahl_Wagen+=i.getAmount();
+				}
+				if (T.getTransporterRequests()==null || T.getTransporterRequests().size()==0){
+					// noch komplett frei...leerfahrt
+					Anzahl_Leerfahrten+=1;
+				} else {
+					// Kapa keine Leerfahrten
+					MaxKapa_keine_Leerfahrten += T.getKapa();
+					FreieKapa_keine_Leerfahrten += T.getKapa_frei();
+				}
+				if (T.getGotoInfo()==null){
+					Anzahl_Iddle+=1;
+				} else {
+					// Kapa alle Fahrten
+					MaxKapa_alle_Fahrten += T.getKapa();
+					FreieKapa_alle_Fahrten += T.getKapa_frei();
+				}
+			}
+		}
+		
+		NumberFormat NF = NumberFormat.getInstance();
+		NF.setMaximumFractionDigits(1);
+		NF.setMinimumFractionDigits(0);
+		NF.setMinimumIntegerDigits(1);
+		NF.setMaximumIntegerDigits(3);
+		
+		su.addComment("Anzahl Transporter: " + Gesamtanzahl_Einheiten);
+		su.addComment("Anzahl Personen: " + Gesamtanzahl_Personen);
+		su.addComment("Pferde: " + Gesamtanzahl_Pferde + ", Wagen: " + Gesamtanzahl_Wagen);
+		su.addComment("Leerfahrten: " + Anzahl_Leerfahrten + ", unbeschäftigt: " + Anzahl_Iddle);
+		su.addComment("Auslastung bewegte Transporter: " + NF.format(((MaxKapa_alle_Fahrten - FreieKapa_alle_Fahrten)/MaxKapa_alle_Fahrten)*100) + "%");
+		su.addComment("Auslastung beladene Transporter: " + NF.format(((MaxKapa_keine_Leerfahrten - FreieKapa_keine_Leerfahrten)/MaxKapa_keine_Leerfahrten)*100) + "%");
+		
+		long time2 = System.currentTimeMillis();
+		long tDiff = time2 - time1;
+		su.addComment("Transporter-Statistik benötigte " + tDiff + "ms.");
+	}
 }

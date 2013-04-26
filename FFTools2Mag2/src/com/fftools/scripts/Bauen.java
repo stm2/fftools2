@@ -14,8 +14,12 @@ import magellan.library.rules.ItemType;
 import magellan.library.rules.SkillType;
 import magellan.library.utils.Direction;
 
+import com.fftools.pools.ausbildung.AusbildungsPool;
+import com.fftools.pools.ausbildung.Lernplan;
+import com.fftools.pools.ausbildung.relations.AusbildungsRelation;
 import com.fftools.pools.bau.Supporter;
 import com.fftools.pools.matpool.relations.MatPoolRequest;
+import com.fftools.trade.TradeArea;
 import com.fftools.utils.FFToolsGameData;
 import com.fftools.utils.FFToolsOptionParser;
 import com.fftools.utils.FFToolsRegions;
@@ -1279,8 +1283,38 @@ public void runScript(int scriptDurchlauf){
 		
 		
 		// this.addOrder("LERNEN " + this.lernTalent + " ;unbeschäftigt", true);
-		this.lerneTalent(this.lernTalent, true);
-		this.finalStatusInfo="ABM: LERNEN";
+		String Lernplanname = "";
+		TradeArea TA = this.getOverlord().getTradeAreaHandler().getTAinRange(this.region());
+		if (TA!=null){
+			Lernplanname = TA.getTradeAreaBauManager().getLernplanname();
+		}
+		
+		if (Lernplanname.length()>2) {
+			AusbildungsRelation AR = super.getOverlord().getLernplanHandler().getAusbildungsrelation(this.scriptUnit, Lernplanname);
+			if (AR!=null){
+				AR.informScriptUnit();
+				AusbildungsPool ausbildungsPool = this.getOverlord().getAusbildungsManager().getAusbildungsPool(super.scriptUnit);
+				ausbildungsPool.addAusbildungsRelation(AR);
+				this.finalStatusInfo="ABM: LERNEN (Lernplan)";
+				if (AR.getActLernplanLevel()!=Lernplan.level_unset){
+					// this.scriptUnit.ordersHaveChanged();
+					// this.scriptUnit.setUnitOrders_adjusted(true);
+				}
+			} else {
+				// keine AR -> Lernplan beendet ?!
+				this.addComment("Lernplan liefert keine Aufgabe mehr");
+				this.scriptUnit.doNotConfirmOrders();
+				// default ergänzen - keine Ahnung, was, eventuell kan
+				// die einheit ja nix..
+				this.lerneTalent(this.lernTalent, true);
+				this.finalStatusInfo="ABM: LERNEN (ohne Lernplan)";
+			}
+			
+		} else {
+			this.lerneTalent(this.lernTalent, true);
+			this.finalStatusInfo="ABM: LERNEN";
+		}
+		
 	}
 
 

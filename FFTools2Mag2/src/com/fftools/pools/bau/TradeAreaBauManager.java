@@ -11,6 +11,9 @@ import magellan.library.Region;
 import magellan.library.Unit;
 
 import com.fftools.ScriptUnit;
+import com.fftools.pools.ausbildung.AusbildungsPool;
+import com.fftools.pools.ausbildung.Lernplan;
+import com.fftools.pools.ausbildung.relations.AusbildungsRelation;
 import com.fftools.pools.matpool.relations.MatPoolRequest;
 import com.fftools.scripts.Bauauftrag;
 import com.fftools.scripts.Bauen;
@@ -56,7 +59,17 @@ public class TradeAreaBauManager {
 	// Eine Liste von Bauarbeitern, die eventuell unterstützt werden könnten
 	private ArrayList<Bauen> supportableBuilder = null;
 	
+	// Ein lernplan, der von unbeschäftigten Bauarbeitern genutzt wird
+	private String Lernplanname = "";
 	
+	public String getLernplanname() {
+		return Lernplanname;
+	}
+
+	public void setLernplanname(String lernplanname) {
+		Lernplanname = lernplanname;
+	}
+
 	public CoordinateID getCentralHomeDest() {
 		return centralHomeDest;
 	}
@@ -548,8 +561,33 @@ public class TradeAreaBauManager {
 				if (lernTalent.length()>0 && actBauen!=null){
 					// alles fein
 					actBauen.addComment("Keine Bautätigkeit. Einheit soll Lernen.");
-					actBauen.lerneTalent(lernTalent,true);
-					actBauen.setFinalStatusInfo("Lerne " + lernTalent);
+					if (this.Lernplanname.length()>2){
+						
+						AusbildungsRelation AR = actBauen.getOverlord().getLernplanHandler().getAusbildungsrelation(actBauen.scriptUnit, Lernplanname);
+						if (AR!=null){
+							AR.informScriptUnit();
+							AusbildungsPool ausbildungsPool = actBauen.getOverlord().getAusbildungsManager().getAusbildungsPool(actBauen.scriptUnit);
+							ausbildungsPool.addAusbildungsRelation(AR);
+							actBauen.setFinalStatusInfo("ABM: LERNEN (Lernplan)");
+							if (AR.getActLernplanLevel()!=Lernplan.level_unset){
+								// this.scriptUnit.ordersHaveChanged();
+								// this.scriptUnit.setUnitOrders_adjusted(true);
+							}
+						} else {
+							// keine AR -> Lernplan beendet ?!
+							actBauen.addComment("Lernplan liefert keine Aufgabe mehr");
+							actBauen.scriptUnit.doNotConfirmOrders();
+							// default ergänzen - keine Ahnung, was, eventuell kan
+							// die einheit ja nix..
+							actBauen.lerneTalent(lernTalent, true);
+							actBauen.setFinalStatusInfo("ABM: LERNEN (ohne Lernplan)");
+						}
+					} else {
+						actBauen.lerneTalent(lernTalent,true);
+						actBauen.setFinalStatusInfo("Lerne " + lernTalent);
+					}
+					
+					
 				} else {
 					// kann nicht lernen
 					actUnit.addComment("!!!Bauen: Unit soll Lernen, kann aber nicht!");

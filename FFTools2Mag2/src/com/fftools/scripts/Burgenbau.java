@@ -2,6 +2,8 @@ package com.fftools.scripts;
 
 import magellan.library.CoordinateID;
 
+import com.fftools.pools.bau.TradeAreaBauManager;
+import com.fftools.trade.TradeArea;
 import com.fftools.utils.FFToolsOptionParser;
 import com.fftools.utils.FFToolsRegions;
 
@@ -88,6 +90,19 @@ public void runScript(int scriptDurchlauf){
 			}
 		}
 		
+		// Lernplanname
+		String Lernplanname=OP.getOptionString("Lernplan");
+		if (Lernplanname.length()>2){
+			TradeArea TA = this.getOverlord().getTradeAreaHandler().getTAinRange(this.region());
+			if (TA!=null){
+				TradeAreaBauManager TABM =  TA.getTradeAreaBauManager();
+				TABM.setLernplanname(Lernplanname);
+				this.addComment("Lernplan " + Lernplanname + " gesetzt für automatische Bauarbeiter im TA " + TA.getName());
+			} else {
+				this.addComment("TA in Range not found ?! - could not set Lernplan");
+				this.doNotConfirmOrders();
+			}
+		}
 		
 		this.getBauManager().addBurgenbau(this);
 	}	
