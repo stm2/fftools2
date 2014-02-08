@@ -91,29 +91,6 @@ import com.fftools.scripts.Akademie;
 			        				AR.getScriptUnit().addOrder("BETRETEN BURG " + AR.getAkademieFromAM().getID() + " ; AkaPool-> " + AR.getAkademieFromAM().toString(), true);
 			        				AR.setOrderedNewAka(true);
 			        			}
-			        			// Für Lehrer auch die Schüler prüfen
-			        			/*
-			        			if (AR.isTeacher()){
-			        				for (AusbildungsRelation AR2:AR.getPooledRelation()){
-			        					needEnterOrder = false;
-					        			neueAka = AR2.getScriptUnit().getUnit().getModifiedBuilding();
-					        			if (neueAka==null){
-					        				needEnterOrder=true;
-					        			} else {
-					        				if (!neueAka.equals(AR2.getAkademieFromAM())){
-					        					needEnterOrder=true;
-					        				}
-					        			}
-					        			if (AR2.isOrderedNewAka()){
-					        				needEnterOrder=false;
-					        			}
-					        			if (needEnterOrder){
-					        				AR2.getScriptUnit().addOrder("BETRETEN BURG " + AR.getAkademieFromAM().getID() + " ; AkaPool-Schüler (von " + AR.getScriptUnit().getUnit().toString(true)+ ") -> " + neueAka.toString(), false);
-					        				AR2.setOrderedNewAka(true);
-					        			}
-			        				}
-			        			}
-			        			*/
 			        		}
 			        	}
 			        	outText.addPoint();
@@ -207,6 +184,7 @@ import com.fftools.scripts.Akademie;
 	    		// Schiffsesatzungen raus
 	    		if (sU.getUnit().getModifiedShip()!=null){
 	    			isInFilter=false;
+	    			sU.addComment("Akadademiemanager: Einheit auf Schiff, daher unberücksichtigt");
 	    		}
 	    		// Akademiebesitzer immer drinne ?! (Nur wenn <=25 Pers!
 	    		Building b = AR.getScriptUnit().getUnit().getModifiedBuilding();
@@ -236,7 +214,7 @@ import com.fftools.scripts.Akademie;
 			erg.add(new AkademieTalent(R.getSkillType("draig",true), 25));
 			erg.add(new AkademieTalent(R.getSkillType("illaun",true), 25));
 			erg.add(new AkademieTalent(R.getSkillType("tybied",true), 25));
-			erg.add(new AkademieTalent(R.getSkillType("gwyyrd",true), 25));
+			erg.add(new AkademieTalent(R.getSkillType("gwyrrd",true), 25));
 			erg.add(new AkademieTalent(R.getSkillType("cerddor",true), 25));
 			erg.add(new AkademieTalent(R.getSkillType("Taktik"), 25));
 			erg.add(new AkademieTalent(R.getSkillType("Wahrnehmung"), 25));

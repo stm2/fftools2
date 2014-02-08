@@ -445,7 +445,7 @@ public class Material extends MatPoolScript {
 		// 1 Halbling 18 TP, ein Mensch 20 TP...Zwerg 24 TP, Troll 30 TP
 		// 20 MM -> 400 TP, 50% wundsalbendurchsatz-> 50 Mann 1 Wundsalbe
 		// hier das entscheidende Setting
-		int personenProWundsalbe = 50;
+		int personenProWundsalbe = 10;
 		// wieviel Wundsalbe sollte diese Einheit also haben?
 		int wishWS = persons / personenProWundsalbe ;
 		if (wishWS>0){
