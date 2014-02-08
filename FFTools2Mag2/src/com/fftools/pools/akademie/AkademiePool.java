@@ -129,9 +129,6 @@ public class AkademiePool {
 			// stehen jetzt aber falsch rum
 			Collections.reverse(actRel);
 			// Liste abarbeiten
-			
-			
-			
 			for (AusbildungsRelation AR:actRel){
 				boolean passtNoch = false;
 				// passen wir hier noch rein?
@@ -160,10 +157,12 @@ public class AkademiePool {
 					
 					// info
 					this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": IN für " + AT.getSkillType().toString() + ": " + AR.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)" );
+					AR.getScriptUnit().addComment("(AkaPool definiert bei: " + this.verwalterScript.scriptUnit.toString() + ")(1)");
 					// wenn Lehrer, auch die Schüler mit rein
 					if (AR.isTeacher()){
 						for (AusbildungsRelation schueler : AR.getPooledRelation()){
 							schueler.setAkademieFromAM(this.akademieBuilding);
+							schueler.getScriptUnit().addComment("(AkaPool definiert bei: " + this.verwalterScript.scriptUnit.toString() + ")(4)");
 							verfPlätze -= schueler.getSchuelerPlaetze();
 							übergabePlätze -= schueler.getSchuelerPlaetze();
 							this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": mit Schüler für " + AT.getSkillType().toString() + ": " + schueler.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)");
@@ -178,6 +177,7 @@ public class AkademiePool {
 						for (AusbildungsRelation einLehrer : einSchueler.getPooledRelation()){
 							if (!AR.equals(einLehrer)){
 								einLehrer.setAkademieFromAM(this.akademieBuilding);
+								einLehrer.getScriptUnit().addComment("(AkaPool definiert bei: " + this.verwalterScript.scriptUnit.toString() + ")(3)");
 								verfPlätze -= einLehrer.getSchuelerPlaetze();
 								übergabePlätze -= einLehrer.getSchuelerPlaetze();
 								this.verwalterScript.addComment("AkaPool " + this.akademieBuilding.getID().toString() + ": weiterer Lehrer für " + AT.getSkillType().toString() + ": " + einLehrer.getScriptUnit().getUnit().toString(true) + " (" + verfPlätze + " verbleibend)");
@@ -229,12 +229,11 @@ public class AkademiePool {
 							AR.getScriptUnit().addOrder("verlassen ; Akapool",true);
 						}
 					}
+					AR.getScriptUnit().addComment("(AkaPool definiert bei: " + this.verwalterScript.scriptUnit.toString() + ")(2)");
 					break;
 				}
-			}
-			
+			}			
 		}
-		
 	}
 	
 

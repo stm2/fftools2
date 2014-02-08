@@ -30,11 +30,8 @@ public class Ontradeareaconnection extends TradeAreaScript{
 	private int[] runners = {Durchlauf_vorMP1,Durchlauf_vorMP1_2};
 	
 	private TradeAreaConnector myTAC = null;
-	public TradeAreaConnector getMyTAC() {
-		return myTAC;
-	}
 
-
+	private String LernplanName = "";
 
 	private int kapa = -1;
 	private double anteil = -1;
@@ -122,6 +119,9 @@ public class Ontradeareaconnection extends TradeAreaScript{
 		// beim TAC vermerken
 		this.myTAC.addMover(this);
 		
+		// Lernplan zuordnen
+		this.LernplanName = OP.getOptionString("Lernplan");
+		
 		
 	}
 	
@@ -195,6 +195,19 @@ public class Ontradeareaconnection extends TradeAreaScript{
 	 */
 	public boolean allowMultipleScripts(){
 		return false;
+	}
+	
+	public String getLernplanName() {
+		return this.LernplanName;
+	}
+
+
+	public void setLernplanName(String lernplanName) {
+		this.LernplanName = lernplanName;
+	}
+	
+	public TradeAreaConnector getMyTAC() {
+		return myTAC;
 	}
 
 }
