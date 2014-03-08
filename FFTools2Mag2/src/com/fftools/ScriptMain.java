@@ -122,6 +122,9 @@ public class ScriptMain {
 	 */
 	
 	public void runScripts(){
+		
+		System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+		
 		long startT = System.currentTimeMillis();
 		if (scriptUnits==null){
 			outText.addOutLine("runScripts nicht moeglich: keine scriptUnits");
