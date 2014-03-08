@@ -341,7 +341,7 @@ public void runScript(int scriptDurchlauf){
 			if (s.length()<2){
 				s = OP.getOptionString("Type");
 			}
-			this.buildingType = this.gd_Script.rules.getBuildingType(s,false);
+			this.buildingType = this.gd_Script.getRules().getBuildingType(s,false);
 			if (this.buildingType==null){
 				// Abbruch
 				this.addComment("Bauen: unbekanntes Geb‰ude: " + s);
@@ -399,7 +399,8 @@ public void runScript(int scriptDurchlauf){
 				s = OP.getOptionString("Ziel");
 			}
 			try {
-				this.dir = Direction.toDirection(s);
+				// this.dir = Direction.toDirection(s);
+				this.dir = FFToolsRegions.getDirectionFromString(s);
 			} catch (IllegalArgumentException e){
 				this.dir=null;
 				this.addComment("Bauen: Strassenrichtung nicht erkannt: " + s);
@@ -407,7 +408,7 @@ public void runScript(int scriptDurchlauf){
 				this.doNotConfirmOrders();
 				return;
 			}
-			if (this.dir.getDir()==Direction.DIR_INVALID){
+			if (this.dir.getDirCode()==Direction.DIR_INVALID){
 				this.dir=null;
 				this.addComment("Bauen: Strassenrichtung nicht erkannt: " + s);
 				statusInfo+="Fehler: Strassenrichtung nicht erkannt: " + s;
@@ -664,7 +665,7 @@ public void runScript(int scriptDurchlauf){
 		int actProz = 0;
 		for (Iterator<Border> iter=this.scriptUnit.getUnit().getRegion().borders().iterator();iter.hasNext();){
 			Border actBorder = (Border)iter.next();
-			if (actBorder.getType().equalsIgnoreCase("Straﬂe") && actBorder.getDirection()==this.dir.getDir()){
+			if (actBorder.getType().equalsIgnoreCase("Straﬂe") && actBorder.getDirection()==this.dir.getDirCode()){
 				actProz = actBorder.getBuildRatio();
 			}
 		}

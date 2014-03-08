@@ -17,6 +17,7 @@ import magellan.library.Region;
 import magellan.library.Rules;
 import magellan.library.Skill;
 import magellan.library.Unit;
+import magellan.library.gamebinding.EresseaMapMetric;
 import magellan.library.rules.CastleType;
 import magellan.library.rules.ItemType;
 import magellan.library.rules.RegionType;
@@ -118,8 +119,8 @@ public class FFToolsRegions {
 		boolean nextHoldSet = false;
 		while (!reached){
 			String actDir = dirs[step];
-			Direction actDirInt = Direction.toDirection(actDir);
-			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
+			Direction actDirInt = FFToolsRegions.getDirectionFromString(actDir);
+			CoordinateID moveCoord = CoordinateID.create(actDirInt.toCoordinate());
 			actCoord = actCoord.translate(moveCoord);
 			
 			int notwBewPunkte = 3;
@@ -153,6 +154,35 @@ public class FFToolsRegions {
 		}
 		
 		return anzRunden;
+	}
+	
+	/**
+	 * ersetzt alte Funktion in magellan.Direction
+	 * @param s
+	 * @return
+	 */
+	public static Direction getDirectionFromString(String s){
+		Direction erg = Direction.INVALID;
+		
+		if (s.equalsIgnoreCase("NW")){
+			erg = EresseaMapMetric.NW;
+		}
+		if (s.equalsIgnoreCase("NO") || s.equalsIgnoreCase("NE")){
+			erg = EresseaMapMetric.NE;
+		}
+		if (s.equalsIgnoreCase("O") || s.equalsIgnoreCase("E")){
+			erg = EresseaMapMetric.E;
+		}
+		if (s.equalsIgnoreCase("SO") || s.equalsIgnoreCase("SE")){
+			erg = EresseaMapMetric.SE;
+		}
+		if (s.equalsIgnoreCase("SW")){
+			erg = EresseaMapMetric.SW;
+		}
+		if (s.equalsIgnoreCase("W")){
+			erg = EresseaMapMetric.W;
+		}
+		return erg;
 	}
 	
 	
@@ -209,8 +239,8 @@ public class FFToolsRegions {
 		boolean nextHoldSet = false;
 		while (!reached){
 			String actDir = dirs[step];
-			Direction actDirInt = Direction.toDirection(actDir);
-			CoordinateID moveCoord = Direction.toCoordinate(actDirInt);
+			Direction actDirInt = FFToolsRegions.getDirectionFromString(actDir);
+			CoordinateID moveCoord = CoordinateID.create(actDirInt.toCoordinate());
 			actCoord = actCoord.translate(moveCoord);
 
 			int notwBewPunkte = 3;
@@ -689,7 +719,7 @@ public class FFToolsRegions {
 		Region fromR = data.getRegion(from);
 		if (fromR==null){return -1;}
 		
-		List<Region> pathL = Regions.planShipRoute(data,from,Direction.DIR_INVALID,to,speed);
+		List<Region> pathL = Regions.planShipRoute(data,from,Direction.INVALID,to,speed);
 		if (pathL==null || pathL.size()<=0){
 			return -1;
 		}

@@ -28,7 +28,7 @@ public class MatPoolOfferComparatorForSort implements Comparator<MatPoolOffer>{
 	 * @return
 	 */
 	public int compare(MatPoolOffer offer1,MatPoolOffer offer2){
-		
+
 		// eigenbedarf decken...;-))
 		if (offer1.getScriptUnit().equals(this.requestingScriptUnit)){
 			return -1;
