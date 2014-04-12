@@ -290,7 +290,7 @@ public class ReportSettings {
 	 * parst den string und setzt entsprechend optionen
 	 * @param optionS
 	 */
-	public void parseOption(String optionS,Unit u) {
+	public void parseOption(String optionS,Unit u,boolean toLowerCase) {
 		/** mögliche angabe des Geltungsbereiches der Option
 		 * region
 		 * insel
@@ -304,15 +304,17 @@ public class ReportSettings {
 		if (couple.length>0){
 			for (int i = 0;i < couple.length ; i++){
 				String option = couple[i];
-				if (option.indexOf("=")>0){
-					// ne Option mit Gleichheitszeichen
-					this.parseOption2(geltungsbereich,option,r);
-				} else {
-					// keine option, eventuell ein geltungsbereich
-					if (option.equalsIgnoreCase("region")||option.equalsIgnoreCase("insel")){
-						geltungsbereich = option;
+				if (option.length()>0){
+					if (option.indexOf("=")>0){
+						// ne Option mit Gleichheitszeichen
+						this.parseOption2(geltungsbereich,option,r,toLowerCase);
 					} else {
-						outText.addOutLine("Reportsettings: unbekannter Geltungsbereich " + option +  " bei" + u.toString(true));
+						// keine option, eventuell ein geltungsbereich
+						if (option.equalsIgnoreCase("region")||option.equalsIgnoreCase("insel")){
+							geltungsbereich = option;
+						} else {
+							outText.addOutLine("Reportsettings: unbekannter Geltungsbereich " + option +  " bei" + u.toString(true) + " (" + optionS +";part " + option + ")");
+						}
 					}
 				}
 			}
@@ -328,14 +330,17 @@ public class ReportSettings {
 	 * und fügt diesen der liste hinzu bzw setzt neu
 	 * @param s
 	 */
-	private void parseOption2(String geltungsbereich, String s,Region r){
+	private void parseOption2(String geltungsbereich, String s,Region r, boolean tolowercase){
 		String[] setting = s.split("=");
 		if (setting.length!=2){
 			outText.addOutLine("!! Reportsettings: not korrect option:" + s);
 			return;
 		}
 		String key = setting[0].toLowerCase();
-		String value = setting[1].toLowerCase();
+		String value = setting[1];
+		if (tolowercase){
+			value = setting[1].toLowerCase();
+		}
 		this.setNotEmpty();
 		// in diese Options soll geschrieben werden
 		// entweder vom report oder von der region

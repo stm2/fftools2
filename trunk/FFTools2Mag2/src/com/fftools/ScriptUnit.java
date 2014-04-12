@@ -454,6 +454,9 @@ public class ScriptUnit {
 		    	 if (scriptName.equalsIgnoreCase("setscripteroption")){
 		    		 noScript = true;
 		    	 }
+		    	 if (scriptName.equalsIgnoreCase("setscripteroption2")){
+		    		 noScript = true;
+		    	 }
 		    	 
 		    	 if (!noScript){
 			    	 // Spannung...classe finden
@@ -621,7 +624,12 @@ public class ScriptUnit {
 			}
 			if (s.toLowerCase().startsWith("// script setscripteroption")) {
 				String s2 = s.substring(28);
-				reportSettings.parseOption(s2,this.getUnit());
+				reportSettings.parseOption(s2,this.getUnit(),true);
+			}
+			String findKey = "// script setscripteroption2 ";
+			if (s.toLowerCase().startsWith(findKey)) {
+				String s2 = s.substring(findKey.length());
+				reportSettings.parseOption(s2,this.getUnit(),false);
 			}
 		}
 	}
