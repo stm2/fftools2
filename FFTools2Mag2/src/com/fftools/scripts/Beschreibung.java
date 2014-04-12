@@ -88,6 +88,52 @@ public class Beschreibung extends Script{
 			neueBeschreibung = this.addItems(itemList,neueBeschreibung);
 		}
 		
+		// text ?
+		String s = OP.getOptionString("text");
+		if (s.length()>1){
+			// richtigen Text holen?
+			String optionText = reportSettings.getOptionString(s);
+			if (optionText.length()>1){
+				this.addComment("Beschreibung: Text übernommen aus Optionen: " + s);
+				s = optionText;
+			}
+			
+			
+			// Replacer?
+			this.addComment("Beschreibung - Text! erkannt");
+			String s_work = s.toLowerCase();
+			// authcode
+			if (s_work.indexOf("$authcode$")>0){
+				String code = reportSettings.getOptionString("authcode");
+				if (code.length()<=0){
+					code="error";
+				}
+				s = s.replace("$authcode$", code);
+			}
+			
+			// Runde
+			if (s_work.indexOf("$runde$")>0){
+				int code = this.gd_Script.getDate().getDate();
+				s = s.replace("$runde$", code + "");
+			}
+			
+			// Leerzeichen
+			s = s.replace("_", " ");
+			
+			// festsetzen
+			if (neueBeschreibung.length()>0){
+				neueBeschreibung = neueBeschreibung.concat(";");
+			}
+			
+			neueBeschreibung = neueBeschreibung.concat(s);
+			
+		} else {
+			this.addComment("!!! Beschreibung - kein Text?");
+			this.doNotConfirmOrders();
+		}
+		
+		
+		
 		// setzen
 		if (neueBeschreibung.length()>1){
 			if (neueBeschreibung.length()>400){
