@@ -146,6 +146,8 @@ public class Rekrutieren extends MatPoolScript{
 		// ?? sonderfall ??
 		// this.region().refreshUnitRelations(true);
 		this.getUnit().reparseOrders();
+		this.scriptUnit.incRecruitedPersons(anzahl);
+		
 		
 		// debug
 		// int test = this.scriptUnit.getUnit().getModifiedPersons();

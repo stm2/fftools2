@@ -51,6 +51,9 @@ public class ScriptUnit {
 	private boolean builtfoundScriptList = false;
 	private ArrayList<Script> foundScriptList = null;
 	
+	// workaround, da nach rekrutiere nicht meht modified persons neu berechnet werden
+	private int recruitedPersons = 0;
+	
 	// wird von addComment und addOrder auf true gesetzt
 	// und dann wird das orderchangeevent gefeuert beim letzten durchlauf
 	private boolean orders_changed = false;
@@ -1789,6 +1792,17 @@ public class ScriptUnit {
 	public void setIncludeSailorsWeight(boolean includeSailorsWeight) {
 		this.includeSailorsWeight = includeSailorsWeight;
 	}
+
+	public int getRecruitedPersons() {
+		return recruitedPersons;
+	}
+
+	public void setRecruitedPersons(int recruitedPersons) {
+		this.recruitedPersons = recruitedPersons;
+	}
 	
+	public void incRecruitedPersons(int recruitedPersons) {
+		this.recruitedPersons += recruitedPersons;
+	}
 	
 }

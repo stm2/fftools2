@@ -93,10 +93,19 @@ public class Lernfix extends MatPoolScript{
 			}
 			
 			// vorerst nur das angegebene Talent zum Lehren und Lernen setzen.
-			if (this.erzeugeSingleSkillList(talentName).size()>0){
+			HashMap<SkillType,Skill> sL = this.erzeugeSingleSkillList(talentName);
+			if (sL.size()>0){
 				// nur, wenn SkillIste durch TalentName gefüllt....
-				AusbildungsRelation AR = new AusbildungsRelation(this.scriptUnit, this.erzeugeSingleSkillList(talentName), this.erzeugeSingleSkillList(talentName));
+				AusbildungsRelation AR = new AusbildungsRelation(this.scriptUnit,sL,sL);
 				
+				// Einschub: alles Lehren....
+				String setLehrer_DE = OP.getOptionString("Lehrer");
+				String setLehrer_EN = OP.getOptionString("Teacher");
+				if (setLehrer_DE.equalsIgnoreCase("ALLES") || setLehrer_EN.equalsIgnoreCase("ALL")){
+					this.addComment("Lernfix: Universallehrer erkannt.");
+					AR = new AusbildungsRelation(this.scriptUnit,sL, this.erzeugeSkillList(this.scriptUnit.getUnit().getSkillMap()));
+				}
+
 				// Einschub Gratistalent
 				if (OP.getOptionString("Gratistalent").length()>2){
 					this.addGratisTalent(AR,OP.getOptionString("Gratistalent"));

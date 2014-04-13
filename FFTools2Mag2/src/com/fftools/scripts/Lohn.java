@@ -80,6 +80,9 @@ public class Lohn extends MatPoolScript{
 		
 		// anzahl der in Frage kommenden Personen bestimmen
 		int personenAnzahl = super.scriptUnit.getUnit().getModifiedPersons();
+		// wurde was dazurekrutiert?
+		personenAnzahl += super.scriptUnit.getRecruitedPersons();
+		
 		// Menge benoetigten Silbers...Trivial
 		// int silber = personenAnzahl * 10 * this.AnzRunden;
 		// Und dazu...
@@ -129,7 +132,7 @@ public class Lohn extends MatPoolScript{
 		if (_mpr.getOriginalGefordert()==_mpr.getBearbeitet()) {
 			// alles fein, wie bestellt, so bekommen
 			// super.addComment(_mpr.anzahl_bearbeitet + " Silber Wochenlohn mit Prio " + this.Prioritaet_Lohn + " von MatPool bestaetigt.", true);
-			super.addComment(_mpr.getBearbeitet() + " Lohn ok", true);
+			super.addComment(_mpr.getBearbeitet() + " Lohn ok (with prio " + _mpr.getPrio() +")", true);
 		} else {
 			// gar nix fein 
 			// sonstiges GIBs am MatPool vorbei (noch) nicht beruecksichtigt
