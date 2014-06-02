@@ -105,7 +105,7 @@ public class Beschreibung extends Script{
 			// authcode
 			if (s_work.indexOf("$authcode$")>0){
 				String code = reportSettings.getOptionString("authcode");
-				if (code.length()<=0){
+				if (code == null || code.length()<=0){
 					code="error";
 				}
 				s = s.replace("$authcode$", code);
@@ -113,7 +113,7 @@ public class Beschreibung extends Script{
 			
 			// Runde
 			if (s_work.indexOf("$runde$")>0){
-				int code = this.gd_Script.getDate().getDate();
+				int code = this.gd_Script.getDate().getDate() + 1;
 				s = s.replace("$runde$", code + "");
 			}
 			

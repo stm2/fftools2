@@ -79,6 +79,12 @@ public class AlchemistTrank {
 	 */
 	private ItemType trankItemType = null;
 	
+	/**
+	 * Maximale Produktion
+	 * Sinnvoll bei Bauernblut
+	 */
+	private int absoluteMaxProduction  = 0;
+	
 	
 	/**
 	 * 
@@ -149,6 +155,9 @@ public class AlchemistTrank {
 		// Vorrat Max
 		this.vorratMax = OP.getOptionInt("vorratMax", Integer.MAX_VALUE);
 		
+		// Abolute Max Production
+		this.absoluteMaxProduction = OP.getOptionInt("maxProd", 0);
+		
 	}
 
 
@@ -205,6 +214,11 @@ public class AlchemistTrank {
 	 */
 	public ItemType getTrankItemType() {
 		return trankItemType;
+	}
+
+
+	public int getAbsoluteMaxProduction() {
+		return absoluteMaxProduction;
 	}
 
 }

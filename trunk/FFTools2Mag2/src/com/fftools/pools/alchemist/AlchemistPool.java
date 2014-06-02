@@ -201,6 +201,9 @@ public class AlchemistPool {
 				if (this.trankListeAusreichendDepot.contains(actTrank)){
 					s+=", Depotvorrat OK (max:" + actTrank.getVorratMax() + ")";
 				}
+				if (actTrank.getAbsoluteMaxProduction()>0){
+					s+=", maxProd=" + actTrank.getAbsoluteMaxProduction();
+				}
 				alchi.addComment(s, true);
 			}
 		}
@@ -263,6 +266,11 @@ public class AlchemistPool {
 		
 		// wieviele können nach der Kräuterlage hergestellt werden?
 		int maxDepot = this.maxTrankNachKräutern(trank.getPotion());
+		
+		// eventuell gibt es aber ein gegenteiliges setting?
+		if (trank.getAbsoluteMaxProduction()>0){
+			maxDepot = Math.min(maxDepot, trank.getAbsoluteMaxProduction());
+		}
 		
 		// checked, ob eventuell genug vom Trank vorhanden
 		if (!this.isUnderVorratMax(trank)){
