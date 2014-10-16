@@ -9,10 +9,12 @@ import magellan.library.Building;
 import magellan.library.CoordinateID;
 import magellan.library.Item;
 import magellan.library.Skill;
+import magellan.library.gamebinding.OrderChanger;
 import magellan.library.rules.BuildingType;
 import magellan.library.rules.ItemType;
 import magellan.library.rules.SkillType;
 import magellan.library.utils.Direction;
+import magellan.library.utils.Locales;
 
 import com.fftools.pools.ausbildung.AusbildungsPool;
 import com.fftools.pools.ausbildung.Lernplan;
@@ -84,6 +86,7 @@ public class Bauen extends MatPoolScript implements Cloneable{
 	 * bei Strasse, Richtung
 	 */
 	private Direction dir = null;
+	private String dirLocal = "";
 	
 	/**
 	 * Ort der MPRs, Items sind die rawMaterials für den Burgentyp
@@ -401,6 +404,9 @@ public void runScript(int scriptDurchlauf){
 			try {
 				// this.dir = Direction.toDirection(s);
 				this.dir = FFToolsRegions.getDirectionFromString(s);
+				// Richtung in Deutsch...
+				OrderChanger changer = super.gd_Script.getGameSpecificStuff().getOrderChanger();
+				this.dirLocal = changer.getOrder(Locales.getOrderLocale(), this.dir.getId());
 			} catch (IllegalArgumentException e){
 				this.dir=null;
 				this.addComment("Bauen: Strassenrichtung nicht erkannt: " + s);
@@ -677,10 +683,10 @@ public void runScript(int scriptDurchlauf){
 		
 		if (this.actSize<this.targetSize){
 			// Strasse noch zu machen
-			String s = "Bauen: noch " + (this.targetSize - this.actSize) + " Steine für Strasse nach " + this.dir.toString() + " einzubauen.";
+			String s = "Bauen: noch " + (this.targetSize - this.actSize) + " Steine für Strasse nach " + this.dirLocal + " einzubauen.";
 			this.addComment(s);
 			statusInfo+=s;
-			this.steinRequest = new MatPoolRequest(this,(this.targetSize - this.actSize),"Stein",this.prioSteine,"Strassenbau " + this.dir.toString());
+			this.steinRequest = new MatPoolRequest(this,(this.targetSize - this.actSize),"Stein",this.prioSteine,"Strassenbau " + this.dirLocal);
 			if (this.steinSpec.length()>0){
 				this.steinRequest.addSpec(this.steinSpec);
 			}
@@ -692,7 +698,7 @@ public void runScript(int scriptDurchlauf){
 			}
 		} else {
 			// Strasse fertig
-			String s = "Bauen: Strasse nach " + this.dir.toString() + " fertig.";
+			String s = "Bauen: Strasse nach " + this.dirLocal + " fertig.";
 			this.addComment(s);
 			statusInfo+=s;
 			this.fertig = true;
@@ -790,7 +796,7 @@ public void runScript(int scriptDurchlauf){
 		this.addComment("Bauen: Ressourcen für " + anzRes + " Stufen bei " + this.buildingType.getName() + " verfügbar.");
 		
 		// Step 2 was könnten wir maximal nach Talentstand der Einheit bauen?
-		SkillType bauType = this.gd_Script.rules.getSkillType("Burgenbau",false);
+		SkillType bauType = this.gd_Script.getRules().getSkillType("Burgenbau",false);
 		int anzTalPoints = 0;
 		if (bauType!=null){
 			Skill bauSkill = this.scriptUnit.getUnit().getModifiedSkill(bauType);
@@ -817,7 +823,7 @@ public void runScript(int scriptDurchlauf){
 		this.addComment("Bauen: Einheit ist fähig für " + anzTal + " Stufen bei " + this.buildingType.getName());
 		
 		// Jetzt erst RdF!
-		ItemType rdfType=this.gd_Script.rules.getItemType("Ring der flinken Finger",false);
+		ItemType rdfType=this.gd_Script.getRules().getItemType("Ring der flinken Finger",false);
 		if (rdfType!=null){
 			Item rdfItem = this.scriptUnit.getModifiedItem(rdfType);
 			if (rdfItem!=null && rdfItem.getAmount()>0){
@@ -961,7 +967,7 @@ public void runScript(int scriptDurchlauf){
 		
 		
 		// Step 2 was könnten wir maximal nach Talentstand der Einheit bauen?
-		SkillType bauType = this.gd_Script.rules.getSkillType("Strassenbau",false);
+		SkillType bauType = this.gd_Script.getRules().getSkillType("Strassenbau",false);
 		int anzTalPoints = 0;
 		if (bauType!=null){
 			Skill bauSkill = this.scriptUnit.getUnit().getModifiedSkill(bauType);
@@ -980,7 +986,7 @@ public void runScript(int scriptDurchlauf){
 		this.addComment("Bauen: Einheit ist fähig für " + anzTal + " Stufen bei der Strasse");
 		
 		// Jetzt erst RdF!
-		ItemType rdfType=this.gd_Script.rules.getItemType("Ring der flinken Finger",false);
+		ItemType rdfType=this.gd_Script.getRules().getItemType("Ring der flinken Finger",false);
 		if (rdfType!=null){
 			Item rdfItem = this.scriptUnit.getModifiedItem(rdfType);
 			if (rdfItem!=null && rdfItem.getAmount()>0){
@@ -1023,13 +1029,14 @@ public void runScript(int scriptDurchlauf){
 			okAusl=true;
 		}
 		
+		
 		// Entscheidung
 		if (okAusl || complete){
-			this.setBauBefehl("MACHEN STRASSE " + this.dir.toString(),"nach MP strasse");
+			this.setBauBefehl("MACHEN STRASSE " + this.dirLocal,"nach MP strasse");
 			this.setFinalStatusInfo("baut Strasse");
 		} else {
 			// nicht bauen
-			this.addComment("Bauen: Strasse (" + this.dir.toString() + ") wird diese Runde nicht weitergebaut.");
+			this.addComment("Bauen: Strasse (" + this.dirLocal + ") wird diese Runde nicht weitergebaut.");
 			this.setBauBefehl("","nach MP Strasse");
 			this.setFinalStatusInfo("wartet auf Strassenbau");
 		}	
@@ -1184,7 +1191,7 @@ public void runScript(int scriptDurchlauf){
 	
 	public String getUnitBauInfo(){
 		String erg =this.unitDesc();
-		SkillType sT = this.gd_Script.rules.getSkillType("Burgenbau",false);
+		SkillType sT = this.gd_Script.getRules().getSkillType("Burgenbau",false);
 		Skill s = this.scriptUnit.getUnit().getModifiedSkill(sT);
 		if (s==null){
 			erg += ",kein Burgenbau";
@@ -1192,7 +1199,7 @@ public void runScript(int scriptDurchlauf){
 			int tp = this.scriptUnit.getUnit().getModifiedPersons() * s.getLevel();
 			erg += ", " + tp + " Burgenbau (" + this.scriptUnit.getUnit().getModifiedPersons() + "x" + s.getLevel()+")";
 		}
-		sT = this.gd_Script.rules.getSkillType("Straßenbau",false);
+		sT = this.gd_Script.getRules().getSkillType("Straßenbau",false);
 		s = this.scriptUnit.getUnit().getModifiedSkill(sT);
 		if (s==null){
 			erg += ",kein Strassenbau";
@@ -1486,7 +1493,7 @@ public void runScript(int scriptDurchlauf){
 	
 	public int calcAnzTalBurg(int castleSize){
 		// Step 2 was könnten wir maximal nach Talentstand der Einheit bauen?
-		SkillType bauType = this.gd_Script.rules.getSkillType("Burgenbau",false);
+		SkillType bauType = this.gd_Script.getRules().getSkillType("Burgenbau",false);
 		int anzTalPoints = 0;
 		if (bauType!=null){
 			Skill bauSkill = this.scriptUnit.getUnit().getModifiedSkill(bauType);
@@ -1511,7 +1518,7 @@ public void runScript(int scriptDurchlauf){
 		this.addComment("Bauen: Einheit ist fähig für " + anzTal + " Stufen bei der Burg");
 		
 		// Jetzt erst RdF!
-		ItemType rdfType=this.gd_Script.rules.getItemType("Ring der flinken Finger",false);
+		ItemType rdfType=this.gd_Script.getRules().getItemType("Ring der flinken Finger",false);
 		if (rdfType!=null){
 			Item rdfItem = this.scriptUnit.getModifiedItem(rdfType);
 			if (rdfItem!=null && rdfItem.getAmount()>0){
