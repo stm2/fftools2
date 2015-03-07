@@ -10,6 +10,7 @@ import magellan.library.Faction;
 import magellan.library.GameData;
 import magellan.library.TempUnit;
 import magellan.library.Unit;
+import magellan.library.gamebinding.EresseaSpecificStuff;
 import magellan.library.io.file.FileType;
 import magellan.library.io.file.FileTypeFactory;
 import magellan.library.utils.Encoding;
@@ -91,7 +92,7 @@ public class myFaction {
 		// die richtige faction finden..eigene Suche zur
 		// Vermeidung der EntityID...
 		Faction actF = null;
-		for (Iterator<Faction> iter = this.data.factions().values().iterator();iter.hasNext();){
+		for (Iterator<Faction> iter = this.data.getFactions().iterator();iter.hasNext();){
     		Faction F = (Faction)iter.next();
     		// outText.addOutLine("Test Faction ID:" + F.getID().toString() + " : " + F.getName());
     		if (F.getID().toString().equals(this.name)) {
@@ -176,7 +177,11 @@ public class myFaction {
 		// Faction faction = (Faction) cmbFaction.getSelectedItem();
 		
 		try {
-			OrderWriter cw = new OrderWriter(data, faction);
+			// OrderWriter cw = new OrderWriter(data, faction);
+			OrderWriter cw;
+			cw = (OrderWriter) new EresseaSpecificStuff().getOrderWriter();
+			cw.setFaction(faction);
+			cw.setGameData(data);
 			cw.setAddECheckComments(true);
 			cw.setRemoveComments(true, false);
 			cw.setConfirmedOnly(true);
@@ -193,7 +198,7 @@ public class myFaction {
 			}
 			*/
 			int allUnits = 0;
-			for(Iterator<Unit> iter = data.units().values().iterator(); iter.hasNext();) {
+			for(Iterator<Unit> iter = data.getUnits().iterator(); iter.hasNext();) {
 				Unit u = (Unit) iter.next();
 
 				if(!(u instanceof TempUnit) && u.getFaction().equals(faction)) {

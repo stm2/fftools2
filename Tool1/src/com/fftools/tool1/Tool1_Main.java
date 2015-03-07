@@ -31,6 +31,9 @@ import com.fftools.utils.FileCopy;
 
 /**
  * @author Fiete
+ * Bearbeitet Züge....
+ * arbeitet nicht, wenn ein temp.cr gefunden wird
+ * sucht nur nach *.xt1.cr
  *
  */
 public class Tool1_Main {
@@ -88,7 +91,7 @@ public class Tool1_Main {
 		checkFile = new File("temp.cr");
 		if (checkFile.exists()){
 			outText.addOutLine("temp.cr found. Aborting.");
-			return;
+			System.exit(0);
 		}	
     	
         try {
@@ -130,9 +133,6 @@ public class Tool1_Main {
 		    			outText.addOutLine("work on file: " + actF);
 		    			workFile(actF);
 		    			break;
-		    		} else if (!actF.getName().endsWith(".cr") && actF.isFile()){
-		    			// kein skipping mehr im log
-		    			// outText.addOutLine("skipping: " + actF);
 		    		}
 		 		}
     		} else {
@@ -211,17 +211,17 @@ public class Tool1_Main {
     		String s2 = Encoding.ISO.toString();
     		
     		// log.addLog("with lokale: " + s2);
-    		CRWriter crw = new CRWriter(null,filetype,s2);
+    		CRWriter crw = new CRWriter(myGD,null,filetype,s2);
     		// alle anderen Values des CRw auf default
     		crw.setRegions(r.getSelectedRegions().values());
     		crw.setServerConformance(false);
     		// temp.cr schreiben
     		myGD.setEncoding(Encoding.ISO.toString());
-    		crw.writeSynchronously(myGD);
+    		crw.writeSynchronously();
     		// Thread t = crw.writeAsynchronously(myGD);
     		// while (t.isAlive()){}
     		crw.close();
-    		outText.addOutLine("wrote temp.cr");
+    		outText.addOutLine("Tool1: wrote temp.cr");
     		// log.addLog("wrote temp.cr");
     	} catch (IOException e) {
     		outText.addOutLine("IOException writing the temp.cr: " + f.getAbsolutePath());
@@ -233,6 +233,7 @@ public class Tool1_Main {
     	String oldName = f.getAbsolutePath();
     	String newName = oldName + "_proc" + FileCopy.getDateS();     	
     	f.renameTo(new File(newName));
+    	outText.addOutLine("Tool1: renamed file to " + newName);
     	
     	// Aus dem temp.cr die Befehlsdateien erstellen...dazu diesen
     	// wieder als myGD einlesen...
@@ -253,18 +254,16 @@ public class Tool1_Main {
     	long unitCounter = 0;
     	boolean checkOK = true;
     	
-    	for (Iterator<UnitID> iter = myGD.units().keySet().iterator();iter.hasNext();){
+    	for (Unit myGDUnit:gd.getUnits()){
     		// im Keyset müssten unit IDs sein...
-    		UnitID myGDUnitID = (UnitID)iter.next();
-    		Unit myGDUnit = myGD.getUnit(myGDUnitID);
-    		
+    		UnitID myGDUnitID = myGDUnit.getID();
     		// nur die weiter checken, die uns gehören
     		String actFactionName = myGDUnit.getFaction().getID().toString();
 	    	if (s.isKnownFaction(actFactionName)) {
 	    		
 	    		Unit gdUnit = gd.getUnit(myGDUnitID);
 	    		// Tempunit sausschliessen und Spione
-	    		if (!myGD.tempUnits().containsKey(myGDUnitID) && myGDUnit.getCombatStatus()!=-1) {
+	    		if (myGD.getTempUnit(myGDUnitID)==null && myGDUnit.getCombatStatus()!=-1) {
 	    			// ist keine TempUnit!
 	    			unitCounter++;
 	    			if (gdUnit == null){
@@ -304,6 +303,7 @@ public class Tool1_Main {
     	// aus den Tags Orders machen in myGD
     	FFToolsTags.AllTags2Orders(myGD);
     	log.addLog("All Tags 2 Orders finished.");
+    	outText.addOutLine("All Tags 2 Orders finished.");
     	
     	ArrayList<Region> unconfirmedRegionList = new ArrayList<Region>();
     	
@@ -402,7 +402,7 @@ public class Tool1_Main {
             System.exit(1);
             return null;
         }
-        outText.addOutLine(f.getName() + " loaded with " + data.regions().size() + " Regions");
+        outText.addOutLine(f.getName() + " loaded with " + data.getRegions().size() + " Regions");
         return data;
     }
     
@@ -428,7 +428,7 @@ public class Tool1_Main {
             System.exit(1);
             return null;
         }
-        outText.addOutLine(fileName + " loaded (monopolreport) with " + data.regions().size() + " Regions");
+        outText.addOutLine(fileName + " loaded (monopolreport) with " + data.getRegions().size() + " Regions");
         return data;
     }
    
@@ -438,7 +438,7 @@ public class Tool1_Main {
     	if (actFact==null){return 0;}
     	if (data==null) {return 0;}
     	
-    	for (Iterator<Unit> iter = data.units().values().iterator();iter.hasNext();){
+    	for (Iterator<Unit> iter = data.getUnits().iterator();iter.hasNext();){
     		Unit u = (Unit) iter.next();
     		if (u.getFaction().getID().equals(actFact.getID())){
     			if (confirmedOnly){
@@ -455,7 +455,7 @@ public class Tool1_Main {
     
     private static Faction findFaction(String actFactionName) {
     	Faction erg = null;
-    	for (Iterator<Faction> iter = gd.factions().values().iterator();iter.hasNext();){
+    	for (Iterator<Faction> iter = gd.getFactions().iterator();iter.hasNext();){
     		Faction F = (Faction)iter.next();
     		if (F.getID().toString().equalsIgnoreCase(actFactionName)){
     			return F;
@@ -475,7 +475,7 @@ public class Tool1_Main {
     	if (actFact==null){return regionList;}
     	if (data==null) {return regionList;}
     	
-    	for (Iterator<Unit> iter = data.units().values().iterator();iter.hasNext();){
+    	for (Iterator<Unit> iter = data.getUnits().iterator();iter.hasNext();){
     		Unit u = (Unit) iter.next();
     		if (u.getFaction().getID().equals(actFact.getID()) && !u.isOrdersConfirmed()){
     			Region r = u.getRegion();
