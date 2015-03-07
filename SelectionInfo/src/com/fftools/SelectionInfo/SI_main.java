@@ -95,6 +95,7 @@ public class SI_main {
     	checkImportantRegionsInSelections(s,myGD);
     	checkOverlappingSelections(s,myGD);
     	outText.addOutLine(FileCopy.getDateS() + " end Selection Info");
+    	System.exit(0);
 	}
 	
 	private static void checkImportantRegionsInSelections(Settings s, GameData gd){
@@ -137,7 +138,7 @@ public class SI_main {
 		int erg=0;
 		importantRegions.clear();
 		// kompletter durchlauf
-		for (Region r:gd.regions().values()){
+		for (Region r:gd.getRegions()){
 			if (r.units()!=null && r.units().size()>0){
 				for (Unit u:r.units()){
 					String actFactionName = u.getFaction().getID().toString();
@@ -167,10 +168,10 @@ public class SI_main {
 				outText.addOutLine("Selektion " + actFileName + " ohne Regionen");
 			}
 		}
-		outText.addOutLine("Starte Komplettsuche ueber " + gd.regions().size() + " Regionen.");
+		outText.addOutLine("Starte Komplettsuche ueber " + gd.getRegions().size() + " Regionen.");
 		// Alle Regionen durchlaufen, dürfen niemals mehr als 1x gefunden werden
 		ArrayList<String> ergList = new ArrayList<String>();
-		for (Region r:gd.regions().values()){
+		for (Region r:gd.getRegions()){
 			int cnt = 0;
 			ergList.clear();
 			CoordinateID actC = r.getCoordinate();
