@@ -4,7 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Tool1"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/FFTools2Mag2"/>
-	<classpathentry kind="lib" path="/Magellan2/lib/activation.jar"/>
 	<classpathentry kind="lib" path="/Magellan2/lib/mail.jar"/>
+	<classpathentry kind="lib" path="/Magellan2/lib/internal/activation.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
