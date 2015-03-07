@@ -8,7 +8,9 @@ import com.fftools.OutTextClass;
 import com.fftools.tool1.Settings;
 import com.fftools.utils.FileCopy;
 
-
+/*
+ * Versendet .sendME - Mails
+ */
 public class Tool2_Main {
 
 	private static final OutTextClass outText = OutTextClass.getInstance();
