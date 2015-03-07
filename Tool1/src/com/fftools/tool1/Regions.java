@@ -102,12 +102,12 @@ public class Regions {
 		for(Iterator<CoordinateID> iter = coordinates.iterator(); iter.hasNext();) {
 			CoordinateID c = (CoordinateID) iter.next();
 
-			if(data.regions().get(c) != null) {
+			if(data.getRegion(c) != null) {
 				if (this.selectedRegions==null){
 					this.selectedRegions = new Hashtable<CoordinateID,Region>();
 				}
-				selectedRegions.put(c, (Region)data.regions().get(c));
-				actSelectedRegions.put(c, (Region)data.regions().get(c));
+				selectedRegions.put(c, (Region)data.getRegion(c));
+				actSelectedRegions.put(c, (Region)data.getRegion(c));
 				result +=1;
 			} else {
 				outText.addOutLine("unknown Region in sel file " + actF.getName() + ":" + c.toString());
@@ -145,10 +145,10 @@ public class Regions {
 		if (this.data==null){
 			return 0;
 		}
-		if (this.data.regions()==null || this.data.regions().size()==0){
+		if (this.data.getRegions()==null || this.data.getRegions().size()==0){
 			return 0;
 		}
-		return this.data.regions().size();
+		return this.data.getRegions().size();
 	}
 	
 
