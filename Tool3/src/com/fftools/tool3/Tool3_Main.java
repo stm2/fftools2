@@ -18,6 +18,9 @@ import com.fftools.tool1.Settings;
 import com.fftools.tool1.User;
 import com.fftools.utils.FileCopy;
 
+/*
+ * Wendet Selections an und erstellt aus *.ct dateien die *.xt1.cr
+ */
 public class Tool3_Main {
 	
 	private static final OutTextClass outText = OutTextClass.getInstance();
@@ -193,6 +196,7 @@ public class Tool3_Main {
     			if (i>1){
     				erg = line.substring(0, i-1).trim().replace("\"", "");
     				outText.addOutLine("charset info found in " + f.toString() + ", returning: " + erg);
+    				in.close();
     				return erg;
     			}
     			line = in.readLine();
